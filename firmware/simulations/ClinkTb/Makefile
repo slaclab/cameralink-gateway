@@ -7,7 +7,7 @@ export PRJ_VERSION = 0x00000001
 target: vcs
 
 # Define target part
-export PRJ_PART = XCKU040-FFVA1156-2-E
+export PRJ_PART = XC7K325TFFG900-2
 
 # Keep unused source code 
 export REMOVE_UNUSED_CODE = 1
