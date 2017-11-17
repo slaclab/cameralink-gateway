@@ -22,6 +22,7 @@ use work.StdRtlPkg.all;
 use work.AxiStreamPkg.all;
 use work.AxiLitePkg.all;
 use work.EthMacPkg.all;
+use work.SsiPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -90,7 +91,7 @@ architecture top_level of ClinkKc705 is
    signal topWriteMaster : AxiLiteWriteMasterType;
    signal topWriteSlave  : AxiLiteWriteSlaveType;
    signal topReadMaster  : AxiLiteReadMasterType;
-   signal topReadSlave   : AxiLiteReadSlaveType);
+   signal topReadSlave   : AxiLiteReadSlaveType;
 
    signal intWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_C-1 downto 0);
    signal intWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_C-1 downto 0);
@@ -169,13 +170,13 @@ begin
          COMM_TIMEOUT_G => 30)
       port map (
          -- Local Configurations
-         localMac        => MAC_ADDR_G,
-         localIp         => IP_ADDR_G,
+         localMac        => MAC_ADDR_C,
+         localIp         => IP_ADDR_C,
          -- Interface to Ethernet Media Access Controller (MAC)
-         obMacMaster     => rxMaster,
-         obMacSlave      => rxSlave,
-         ibMacMaster     => txMaster,
-         ibMacSlave      => txSlave,
+         obMacMaster     => rxMasters(0),
+         obMacSlave      => rxSlaves(0),
+         ibMacMaster     => txMasters(0),
+         ibMacSlave      => txSlaves(0),
          -- Interface to UDP Server engine(s)
          obServerMasters => obServerMasters,
          obServerSlaves  => obServerSlaves,
@@ -197,7 +198,7 @@ begin
          APP_STREAM_ROUTES_G => (
             0                => X"00",
             1                => X"01"),
-         CLK_FREQUENCY_G     => CLK_FREQUENCY_G,
+         CLK_FREQUENCY_G     => CLK_FREQUENCY_C,
          TIMEOUT_UNIT_G      => 1.0E-3,  -- In units of seconds
          SERVER_G            => true,
          RETRANSMIT_ENABLE_G => true,
@@ -253,7 +254,6 @@ begin
    U_XBAR : entity work.AxiLiteCrossbar
       generic map (
          TPD_G              => TPD_G,
-         DEC_ERROR_RESP_G   => AXI_ERROR_RESP_G,
          NUM_SLAVE_SLOTS_G  => 1,
          NUM_MASTER_SLOTS_G => NUM_AXIL_C,
          MASTERS_CONFIG_G   => AXIL_CONFIG_C)
@@ -271,8 +271,8 @@ begin
 
    U_Version : entity work.AxiVersion
       generic map (
-         TPD_G        => TPD_C,
-         BUILD_INFO_G => BUILD_INFO_C,
+         TPD_G        => TPD_G,
+         BUILD_INFO_G => BUILD_INFO_G,
          CLK_PERIOD_G => (1.0/CLK_FREQUENCY_C))
       port map (
          -- AXI-Lite Interface
@@ -291,8 +291,8 @@ begin
    --rssiObMasters(1),
    rssiObSlaves(1) <= AXI_STREAM_SLAVE_FORCE_C;
 
-   intReadSlave  <= AXI_LITE_READ_SLAVE_INIT_C;
-   intWriteSlave <= AXI_LITE_WRITE_SLAVE_INIT_C;
+   intReadSlaves(1)  <= AXI_LITE_READ_SLAVE_INIT_C;
+   intWriteSlaves(1) <= AXI_LITE_WRITE_SLAVE_INIT_C;
 
    ----------------
    -- Misc. Signals
