@@ -8,5 +8,5 @@ loadRuckusTcl $::env(TOP_DIR)/submodules/surf
 #loadSource -sim_only -dir "$::DIR_PATH/tb/"
 
 # Set the top level synth_1 and sim_1
-set_property top {ClPackTb} [get_filesets sim_1]
+set_property top {AxiStreamBytePackerTb} [get_filesets sim_1]
 
