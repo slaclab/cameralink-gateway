@@ -23,6 +23,7 @@ use work.AxiStreamPkg.all;
 use work.AxiLitePkg.all;
 use work.EthMacPkg.all;
 use work.SsiPkg.all;
+use work.Pgp2bPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -34,194 +35,82 @@ entity ClinkKc705 is
       SIM_SPEEDUP_G : boolean := false;
       SIMULATION_G  : boolean := false);
    port (
-      -- Misc. IOs
-      fmcLed          : out slv(3 downto 0);
-      fmcSfpLossL     : in  slv(3 downto 0);
-      fmcTxFault      : in  slv(3 downto 0);
-      fmcSfpTxDisable : out slv(3 downto 0);
-      fmcSfpRateSel   : out slv(3 downto 0);
-      fmcSfpModDef0   : out slv(3 downto 0);
       extRst          : in  sl;
       led             : out slv(7 downto 0);
       -- XADC Ports
-      --vPIn            : in  sl;
-      --vNIn            : in  sl;
+      vPIn            : in  sl;
+      vNIn            : in  sl;
       -- ETH GT Pins
-      ethClkP         : in  sl;
-      ethClkN         : in  sl;
-      ethRxP          : in  sl;
-      ethRxN          : in  sl;
-      ethTxP          : out sl;
-      ethTxN          : out sl);       
+      gtClkP          : in  sl;
+      gtClkN          : in  sl;
+      gtRxP           : in  sl;
+      gtRxN           : in  sl;
+      gtTxP           : out sl;
+      gtTxN           : out sl);       
 end ClinkKc705;
 
 architecture top_level of ClinkKc705 is
 
-   constant IP_ADDR_C      : slv(31 downto 0) := x"0A02A8C0";      -- 192.168.2.10  
-   constant MAC_ADDR_C     : slv(47 downto 0) := x"010300564400";  -- 00:44:56:00:03:01
+   constant AXIS_SIZE_C : positive := 4;
 
-   constant CLK_FREQUENCY_C : real    := 125.0E+6;
-   constant NUM_SERVERS_C   : integer := 1;
-   constant SERVER_PORTS_C  : PositiveArray(NUM_SERVERS_C-1 downto 0) := (0 => 8192);
-
-   constant RSSI_SIZE_C : positive := 2;
-   constant AXIS_CONFIG_C : AxiStreamConfigArray(RSSI_SIZE_C-1 downto 0) := (
-      0 => ssiAxiStreamConfig(4),
-      1 => ssiAxiStreamConfig(4));
+   signal txMasters : AxiStreamMasterArray(AXIS_SIZE_C-1 downto 0);
+   signal txSlaves  : AxiStreamSlaveArray(AXIS_SIZE_C-1 downto 0);
+   signal rxMasters : AxiStreamMasterArray(AXIS_SIZE_C-1 downto 0);
+   signal rxCtrl    : AxiStreamCtrlArray(AXIS_SIZE_C-1 downto 0);
 
    constant NUM_AXIL_C : positive := 2;
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_C-1 downto 0) := 
       genAxiLiteConfig(NUM_AXIL_C, x"00000000", 16, 8);
 
-   signal txMasters : AxiStreamMasterArray(NUM_SERVERS_C-1 downto 0);
-   signal txSlaves  : AxiStreamSlaveArray(NUM_SERVERS_C-1 downto 0);
-   signal rxMasters : AxiStreamMasterArray(NUM_SERVERS_C-1 downto 0);
-   signal rxSlaves  : AxiStreamSlaveArray(NUM_SERVERS_C-1 downto 0);
-
-   signal ibServerMasters : AxiStreamMasterArray(NUM_SERVERS_C-1 downto 0);
-   signal ibServerSlaves  : AxiStreamSlaveArray(NUM_SERVERS_C-1 downto 0);
-   signal obServerMasters : AxiStreamMasterArray(NUM_SERVERS_C-1 downto 0);
-   signal obServerSlaves  : AxiStreamSlaveArray(NUM_SERVERS_C-1 downto 0);
-
-   signal rssiIbMasters : AxiStreamMasterArray(RSSI_SIZE_C-1 downto 0);
-   signal rssiIbSlaves  : AxiStreamSlaveArray(RSSI_SIZE_C-1 downto 0);
-   signal rssiObMasters : AxiStreamMasterArray(RSSI_SIZE_C-1 downto 0);
-   signal rssiObSlaves  : AxiStreamSlaveArray(RSSI_SIZE_C-1 downto 0);
-
-   signal topWriteMaster : AxiLiteWriteMasterType;
-   signal topWriteSlave  : AxiLiteWriteSlaveType;
-   signal topReadMaster  : AxiLiteReadMasterType;
-   signal topReadSlave   : AxiLiteReadSlaveType;
+   signal topWriteMaster  : AxiLiteWriteMasterType;
+   signal topWriteSlave   : AxiLiteWriteSlaveType;
+   signal topReadMaster   : AxiLiteReadMasterType;
+   signal topReadSlave    : AxiLiteReadSlaveType;
 
    signal intWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_C-1 downto 0);
    signal intWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_C-1 downto 0);
    signal intReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_C-1 downto 0);
    signal intReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_C-1 downto 0);
 
+   signal pgpTxOut : Pgp2bTxOutType;
+   signal pgpRxOut : Pgp2bRxOutType;
+
    signal clk      : sl;
    signal rst      : sl;
-   signal reset    : sl;
-   signal phyReady : sl;
 
 begin
 
-   -----------------
-   -- Power Up Reset
-   -----------------
-   PwrUpRst_Inst : entity work.PwrUpRst
+   U_PGP : entity work.Pgp2bGtx7VarLatWrapper
       generic map (
          TPD_G => TPD_G)
       port map (
-         arst   => extRst,
-         clk    => clk,
-         rstOut => reset);
-
-   ----------------------------
-   -- 10GBASE-R Ethernet Module
-   ----------------------------
-   U_10GigE : entity work.TenGigEthGtx7Wrapper
-      generic map (
-         TPD_G             => TPD_G,
-         -- DMA/MAC Configurations
-         NUM_LANE_G        => 1,
-         -- QUAD PLL Configurations
-         REFCLK_DIV2_G     => true,     -- TRUE: gtClkP/N = 312.5 MHz
-         QPLL_REFCLK_SEL_G => "001",    -- GTREFCLK0 selected
-         -- AXI Streaming Configurations
-         AXIS_CONFIG_G     => (others => EMAC_AXIS_CONFIG_C))
-      port map (
-         -- Local Configurations
-         localMac     => (others => MAC_ADDR_C),
-         -- Streaming DMA Interface 
-         dmaClk       => (others => clk),
-         dmaRst       => (others => rst),
-         dmaIbMasters => rxMasters,
-         dmaIbSlaves  => rxSlaves,
-         dmaObMasters => txMasters,
-         dmaObSlaves  => txSlaves,
-         -- Misc. Signals
-         extRst       => reset,
-         phyClk       => clk,
-         phyRst       => rst,
-         phyReady(0)  => phyReady,
-         -- MGT Clock Port (156.25 MHz or 312.5 MHz)
-         gtClkP       => ethClkP,
-         gtClkN       => ethClkN,
-         -- MGT Ports
-         gtTxP(0)     => ethTxP,
-         gtTxN(0)     => ethTxN,
-         gtRxP(0)     => ethRxP,
-         gtRxN(0)     => ethRxN);  
-
-   -- UDP Servers
-   U_UDP : entity work.UdpEngineWrapper
-      generic map (
-         -- Simulation Generics
-         TPD_G          => TPD_G,
-         -- UDP Server Generics
-         SERVER_EN_G    => true,
-         SERVER_SIZE_G  => NUM_SERVERS_C,
-         SERVER_PORTS_G => SERVER_PORTS_C,
-         -- UDP Client Generics
-         CLIENT_EN_G    => false,
-         -- General IPv4/ARP/DHCP Generics
-         DHCP_G         => true,
-         CLK_FREQ_G     => CLK_FREQUENCY_C,
-         COMM_TIMEOUT_G => 30)
-      port map (
-         -- Local Configurations
-         localMac        => MAC_ADDR_C,
-         localIp         => IP_ADDR_C,
-         -- Interface to Ethernet Media Access Controller (MAC)
-         obMacMaster     => rxMasters(0),
-         obMacSlave      => rxSlaves(0),
-         ibMacMaster     => txMasters(0),
-         ibMacSlave      => txSlaves(0),
-         -- Interface to UDP Server engine(s)
-         obServerMasters => obServerMasters,
-         obServerSlaves  => obServerSlaves,
-         ibServerMasters => ibServerMasters,
-         ibServerSlaves  => ibServerSlaves,
+         -- External Reset
+         extRst       => extRst,
          -- Clock and Reset
-         clk             => clk,
-         rst             => rst);
+         pgpClk       => clk,
+         pgpRst       => rst,
+         -- Non VC TX Signals
+         pgpTxIn      => PGP2B_TX_IN_INIT_C,
+         pgpTxOut     => pgpTxOut,
+         -- Non VC RX Signals
+         pgpRxIn      => PGP2B_RX_IN_INIT_C,
+         pgpRxOut     => pgpRxOut,
+         -- Frame TX Interface
+         pgpTxMasters => txMasters,
+         pgpTxSlaves  => txSlaves,
+         -- Frame RX Interface
+         pgpRxMasters => rxMasters,
+         pgpRxCtrl    => rxCtrl,
+         -- GT Pins
+         gtClkP       => gtClkP,
+         gtClkN       => gtClkN,
+         gtTxP        => gtTxP,
+         gtTxN        => gtTxN,
+         gtRxP        => gtRxP,
+         gtRxN        => gtRxN);
 
-   ------------------------------------------
-   -- Software's RSSI Server Interface @ 8192
-   ------------------------------------------
-   U_RssiServer : entity work.RssiCoreWrapper
-      generic map (
-         TPD_G               => TPD_G,
-         MAX_SEG_SIZE_G      => 1024,
-         SEGMENT_ADDR_SIZE_G => 7,
-         APP_STREAMS_G       => RSSI_SIZE_C,
-         APP_STREAM_ROUTES_G => (
-            0                => X"00",
-            1                => X"01"),
-         CLK_FREQUENCY_G     => CLK_FREQUENCY_C,
-         TIMEOUT_UNIT_G      => 1.0E-3,  -- In units of seconds
-         SERVER_G            => true,
-         RETRANSMIT_ENABLE_G => true,
-         BYPASS_CHUNKER_G    => false,
-         WINDOW_ADDR_SIZE_G  => 3,
-         PIPE_STAGES_G       => 1,
-         APP_AXIS_CONFIG_G   => AXIS_CONFIG_C,
-         TSP_AXIS_CONFIG_G   => EMAC_AXIS_CONFIG_C,
-         INIT_SEQ_N_G        => 16#80#)
-      port map (
-         clk_i             => clk,
-         rst_i             => rst,
-         openRq_i          => '1',
-         -- Application Layer Interface
-         sAppAxisMasters_i => rssiIbMasters,
-         sAppAxisSlaves_o  => rssiIbSlaves,
-         mAppAxisMasters_o => rssiObMasters,
-         mAppAxisSlaves_i  => rssiObSlaves,
-         -- Transport Layer Interface
-         sTspAxisMaster_i  => obServerMasters(0),
-         sTspAxisSlave_o   => obServerSlaves(0),
-         mTspAxisMaster_o  => ibServerMasters(0),
-         mTspAxisSlave_i   => ibServerSlaves(0));
+   txMasters(3 downto 2) <= (others=>AXI_STREAM_MASTER_INIT_C);
+   rxCtrl(3 downto 1)    <= (others=>AXI_STREAM_CTRL_INIT_C);
 
    ---------------------------------------
    -- TDEST = 0x0: Register access control   
@@ -229,20 +118,20 @@ begin
    U_SRPv3 : entity work.SrpV3AxiLite
       generic map (
          TPD_G               => TPD_G,
-         SLAVE_READY_EN_G    => true,
+         SLAVE_READY_EN_G    => false,
          GEN_SYNC_FIFO_G     => true,
-         AXI_STREAM_CONFIG_G => AXIS_CONFIG_C(0))
+         AXI_STREAM_CONFIG_G => SSI_PGP2B_CONFIG_C)
       port map (
          -- Streaming Slave (Rx) Interface (sAxisClk domain) 
          sAxisClk         => clk,
          sAxisRst         => rst,
-         sAxisMaster      => rssiObMasters(0),
-         sAxisSlave       => rssiObSlaves(0),
+         sAxisMaster      => rxMasters(0),
+         sAxisCtrl        => rxCtrl(0),
          -- Streaming Master (Tx) Data Interface (mAxisClk domain)
          mAxisClk         => clk,
          mAxisRst         => rst,
-         mAxisMaster      => rssiIbMasters(0),
-         mAxisSlave       => rssiIbSlaves(0),
+         mAxisMaster      => txMasters(0),
+         mAxisSlave       => txSlaves(0),
          -- Master AXI-Lite Interface (axilClk domain)
          axilClk          => clk,
          axilRst          => rst,
@@ -269,11 +158,11 @@ begin
          mAxiReadMasters     => intReadMasters,
          mAxiReadSlaves      => intReadSlaves);
 
-   U_Version : entity work.AxiVersion
+   U_AxiVersion : entity work.AxiVersion
       generic map (
          TPD_G        => TPD_G,
          BUILD_INFO_G => BUILD_INFO_G,
-         CLK_PERIOD_G => (1.0/CLK_FREQUENCY_C))
+         CLK_PERIOD_G => 6.4e-9)
       port map (
          -- AXI-Lite Interface
          axiClk         => clk,
@@ -286,10 +175,8 @@ begin
    ---------------------------------------
    -- Application
    ---------------------------------------
-   rssiIbMasters(1) <= AXI_STREAM_MASTER_INIT_C;
-   --rssiIbSlaves(1),
-   --rssiObMasters(1),
-   rssiObSlaves(1) <= AXI_STREAM_SLAVE_FORCE_C;
+
+   txMasters(1) <= AXI_STREAM_MASTER_INIT_C;
 
    intReadSlaves(1)  <= AXI_LITE_READ_SLAVE_INIT_C;
    intWriteSlaves(1) <= AXI_LITE_WRITE_SLAVE_INIT_C;
@@ -297,19 +184,14 @@ begin
    ----------------
    -- Misc. Signals
    ----------------
-   led(7) <= phyReady;
-   led(6) <= phyReady;
-   led(5) <= phyReady;
-   led(4) <= phyReady;
-   led(3) <= phyReady;
-   led(2) <= phyReady;
-   led(1) <= phyReady;
-   led(0) <= phyReady;
+   led(7) <= '0';
+   led(6) <= '0';
+   led(5) <= '0';
+   led(4) <= '0';
+   led(3) <= '1';
+   led(2) <= '0';
+   led(1) <= pgpTxOut.linkReady and not(rst);
+   led(0) <= pgpRxOut.linkReady and not(rst);
 
-   fmcLed          <= not(fmcSfpLossL);
-   fmcSfpTxDisable <= (others => '0');
-   fmcSfpRateSel   <= (others => '1');
-   fmcSfpModDef0   <= (others => '0');
-   
 end top_level;
 
