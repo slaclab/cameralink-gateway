@@ -7,6 +7,22 @@
 ## may be copied, modified, propagated, or distributed except according to 
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
+#
+#
+      #cbl0Half0P      : inout slv(4 downto 0); --  2,  4,  5,  6, 3
+      #cbl0Half0M      : inout slv(4 downto 0); -- 15, 17, 18, 19 16
+      #cbl0Half1P      : in    slv(4 downto 0); --  8, 10, 11, 12,  9
+      #cbl0Half1M      : in    slv(4 downto 0); -- 21, 23, 24, 25, 22
+      #cbl0SerP        : out   sl; -- 20
+      #cbl0SerM        : out   sl; -- 7
+      #cbl1Half0P      : inout slv(4 downto 0); --  2,  4,  5,  6, 3
+      #cbl1Half0M      : inout slv(4 downto 0); -- 15, 17, 18, 19 16
+      #cbl1Half1P      : in    slv(4 downto 0); --  8, 10, 11, 12,  9
+      #cbl1Half1M      : in    slv(4 downto 0); -- 21, 23, 24, 25, 22
+      #cbl1SerP        : out   sl; -- 20
+      #cbl1SerM        : out   sl; -- 7
+#
+#
 # I/O Port Mapping
 set_property PACKAGE_PIN AB7 [get_ports extRst]
 set_property IOSTANDARD LVCMOS15 [get_ports extRst]

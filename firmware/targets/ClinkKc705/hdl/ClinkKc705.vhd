@@ -40,6 +40,19 @@ entity ClinkKc705 is
       -- XADC Ports
       vPIn            : in  sl;
       vNIn            : in  sl;
+      -- Clink Ports
+      cbl0Half0P      : inout slv(4 downto 0); --  2,  4,  5,  6, 3
+      cbl0Half0M      : inout slv(4 downto 0); -- 15, 17, 18, 19 16
+      cbl0Half1P      : in    slv(4 downto 0); --  8, 10, 11, 12,  9
+      cbl0Half1M      : in    slv(4 downto 0); -- 21, 23, 24, 25, 22
+      cbl0SerP        : out   sl; -- 20
+      cbl0SerM        : out   sl; -- 7
+      cbl1Half0P      : inout slv(4 downto 0); --  2,  4,  5,  6, 3
+      cbl1Half0M      : inout slv(4 downto 0); -- 15, 17, 18, 19 16
+      cbl1Half1P      : in    slv(4 downto 0); --  8, 10, 11, 12,  9
+      cbl1Half1M      : in    slv(4 downto 0); -- 21, 23, 24, 25, 22
+      cbl1SerP        : out   sl; -- 20
+      cbl1SerM        : out   sl; -- 7
       -- ETH GT Pins
       gtClkP          : in  sl;
       gtClkN          : in  sl;
@@ -51,16 +64,18 @@ end ClinkKc705;
 
 architecture top_level of ClinkKc705 is
 
+   constant AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(dataBytes=>16,tDestBits=>0);
+
    constant AXIS_SIZE_C : positive := 4;
 
    signal txMasters : AxiStreamMasterArray(AXIS_SIZE_C-1 downto 0);
    signal txSlaves  : AxiStreamSlaveArray(AXIS_SIZE_C-1 downto 0);
    signal rxMasters : AxiStreamMasterArray(AXIS_SIZE_C-1 downto 0);
-   signal rxCtrl    : AxiStreamCtrlArray(AXIS_SIZE_C-1 downto 0);
+   signal rxCtrls   : AxiStreamCtrlArray(AXIS_SIZE_C-1 downto 0);
 
    constant NUM_AXIL_C : positive := 2;
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_C-1 downto 0) := 
-      genAxiLiteConfig(NUM_AXIL_C, x"00000000", 16, 8);
+      genAxiLiteConfig(NUM_AXIL_C, x"00000000", 24, 16);
 
    signal topWriteMaster  : AxiLiteWriteMasterType;
    signal topWriteSlave   : AxiLiteWriteSlaveType;
@@ -71,6 +86,14 @@ architecture top_level of ClinkKc705 is
    signal intWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_C-1 downto 0);
    signal intReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_C-1 downto 0);
    signal intReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_C-1 downto 0);
+
+   signal dataMasters     : AxiStreamMasterArray(1 downto 0);
+   signal dataSlaves      : AxiStreamSlaveArray(1 downto 0);
+
+   signal mUartMasters    : AxiStreamMasterArray(1 downto 0);
+   signal mUartSlaves     : AxiStreamSlaveArray(1 downto 0);
+   signal sUartMasters    : AxiStreamMasterArray(1 downto 0);
+   signal sUartCtrls      : AxiStreamCtrlArray(1 downto 0);
 
    signal pgpTxOut : Pgp2bTxOutType;
    signal pgpRxOut : Pgp2bRxOutType;
@@ -100,7 +123,7 @@ begin
          pgpTxSlaves  => txSlaves,
          -- Frame RX Interface
          pgpRxMasters => rxMasters,
-         pgpRxCtrl    => rxCtrl,
+         pgpRxCtrl    => rxCtrls,
          -- GT Pins
          gtClkP       => gtClkP,
          gtClkN       => gtClkN,
@@ -110,7 +133,7 @@ begin
          gtRxN        => gtRxN);
 
    txMasters(3 downto 2) <= (others=>AXI_STREAM_MASTER_INIT_C);
-   rxCtrl(3 downto 1)    <= (others=>AXI_STREAM_CTRL_INIT_C);
+   rxCtrls(3 downto 2)   <= (others=>AXI_STREAM_CTRL_UNUSED_C);
 
    ---------------------------------------
    -- TDEST = 0x0: Register access control   
@@ -126,7 +149,7 @@ begin
          sAxisClk         => clk,
          sAxisRst         => rst,
          sAxisMaster      => rxMasters(0),
-         sAxisCtrl        => rxCtrl(0),
+         sAxisCtrl        => rxCtrls(0),
          -- Streaming Master (Tx) Data Interface (mAxisClk domain)
          mAxisClk         => clk,
          mAxisRst         => rst,
@@ -176,10 +199,75 @@ begin
    -- Application
    ---------------------------------------
 
-   txMasters(1) <= AXI_STREAM_MASTER_INIT_C;
+   U_ClinkTop : entity work.ClinkTop
+      generic map (
+         TPD_G              => TPD_G,
+         SYS_CLK_FREQ_G     => 156.25e6,
+         AXI_COMMON_CLK_G   => true,
+         UART_READY_EN_G    => false,
+         DATA_AXIS_CONFIG_G => AXIS_CONFIG_C,
+         UART_AXIS_CONFIG_G => SSI_PGP2B_CONFIG_C)
+      port map (
+         cbl0Half0P      => cbl0Half0P,
+         cbl0Half0M      => cbl0Half0M,
+         cbl0Half1P      => cbl0Half1P,
+         cbl0Half1M      => cbl0Half1M,
+         cbl0SerP        => cbl0SerP,
+         cbl0SerM        => cbl0SerM,
+         cbl1Half0P      => cbl1Half0P,
+         cbl1Half0M      => cbl1Half0M,
+         cbl1Half1P      => cbl1Half1P,
+         cbl1Half1M      => cbl1Half1M,
+         cbl1SerP        => cbl1SerP,
+         cbl1SerM        => cbl1SerM,
+         -- System clock and reset, must be 100Mhz or greater
+         sysClk          => clk,
+         sysRst          => rst,
+         camCtrl         => (others=>(others=>'0')),
+         dataMasters     => dataMasters,
+         dataSlaves      => dataSlaves,
+         sUartMasters    => sUartMasters,
+         sUartSlaves     => open,
+         sUartCtrls      => sUartCtrls,
+         mUartMasters    => mUartMasters,
+         mUartSlaves     => mUartSlaves,
+         axilClk         => clk,
+         axilRst         => rst,
+         axilReadMaster  => intReadMasters(1),
+         axilReadSlave   => intReadSlaves(1),
+         axilWriteMaster => intWriteMasters(1),
+         axilWriteSlave  => intWriteSlaves(1));
 
-   intReadSlaves(1)  <= AXI_LITE_READ_SLAVE_INIT_C;
-   intWriteSlaves(1) <= AXI_LITE_WRITE_SLAVE_INIT_C;
+   sUartMasters(1) <= AXI_STREAM_MASTER_INIT_C;
+   mUartSlaves(1)  <= AXI_STREAM_SLAVE_INIT_C;
+   rxCtrls(1)      <= AXI_STREAM_CTRL_UNUSED_C;
+
+   sUartMasters(0) <= rxMasters(2);
+   rxCtrls(2)      <= sUartCtrls(0);
+
+   txMasters(2)   <= mUartMasters(0);
+   mUartSlaves(0) <= txSlaves(2);
+
+   dataSlaves(1) <= AXI_STREAM_SLAVE_INIT_C;
+
+   U_DataFifo: entity work.AxiStreamFifoV2
+      generic map (
+         TPD_G               => TPD_G,
+         SLAVE_READY_EN_G    => false,
+         GEN_SYNC_FIFO_G     => true,
+         FIFO_ADDR_WIDTH_G   => 9,
+         FIFO_PAUSE_THRESH_G => 500,
+         SLAVE_AXI_CONFIG_G  => AXIS_CONFIG_C,
+         MASTER_AXI_CONFIG_G => SSI_PGP2B_CONFIG_C)
+      port map (
+         sAxisClk    => clk,
+         sAxisRst    => rst,
+         sAxisMaster => dataMasters(0),
+         sAxisSlave  => dataSlaves(0),
+         mAxisClk    => clk,
+         mAxisRst    => rst,
+         mAxisMaster => txMasters(1),
+         mAxisSlave  => txSlaves(1));
 
    ----------------
    -- Misc. Signals
