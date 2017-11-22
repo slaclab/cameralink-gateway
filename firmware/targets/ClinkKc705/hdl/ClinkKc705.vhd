@@ -132,8 +132,8 @@ begin
          gtRxP        => gtRxP,
          gtRxN        => gtRxN);
 
-   txMasters(3 downto 2) <= (others=>AXI_STREAM_MASTER_INIT_C);
-   rxCtrls(3 downto 2)   <= (others=>AXI_STREAM_CTRL_UNUSED_C);
+   txMasters(3) <= AXI_STREAM_MASTER_INIT_C;
+   rxCtrls(3)   <= AXI_STREAM_CTRL_UNUSED_C;
 
    ---------------------------------------
    -- TDEST = 0x0: Register access control   
