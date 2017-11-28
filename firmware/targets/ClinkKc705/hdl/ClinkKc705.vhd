@@ -64,7 +64,8 @@ end ClinkKc705;
 
 architecture top_level of ClinkKc705 is
 
-   constant AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(dataBytes=>16,tDestBits=>0);
+   constant AXIS_128_C : AxiStreamConfigType := ssiAxiStreamConfig(dataBytes=>16,tDestBits=>0);
+   constant AXIS_32_C  : AxiStreamConfigType := ssiAxiStreamConfig(dataBytes=>16,tDestBits=>0);
 
    constant AXIS_SIZE_C : positive := 4;
 
@@ -89,6 +90,10 @@ architecture top_level of ClinkKc705 is
 
    signal dataMasters     : AxiStreamMasterArray(1 downto 0);
    signal dataSlaves      : AxiStreamSlaveArray(1 downto 0);
+
+   signal intMasterA      : AxiStreamMasterType;
+   signal intMasterB      : AxiStreamMasterType;
+   signal intSlave        : AxiStreamSlaveType;
 
    signal mUartMasters    : AxiStreamMasterArray(1 downto 0);
    signal mUartSlaves     : AxiStreamSlaveArray(1 downto 0);
@@ -205,7 +210,7 @@ begin
          SYS_CLK_FREQ_G     => 156.25e6,
          AXI_COMMON_CLK_G   => true,
          UART_READY_EN_G    => false,
-         DATA_AXIS_CONFIG_G => AXIS_CONFIG_C,
+         DATA_AXIS_CONFIG_G => AXIS_128_C,
          UART_AXIS_CONFIG_G => SSI_PGP2B_CONFIG_C)
       port map (
          cbl0Half0P      => cbl0Half0P,
@@ -250,20 +255,45 @@ begin
 
    dataSlaves(1) <= AXI_STREAM_SLAVE_INIT_C;
 
-   U_DataFifo: entity work.AxiStreamFifoV2
+   U_DataFifoA: entity work.AxiStreamFifoV2
+      generic map (
+         TPD_G               => TPD_G,
+         SLAVE_READY_EN_G    => false,
+         GEN_SYNC_FIFO_G     => true,
+         FIFO_ADDR_WIDTH_G   => 12,
+         FIFO_PAUSE_THRESH_G => 500,
+         SLAVE_AXI_CONFIG_G  => AXIS_128_C,
+         MASTER_AXI_CONFIG_G => AXIS_32_C)
+      port map (
+         sAxisClk    => clk,
+         sAxisRst    => rst,
+         sAxisMaster => dataMasters(0),
+         sAxisSlave  => dataSlaves(0),
+         mAxisClk    => clk,
+         mAxisRst    => rst,
+         mAxisMaster => intMasterA,
+         mAxisSlave  => intSlave);
+
+   -- Force 32-bit alignment
+   process(intMasterA) begin
+      intMasterB <= intMasterA;
+      intMasterB.tKeep <= (others=>'1');
+   end process;
+
+   U_DataFifoB: entity work.AxiStreamFifoV2
       generic map (
          TPD_G               => TPD_G,
          SLAVE_READY_EN_G    => false,
          GEN_SYNC_FIFO_G     => true,
          FIFO_ADDR_WIDTH_G   => 9,
          FIFO_PAUSE_THRESH_G => 500,
-         SLAVE_AXI_CONFIG_G  => AXIS_CONFIG_C,
+         SLAVE_AXI_CONFIG_G  => AXIS_32_C,
          MASTER_AXI_CONFIG_G => SSI_PGP2B_CONFIG_C)
       port map (
          sAxisClk    => clk,
          sAxisRst    => rst,
-         sAxisMaster => dataMasters(0),
-         sAxisSlave  => dataSlaves(0),
+         sAxisMaster => intMasterB,
+         sAxisSlave  => intSlave,
          mAxisClk    => clk,
          mAxisRst    => rst,
          mAxisMaster => txMasters(1),

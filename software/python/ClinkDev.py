@@ -14,6 +14,7 @@ class ClinkDev(pr.Root):
         # Create the stream interface
         pgpVc0 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,0) # Registers
         pgpVc1 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,1) # Data
+        pgpVc2 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,2) # Serial
 
         # SRP
         srp = rogue.protocols.srp.SrpV3()
@@ -21,7 +22,7 @@ class ClinkDev(pr.Root):
 
         # Version registers
         self.add(surf.axi.AxiVersion(memBase=srp,offset=0))
-        #self.add(surf.protocols.clink.ClinkTop(memBase=srp,offset=0))
+        self.add(surf.protocols.clink.ClinkTop(memBase=srp,offset=0x10000,serial=pgpVc2))
 
         # Start the system
         self.start(pollEn=False)
