@@ -25,6 +25,6 @@ class ClinkDev(pr.Root):
         self.add(surf.protocols.clink.ClinkTop(memBase=srp,offset=0x10000,serial=pgpVc2))
 
         # Start the system
-        self.start(pollEn=False)
+        self.start(pollEn=True)
 
 

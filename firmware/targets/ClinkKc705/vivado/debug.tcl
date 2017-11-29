@@ -19,7 +19,8 @@ open_run synth_1
 set netFile ${PROJ_DIR}/net_log.txt
 set fd [open ${netFile} "w"]
 set nl ""
-append nl [get_nets {U_App/U_Core/LayerGen[2].U_Layer/*}]
+append nl [get_nets {U_ClinkTop/U_Framer0/*}]
+append nl [get_nets {U_ClinkTop/*}]
 
 regsub -all -line { } $nl "\n" nl
 puts $fd $nl
@@ -32,34 +33,52 @@ set ilaName u_ila_0
 CreateDebugCore ${ilaName}
 
 ## Set the record depth
-set_property C_DATA_DEPTH 8192 [get_debug_cores ${ilaName}]
+set_property C_DATA_DEPTH 16384      [get_debug_cores ${ilaName}]
+set_property C_EN_STRG_QUAL 1        [get_debug_cores ${ilaName}]
+set_property ALL_PROBE_SAME_MU_CNT 2 [get_debug_cores ${ilaName}]
 
 ## Set the clock for the Core
-SetDebugCoreClk ${ilaName} {U_App/U_Core/cnnClk}
+SetDebugCoreClk ${ilaName} {U_ClinkTop/U_Framer0/sysClk}
 
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/confData[0][*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dspData[*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dspIdx[done]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dspIdx[index][*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dspIdx[last]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dspIdx[valid]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dstIdx[bias]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dstIdx[done]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dstIdx[last]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/dstIdx[valid]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/idx_index[*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/inMaster[data][*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/inMaster[valid]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/inSlave[idx][done]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/inSlave[idx][index][*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/inSlave[idx][valid]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/memData[49][*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/srcIdx[bias]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/srcIdx[channel]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/srcIdx[config][*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/srcIdx[done]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/srcIdx[index][*]}
-ConfigProbe ${ilaName} {U_App/U_Core/LayerGen[2].U_Layer/srcIdx[last]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/parValid[0]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/parValid[1]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/parValid[2]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/parData[0][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/parData[1][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/parData[2][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/parReady}
+
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][0][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][1][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][2][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][3][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][4][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][5][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][6][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][7][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][8][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][data][9][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][dv]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][fv]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][lv]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[portData][valid]}
+
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][0][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][1][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][2][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][3][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][4][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][5][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][6][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][7][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][8][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][data][9][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][dv]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][fv]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][lv]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][valid]}
+
+ConfigProbe ${ilaName} {U_ClinkTop/r_reg[swCamCtrl_n_0_][0][0]}
 
 ## Delete the last unused port
 delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
