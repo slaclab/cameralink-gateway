@@ -168,8 +168,8 @@ create_clock -name cbl1Half1Clk0 -period 11.765 [get_ports {cbl1Half1P[0]}]
 # Clink derived clocks
 create_generated_clock -name cbl0Half1Clk1 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
 create_generated_clock -name cbl0Half1Clk2 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT1}] 
-create_generated_clock -name cbl1Half0Clk1 [get_pins {U_ClinkTop/U_Cbl1Half0/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
-create_generated_clock -name cbl1Half0Clk2 [get_pins {U_ClinkTop/U_Cbl1Half0/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT1}] 
+create_generated_clock -name cbl1Half0Clk1 [get_pins {U_ClinkTop/U_DualCtrl*/U_Cbl1Half0/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
+create_generated_clock -name cbl1Half0Clk2 [get_pins {U_ClinkTop/U_DualCtrl*/U_Cbl1Half0/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT1}] 
 create_generated_clock -name cbl1Half1Clk1 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
 create_generated_clock -name cbl1Half1Clk2 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT1}] 
 

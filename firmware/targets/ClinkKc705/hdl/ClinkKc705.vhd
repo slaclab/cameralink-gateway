@@ -65,7 +65,7 @@ end ClinkKc705;
 architecture top_level of ClinkKc705 is
 
    constant AXIS_128_C : AxiStreamConfigType := ssiAxiStreamConfig(dataBytes=>16,tDestBits=>0);
-   constant AXIS_32_C  : AxiStreamConfigType := ssiAxiStreamConfig(dataBytes=>16,tDestBits=>0);
+   constant AXIS_32_C  : AxiStreamConfigType := ssiAxiStreamConfig(dataBytes=>4, tDestBits=>0);
 
    constant AXIS_SIZE_C : positive := 4;
 
@@ -105,6 +105,12 @@ architecture top_level of ClinkKc705 is
 
    signal clk      : sl;
    signal rst      : sl;
+
+   attribute MARK_DEBUG : string;
+   attribute MARK_DEBUG of intMasterA  : signal is "TRUE";
+   attribute MARK_DEBUG of intSlave    : signal is "TRUE";
+   attribute MARK_DEBUG of dataMasters : signal is "TRUE";
+   attribute MARK_DEBUG of dataSlaves  : signal is "TRUE";
 
 begin
 
@@ -207,6 +213,7 @@ begin
    U_ClinkTop : entity work.ClinkTop
       generic map (
          TPD_G              => TPD_G,
+         DUAL_CHAN_EN_G     => false,
          SYS_CLK_FREQ_G     => 156.25e6,
          AXI_COMMON_CLK_G   => true,
          UART_READY_EN_G    => false,
@@ -258,7 +265,7 @@ begin
    U_DataFifoA: entity work.AxiStreamFifoV2
       generic map (
          TPD_G               => TPD_G,
-         SLAVE_READY_EN_G    => false,
+         SLAVE_READY_EN_G    => true,
          GEN_SYNC_FIFO_G     => true,
          FIFO_ADDR_WIDTH_G   => 12,
          FIFO_PAUSE_THRESH_G => 500,
@@ -283,7 +290,7 @@ begin
    U_DataFifoB: entity work.AxiStreamFifoV2
       generic map (
          TPD_G               => TPD_G,
-         SLAVE_READY_EN_G    => false,
+         SLAVE_READY_EN_G    => true,
          GEN_SYNC_FIFO_G     => true,
          FIFO_ADDR_WIDTH_G   => 9,
          FIFO_PAUSE_THRESH_G => 500,

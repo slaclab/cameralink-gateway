@@ -21,6 +21,7 @@ set fd [open ${netFile} "w"]
 set nl ""
 append nl [get_nets {U_ClinkTop/U_Framer0/*}]
 append nl [get_nets {U_ClinkTop/*}]
+append nl [get_nets {*}]
 
 regsub -all -line { } $nl "\n" nl
 puts $fd $nl
@@ -33,9 +34,9 @@ set ilaName u_ila_0
 CreateDebugCore ${ilaName}
 
 ## Set the record depth
-set_property C_DATA_DEPTH 16384      [get_debug_cores ${ilaName}]
-set_property C_EN_STRG_QUAL 1        [get_debug_cores ${ilaName}]
-set_property ALL_PROBE_SAME_MU_CNT 2 [get_debug_cores ${ilaName}]
+set_property C_DATA_DEPTH 8192        [get_debug_cores ${ilaName}]
+#set_property C_EN_STRG_QUAL 1        [get_debug_cores ${ilaName}]
+#set_property ALL_PROBE_SAME_MU_CNT 2 [get_debug_cores ${ilaName}]
 
 ## Set the clock for the Core
 SetDebugCoreClk ${ilaName} {U_ClinkTop/U_Framer0/sysClk}
@@ -78,7 +79,35 @@ ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][fv]}
 ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][lv]}
 ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[byteData][valid]}
 
-ConfigProbe ${ilaName} {U_ClinkTop/r_reg[swCamCtrl_n_0_][0][0]}
+ConfigProbe ${ilaName} {U_ClinkTop/r[config][0][swCamCtrl][0]}
+ConfigProbe ${ilaName} {U_ClinkTop/r[config][0][swCamCtrl][1]}
+ConfigProbe ${ilaName} {U_ClinkTop/r[config][0][swCamCtrl][2]}
+ConfigProbe ${ilaName} {U_ClinkTop/r[config][0][swCamCtrl][3]}
+
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[master][tData][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[master][tKeep][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[master][tLast]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[master][tValid]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[inFrame]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[dump]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/r[bytes][*]}
+
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/packMaster[tData][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/packMaster[tKeep][*]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/packMaster[tLast]}
+ConfigProbe ${ilaName} {U_ClinkTop/U_Framer0/packMaster[tValid]}
+
+ConfigProbe ${ilaName} {dataMasters[0][tData][*]}
+ConfigProbe ${ilaName} {dataMasters[0][tKeep][*]}
+ConfigProbe ${ilaName} {dataMasters[0][tLast]}
+ConfigProbe ${ilaName} {dataMasters[0][tValid]}
+ConfigProbe ${ilaName} {dataSlaves[0][tReady]}
+
+ConfigProbe ${ilaName} {intMasterA[tData][*]}
+ConfigProbe ${ilaName} {intMasterA[tKeep][*]}
+ConfigProbe ${ilaName} {intMasterA[tLast]}
+ConfigProbe ${ilaName} {intMasterA[tValid]}
+ConfigProbe ${ilaName} {intSlave[tReady]}
 
 ## Delete the last unused port
 delete_debug_port [get_debug_ports [GetCurrentProbe ${ilaName}]]
