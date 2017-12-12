@@ -38,115 +38,210 @@ set_property PACKAGE_PIN G3 [get_ports gtRxN]
 set_property PACKAGE_PIN G8 [get_ports gtClkP]
 set_property PACKAGE_PIN G7 [get_ports gtClkN]
 
-set_property PACKAGE_PIN E19      [get_ports {cbl0Half0P[0]}]
-set_property PACKAGE_PIN D19      [get_ports {cbl0Half0N[0]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half0P[0]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0P[0]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0N[0]}]
 
-set_property PACKAGE_PIN B28      [get_ports {cbl0Half0P[1]}]
-set_property PACKAGE_PIN A28      [get_ports {cbl0Half0N[1]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half0P[1]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0P[1]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0N[1]}]
 
-set_property PACKAGE_PIN F21      [get_ports {cbl0Half0P[2]}]
-set_property PACKAGE_PIN E21      [get_ports {cbl0Half0N[2]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half0P[2]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0P[2]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0N[2]}]
 
-set_property PACKAGE_PIN G18      [get_ports {cbl0Half0P[3]}]
-set_property PACKAGE_PIN f18      [get_ports {cbl0Half0N[3]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half0P[3]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0P[3]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0N[3]}]
 
-set_property PACKAGE_PIN A20      [get_ports {cbl0Half0P[4]}]
-set_property PACKAGE_PIN A21      [get_ports {cbl0Half0N[4]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half0P[4]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0P[4]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half0N[4]}]
 
-set_property PACKAGE_PIN C25      [get_ports {cbl0Half1P[0]}]
-set_property PACKAGE_PIN B25      [get_ports {cbl0Half1N[0]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half1P[0]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1P[0]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1N[0]}]
 
-set_property PACKAGE_PIN H24      [get_ports {cbl0Half1P[1]}]
-set_property PACKAGE_PIN H25      [get_ports {cbl0Half1N[1]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half1P[1]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1P[1]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1N[1]}]
 
-set_property PACKAGE_PIN H26      [get_ports {cbl0Half1P[2]}]
-set_property PACKAGE_PIN H27      [get_ports {cbl0Half1N[2]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half1P[2]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1P[2]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1N[2]}]
 
-set_property PACKAGE_PIN G28      [get_ports {cbl0Half1P[3]}]
-set_property PACKAGE_PIN F28      [get_ports {cbl0Half1N[3]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half1P[3]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1P[3]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1N[3]}]
 
-set_property PACKAGE_PIN G29      [get_ports {cbl0Half1P[4]}]
-set_property PACKAGE_PIN F30      [get_ports {cbl0Half1N[4]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl0Half1P[4]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1P[4]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0Half1N[4]}]
 
-set_property PACKAGE_PIN C24      [get_ports {cbl0SerP}]
-set_property PACKAGE_PIN B24      [get_ports {cbl0SerN}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl0SerP}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl0SerN}]
 
-set_property PACKAGE_PIN F20      [get_ports {cbl1Half0P[0]}]
-set_property PACKAGE_PIN E20      [get_ports {cbl1Half0N[0]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half0P[0]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0P[0]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0N[0]}]
 
-set_property PACKAGE_PIN D29      [get_ports {cbl1Half0P[1]}]
-set_property PACKAGE_PIN C30      [get_ports {cbl1Half0N[1]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half0P[1]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0P[1]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0N[1]}]
 
-set_property PACKAGE_PIN G27      [get_ports {cbl1Half0P[2]}]
-set_property PACKAGE_PIN F27      [get_ports {cbl1Half0N[2]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half0P[2]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0P[2]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0N[2]}]
 
-set_property PACKAGE_PIN C29      [get_ports {cbl1Half0P[3]}]
-set_property PACKAGE_PIN B29      [get_ports {cbl1Half0N[3]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half0P[3]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0P[3]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0N[3]}]
 
-set_property PACKAGE_PIN A25      [get_ports {cbl1Half0P[4]}]
-set_property PACKAGE_PIN A26      [get_ports {cbl1Half0N[4]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half0P[4]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0P[4]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half0N[4]}]
 
-set_property PACKAGE_PIN D26      [get_ports {cbl1Half1P[0]}]
-set_property PACKAGE_PIN C26      [get_ports {cbl1Half1N[0]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half1P[0]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1P[0]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1N[0]}]
 
-set_property PACKAGE_PIN H30      [get_ports {cbl1Half1P[1]}]
-set_property PACKAGE_PIN G30      [get_ports {cbl1Half1N[1]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half1P[1]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1P[1]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1N[1]}]
 
-set_property PACKAGE_PIN E28      [get_ports {cbl1Half1P[2]}]
-set_property PACKAGE_PIN D28      [get_ports {cbl1Half1N[2]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half1P[2]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1P[2]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1N[2]}]
 
-set_property PACKAGE_PIN E29      [get_ports {cbl1Half1P[3]}]
-set_property PACKAGE_PIN E30      [get_ports {cbl1Half1N[3]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half1P[3]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1P[3]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1N[3]}]
 
-set_property PACKAGE_PIN B30      [get_ports {cbl1Half1P[4]}]
-set_property PACKAGE_PIN A30      [get_ports {cbl1Half1N[4]}]
+set_property DIFF_TERM   TRUE     [get_ports {cbl1Half1P[4]}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1P[4]}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1Half1N[4]}]
 
-set_property PACKAGE_PIN B27      [get_ports {cbl1SerP}]
-set_property PACKAGE_PIN A27      [get_ports {cbl1SerN}]
 set_property IOSTANDARD  LVDS_25  [get_ports {cbl1SerP}]
-set_property IOSTANDARD  LVDS_25  [get_ports {cbl1SerN}]
+
+##############################################################
+# HPC Connector
+##############################################################
+
+#set_property PACKAGE_PIN E19      [get_ports {cbl0Half0P[0]}]
+#set_property PACKAGE_PIN D19      [get_ports {cbl0Half0N[0]}]
+#
+#set_property PACKAGE_PIN B28      [get_ports {cbl0Half0P[1]}]
+#set_property PACKAGE_PIN A28      [get_ports {cbl0Half0N[1]}]
+#
+#set_property PACKAGE_PIN F21      [get_ports {cbl0Half0P[2]}]
+#set_property PACKAGE_PIN E21      [get_ports {cbl0Half0N[2]}]
+#
+#set_property PACKAGE_PIN G18      [get_ports {cbl0Half0P[3]}]
+#set_property PACKAGE_PIN f18      [get_ports {cbl0Half0N[3]}]
+#
+#set_property PACKAGE_PIN A20      [get_ports {cbl0Half0P[4]}]
+#set_property PACKAGE_PIN A21      [get_ports {cbl0Half0N[4]}]
+#
+#set_property PACKAGE_PIN C25      [get_ports {cbl0Half1P[0]}]
+#set_property PACKAGE_PIN B25      [get_ports {cbl0Half1N[0]}]
+#
+#set_property PACKAGE_PIN H24      [get_ports {cbl0Half1P[1]}]
+#set_property PACKAGE_PIN H25      [get_ports {cbl0Half1N[1]}]
+#
+#set_property PACKAGE_PIN H26      [get_ports {cbl0Half1P[2]}]
+#set_property PACKAGE_PIN H27      [get_ports {cbl0Half1N[2]}]
+#
+#set_property PACKAGE_PIN G28      [get_ports {cbl0Half1P[3]}]
+#set_property PACKAGE_PIN F28      [get_ports {cbl0Half1N[3]}]
+#
+#set_property PACKAGE_PIN G29      [get_ports {cbl0Half1P[4]}]
+#set_property PACKAGE_PIN F30      [get_ports {cbl0Half1N[4]}]
+#
+#set_property PACKAGE_PIN C24      [get_ports {cbl0SerP}]
+#set_property PACKAGE_PIN B24      [get_ports {cbl0SerN}]
+#
+#set_property PACKAGE_PIN F20      [get_ports {cbl1Half0P[0]}]
+#set_property PACKAGE_PIN E20      [get_ports {cbl1Half0N[0]}]
+#
+#set_property PACKAGE_PIN D29      [get_ports {cbl1Half0P[1]}]
+#set_property PACKAGE_PIN C30      [get_ports {cbl1Half0N[1]}]
+#
+#set_property PACKAGE_PIN G27      [get_ports {cbl1Half0P[2]}]
+#set_property PACKAGE_PIN F27      [get_ports {cbl1Half0N[2]}]
+#
+#set_property PACKAGE_PIN C29      [get_ports {cbl1Half0P[3]}]
+#set_property PACKAGE_PIN B29      [get_ports {cbl1Half0N[3]}]
+#
+#set_property PACKAGE_PIN A25      [get_ports {cbl1Half0P[4]}]
+#set_property PACKAGE_PIN A26      [get_ports {cbl1Half0N[4]}]
+#
+#set_property PACKAGE_PIN D26      [get_ports {cbl1Half1P[0]}]
+#set_property PACKAGE_PIN C26      [get_ports {cbl1Half1N[0]}]
+#
+#set_property PACKAGE_PIN H30      [get_ports {cbl1Half1P[1]}]
+#set_property PACKAGE_PIN G30      [get_ports {cbl1Half1N[1]}]
+#
+#set_property PACKAGE_PIN E28      [get_ports {cbl1Half1P[2]}]
+#set_property PACKAGE_PIN D28      [get_ports {cbl1Half1N[2]}]
+#
+#set_property PACKAGE_PIN E29      [get_ports {cbl1Half1P[3]}]
+#set_property PACKAGE_PIN E30      [get_ports {cbl1Half1N[3]}]
+#
+#set_property PACKAGE_PIN B30      [get_ports {cbl1Half1P[4]}]
+#set_property PACKAGE_PIN A30      [get_ports {cbl1Half1N[4]}]
+#
+#set_property PACKAGE_PIN B27      [get_ports {cbl1SerP}]
+#set_property PACKAGE_PIN A27      [get_ports {cbl1SerN}]
+
+##############################################################
+# LPC Connector
+##############################################################
+
+set_property PACKAGE_PIN AF26     [get_ports {cbl0Half0P[0]}]
+set_property PACKAGE_PIN AF27     [get_ports {cbl0Half0N[0]}]
+
+set_property PACKAGE_PIN AD21     [get_ports {cbl0Half0P[1]}]
+set_property PACKAGE_PIN AE21     [get_ports {cbl0Half0N[1]}]
+
+set_property PACKAGE_PIN AD27     [get_ports {cbl0Half0P[2]}]
+set_property PACKAGE_PIN AD28     [get_ports {cbl0Half0N[2]}]
+
+set_property PACKAGE_PIN AJ26     [get_ports {cbl0Half0P[3]}]
+set_property PACKAGE_PIN AK26     [get_ports {cbl0Half0N[3]}]
+
+set_property PACKAGE_PIN AG27     [get_ports {cbl0Half0P[4]}]
+set_property PACKAGE_PIN AG28     [get_ports {cbl0Half0N[4]}]
+
+set_property PACKAGE_PIN AD23     [get_ports {cbl0Half1P[0]}]
+set_property PACKAGE_PIN AE24     [get_ports {cbl0Half1N[0]}]
+
+set_property PACKAGE_PIN AF20     [get_ports {cbl0Half1P[1]}]
+set_property PACKAGE_PIN AF21     [get_ports {cbl0Half1N[1]}]
+
+set_property PACKAGE_PIN AG20     [get_ports {cbl0Half1P[2]}]
+set_property PACKAGE_PIN AH20     [get_ports {cbl0Half1N[2]}]
+
+set_property PACKAGE_PIN AH21     [get_ports {cbl0Half1P[3]}]
+set_property PACKAGE_PIN AJ21     [get_ports {cbl0Half1N[3]}]
+
+set_property PACKAGE_PIN AG22     [get_ports {cbl0Half1P[4]}]
+set_property PACKAGE_PIN AH22     [get_ports {cbl0Half1N[4]}]
+
+set_property PACKAGE_PIN AC24     [get_ports {cbl0SerP}]
+set_property PACKAGE_PIN AD24     [get_ports {cbl0SerN}]
+
+set_property PACKAGE_PIN AB27     [get_ports {cbl1Half0P[0]}]
+set_property PACKAGE_PIN AC27     [get_ports {cbl1Half0N[0]}]
+
+set_property PACKAGE_PIN AJ24     [get_ports {cbl1Half0P[1]}]
+set_property PACKAGE_PIN AK25     [get_ports {cbl1Half0N[1]}]
+
+set_property PACKAGE_PIN AE25     [get_ports {cbl1Half0P[2]}]
+set_property PACKAGE_PIN AF25     [get_ports {cbl1Half0N[2]}]
+
+set_property PACKAGE_PIN AA20     [get_ports {cbl1Half0P[3]}]
+set_property PACKAGE_PIN AB20     [get_ports {cbl1Half0N[3]}]
+
+set_property PACKAGE_PIN AB24     [get_ports {cbl1Half0P[4]}]
+set_property PACKAGE_PIN AC25     [get_ports {cbl1Half0N[4]}]
+
+set_property PACKAGE_PIN AE23     [get_ports {cbl1Half1P[0]}]
+set_property PACKAGE_PIN AF23     [get_ports {cbl1Half1N[0]}]
+
+set_property PACKAGE_PIN AK20     [get_ports {cbl1Half1P[1]}]
+set_property PACKAGE_PIN AK21     [get_ports {cbl1Half1N[1]}]
+
+set_property PACKAGE_PIN AG25     [get_ports {cbl1Half1P[2]}]
+set_property PACKAGE_PIN AH25     [get_ports {cbl1Half1N[2]}]
+
+set_property PACKAGE_PIN AJ22     [get_ports {cbl1Half1P[3]}]
+set_property PACKAGE_PIN AJ23     [get_ports {cbl1Half1N[3]}]
+
+set_property PACKAGE_PIN AK23     [get_ports {cbl1Half1P[4]}]
+set_property PACKAGE_PIN AK24     [get_ports {cbl1Half1N[4]}]
+
+set_property PACKAGE_PIN AC22     [get_ports {cbl1SerP}]
+set_property PACKAGE_PIN AD22     [get_ports {cbl1SerN}]
+
 
 # Timing Constraints 
 create_clock -name gtClkP -period 8.000 [get_ports {gtClkP}]
@@ -161,19 +256,23 @@ set_clock_groups -asynchronous -group [get_clocks {pgpClk}] -group [get_clocks {
 set_clock_groups -asynchronous -group [get_clocks {pgpClk}] -group [get_clocks {dnaClkInv}] 
 
 # Clink clock inputs
-create_clock -name cbl0Half1Clk0 -period 11.765 [get_ports {cbl0Half1P[0]}]
-create_clock -name cbl1Half0Clk0 -period 11.765 [get_ports {cbl1Half0P[0]}]
-create_clock -name cbl1Half1Clk0 -period 11.765 [get_ports {cbl1Half1P[0]}]
+create_clock -name cbl0Half1Clk0 -period 10 [get_ports {cbl0Half1P[0]}]
+create_clock -name cbl1Half0Clk0 -period 10 [get_ports {cbl1Half0P[0]}]
+create_clock -name cbl1Half1Clk0 -period 10 [get_ports {cbl1Half1P[0]}]
 
-# Clink derived clocks
-create_generated_clock -name cbl0Half1Clk1 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
-create_generated_clock -name cbl0Half1Clk2 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT1}] 
+set_input_jitter [get_ports -of_objects cbl0Half1Clk0]
+set_input_jitter [get_ports -of_objects cbl1Half0Clk0]
+set_input_jitter [get_ports -of_objects cbl1Half1Clk0]
 
-create_generated_clock -name cbl1Half0Clk1 [get_pins {U_ClinkTop/U_DualCtrl*.U_Cbl1Half0/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
-create_generated_clock -name cbl1Half0Clk2 [get_pins {U_ClinkTop/U_DualCtrl*.U_Cbl1Half0/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT1}] 
+# Clink derived clocks - MMCM
+create_generated_clock -name cbl0Half1Clk1 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT0}] 
+create_generated_clock -name cbl0Half1Clk2 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT1}] 
 
-create_generated_clock -name cbl1Half1Clk1 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
-create_generated_clock -name cbl1Half1Clk2 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DeSerial/U_ClkGen/MmcmGen.U_Mmcm/CLKOUT1}] 
+create_generated_clock -name cbl1Half0Clk1 [get_pins {U_ClinkTop/U_DualCtrl*.U_Cbl1Half0/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT0}] 
+create_generated_clock -name cbl1Half0Clk2 [get_pins {U_ClinkTop/U_DualCtrl*.U_Cbl1Half0/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT1}] 
+
+create_generated_clock -name cbl1Half1Clk1 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT0}] 
+create_generated_clock -name cbl1Half1Clk2 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT1}] 
 
 # Clink clocks async to internal clock
 set_clock_groups -asynchronous -group [get_clocks {pgpClk}] -group [get_clocks {cbl0Half1Clk0}] 
@@ -187,16 +286,31 @@ set_clock_groups -asynchronous -group [get_clocks {pgpClk}] -group [get_clocks {
 set_clock_groups -asynchronous -group [get_clocks {pgpClk}] -group [get_clocks {cbl1Half1Clk2}] 
 
 # Clink input clock async to derived clocks (for clock input shift)
-set_clock_groups -asynchronous -group [get_clocks {cbl0Half1Clk0}] -group [get_clocks {cbl0Half1Clk1}] 
-set_clock_groups -asynchronous -group [get_clocks {cbl0Half1Clk0}] -group [get_clocks {cbl0Half1Clk2}] 
+set_clock_groups -asynchronous -group [get_clocks {cbl0Half1Clk0}] -group [get_clocks {cbl0Half1Clk2}]
 
 # Clink input clock async to derived clocks (for clock input shift)
-set_clock_groups -asynchronous -group [get_clocks {cbl1Half0Clk0}] -group [get_clocks {cbl1Half0Clk1}] 
-set_clock_groups -asynchronous -group [get_clocks {cbl1Half0Clk0}] -group [get_clocks {cbl1Half0Clk2}] 
+set_clock_groups -asynchronous -group [get_clocks {cbl1Half0Clk0}] -group [get_clocks {cbl1Half0Clk2}]
 
 # Clink input clock async to derived clocks (for clock input shift)
-set_clock_groups -asynchronous -group [get_clocks {cbl1Half1Clk0}] -group [get_clocks {cbl1Half1Clk1}] 
-set_clock_groups -asynchronous -group [get_clocks {cbl1Half1Clk0}] -group [get_clocks {cbl1Half1Clk2}] 
+set_clock_groups -asynchronous -group [get_clocks {cbl1Half1Clk0}] -group [get_clocks {cbl1Half1Clk2}]
+
+# Clink Clock
+create_generated_clock -name dlyClk [get_pins {U_ClkGen/MmcmGen.U_Mmcm/CLKOUT0}] 
+
+# Clink clocks async to other clocks 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {stableClk}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {dnaClk}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {dnaClkInv}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {pgpClk}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl0Half1Clk0}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl0Half1Clk1}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl0Half1Clk2}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl1Half0Clk0}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl1Half0Clk1}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl1Half0Clk2}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl1Half1Clk0}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl1Half1Clk1}] 
+set_clock_groups -asynchronous -group [get_clocks {dlyClk}] -group [get_clocks {cbl1Half1Clk2}] 
 
 # .bit File Configuration
 set_property BITSTREAM.CONFIG.CONFIGRATE 9 [current_design]  

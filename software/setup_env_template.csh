@@ -1,6 +1,7 @@
 
 # Rogue
-source /afs/slac.stanford.edu/g/reseng/rogue/master/setup_env.csh
+#source /afs/slac.stanford.edu/g/reseng/rogue/master/setup_env.csh
+source $HOME/projects/gen_daq/rogue/setup.csh
 
 # Package directories
 setenv SURF_DIR ${PWD}/../firmware/submodules/surf/python/

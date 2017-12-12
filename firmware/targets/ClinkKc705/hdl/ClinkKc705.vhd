@@ -43,14 +43,14 @@ entity ClinkKc705 is
       -- Clink Ports
       cbl0Half0P      : inout slv(4 downto 0); --  2,  4,  5,  6, 3
       cbl0Half0M      : inout slv(4 downto 0); -- 15, 17, 18, 19 16
-      cbl0Half1P      : in    slv(4 downto 0); --  8, 10, 11, 12,  9
-      cbl0Half1M      : in    slv(4 downto 0); -- 21, 23, 24, 25, 22
+      cbl0Half1P      : inout slv(4 downto 0); --  8, 10, 11, 12,  9
+      cbl0Half1M      : inout slv(4 downto 0); -- 21, 23, 24, 25, 22
       cbl0SerP        : out   sl; -- 20
       cbl0SerM        : out   sl; -- 7
       cbl1Half0P      : inout slv(4 downto 0); --  2,  4,  5,  6, 3
       cbl1Half0M      : inout slv(4 downto 0); -- 15, 17, 18, 19 16
-      cbl1Half1P      : in    slv(4 downto 0); --  8, 10, 11, 12,  9
-      cbl1Half1M      : in    slv(4 downto 0); -- 21, 23, 24, 25, 22
+      cbl1Half1P      : inout slv(4 downto 0); --  8, 10, 11, 12,  9
+      cbl1Half1M      : inout slv(4 downto 0); -- 21, 23, 24, 25, 22
       cbl1SerP        : out   sl; -- 20
       cbl1SerM        : out   sl; -- 7
       -- ETH GT Pins
@@ -88,23 +88,26 @@ architecture top_level of ClinkKc705 is
    signal intReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_C-1 downto 0);
    signal intReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_C-1 downto 0);
 
-   signal dataMasters     : AxiStreamMasterArray(1 downto 0);
-   signal dataSlaves      : AxiStreamSlaveArray(1 downto 0);
+   signal dataMasters     : AxiStreamMasterArray(0 downto 0);
+   signal dataSlaves      : AxiStreamSlaveArray(0 downto 0);
 
    signal intMasterA      : AxiStreamMasterType;
    signal intMasterB      : AxiStreamMasterType;
    signal intSlave        : AxiStreamSlaveType;
 
-   signal mUartMasters    : AxiStreamMasterArray(1 downto 0);
-   signal mUartSlaves     : AxiStreamSlaveArray(1 downto 0);
-   signal sUartMasters    : AxiStreamMasterArray(1 downto 0);
-   signal sUartCtrls      : AxiStreamCtrlArray(1 downto 0);
+   signal mUartMasters    : AxiStreamMasterArray(0 downto 0);
+   signal mUartSlaves     : AxiStreamSlaveArray(0 downto 0);
+   signal sUartMasters    : AxiStreamMasterArray(0 downto 0);
+   signal sUartCtrls      : AxiStreamCtrlArray(0 downto 0);
 
    signal pgpTxOut : Pgp2bTxOutType;
    signal pgpRxOut : Pgp2bRxOutType;
 
    signal clk      : sl;
    signal rst      : sl;
+
+   signal dlyClk : sl;
+   signal dlyRst : sl;
 
    attribute MARK_DEBUG : string;
    attribute MARK_DEBUG of intMasterA  : signal is "TRUE";
@@ -145,6 +148,24 @@ begin
 
    txMasters(3) <= AXI_STREAM_MASTER_INIT_C;
    rxCtrls(3)   <= AXI_STREAM_CTRL_UNUSED_C;
+
+   U_ClkGen : entity work.ClockManager7
+      generic map (
+         TPD_G               => TPD_G,
+         INPUT_BUFG_G        => true,
+         FB_BUFG_G           => true,
+         OUTPUT_BUFG_G       => true, 
+         NUM_CLOCKS_G        => 1,
+         BANDWIDTH_G         => "OPTIMIZED",
+         CLKIN_PERIOD_G      => 6.4, -- 156.25Mhz
+         DIVCLK_DIVIDE_G     => 1,
+         CLKFBOUT_MULT_F_G   => 6.4, -- 1.00Ghz
+         CLKOUT0_DIVIDE_F_G  => 5.0) -- 200Mhz
+      port map (
+         clkIn            => clk,
+         rstIn            => rst,
+         clkOut(0)        => dlyClk,
+         rstOut(0)        => dlyRst);
 
    ---------------------------------------
    -- TDEST = 0x0: Register access control   
@@ -213,9 +234,6 @@ begin
    U_ClinkTop : entity work.ClinkTop
       generic map (
          TPD_G              => TPD_G,
-         DUAL_CHAN_EN_G     => false,
-         SYS_CLK_FREQ_G     => 156.25e6,
-         AXI_COMMON_CLK_G   => true,
          UART_READY_EN_G    => false,
          DATA_AXIS_CONFIG_G => AXIS_128_C,
          UART_AXIS_CONFIG_G => SSI_PGP2B_CONFIG_C)
@@ -232,12 +250,18 @@ begin
          cbl1Half1M      => cbl1Half1M,
          cbl1SerP        => cbl1SerP,
          cbl1SerM        => cbl1SerM,
-         -- System clock and reset, must be 100Mhz or greater
+         -- System clock and reset, 200Mhz
+         dlyClk          => dlyClk,
+         dlyRst          => dlyRst,
          sysClk          => clk,
          sysRst          => rst,
          camCtrl         => (others=>(others=>'0')),
+         dataClk         => clk,
+         dataRst         => rst,
          dataMasters     => dataMasters,
          dataSlaves      => dataSlaves,
+         uartClk         => clk,
+         uartRst         => rst,
          sUartMasters    => sUartMasters,
          sUartSlaves     => open,
          sUartCtrls      => sUartCtrls,
@@ -250,8 +274,6 @@ begin
          axilWriteMaster => intWriteMasters(1),
          axilWriteSlave  => intWriteSlaves(1));
 
-   sUartMasters(1) <= AXI_STREAM_MASTER_INIT_C;
-   mUartSlaves(1)  <= AXI_STREAM_SLAVE_INIT_C;
    rxCtrls(1)      <= AXI_STREAM_CTRL_UNUSED_C;
 
    sUartMasters(0) <= rxMasters(2);
@@ -259,8 +281,6 @@ begin
 
    txMasters(2)   <= mUartMasters(0);
    mUartSlaves(0) <= txSlaves(2);
-
-   dataSlaves(1) <= AXI_STREAM_SLAVE_INIT_C;
 
    U_DataFifoA: entity work.AxiStreamFifoV2
       generic map (
