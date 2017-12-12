@@ -268,8 +268,8 @@ set_input_jitter [get_ports -of_objects cbl1Half1Clk0]
 create_generated_clock -name cbl0Half1Clk1 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT0}] 
 create_generated_clock -name cbl0Half1Clk2 [get_pins {U_ClinkTop/U_Cbl0Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT1}] 
 
-create_generated_clock -name cbl1Half0Clk1 [get_pins {U_ClinkTop/U_DualCtrl*.U_Cbl1Half0/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT0}] 
-create_generated_clock -name cbl1Half0Clk2 [get_pins {U_ClinkTop/U_DualCtrl*.U_Cbl1Half0/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT1}] 
+create_generated_clock -name cbl1Half0Clk1 [get_pins {U_ClinkTop/U_DualCtrlDis.U_Cbl1Half0/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT0}] 
+create_generated_clock -name cbl1Half0Clk2 [get_pins {U_ClinkTop/U_DualCtrlDis.U_Cbl1Half0/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT1}] 
 
 create_generated_clock -name cbl1Half1Clk1 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT0}] 
 create_generated_clock -name cbl1Half1Clk2 [get_pins {U_ClinkTop/U_Cbl1Half1/U_DataShift/U_ClkGen/U_Mmcm/CLKOUT1}] 
