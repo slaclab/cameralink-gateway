@@ -247,7 +247,7 @@ begin
             elsif ccCount = 0 then
                camCtrl(0)(0) <= '0' after TPD_G;
             else
-               ccCount <= ccCount - 1 after TPD_G;
+               ccCount <= ccCount - 1 after TPD_G; -- 6.4nS * 4095 = 26.2uS
             end if;
          end if;
       end if;
