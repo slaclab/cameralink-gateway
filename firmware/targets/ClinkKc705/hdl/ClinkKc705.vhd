@@ -109,6 +109,9 @@ architecture top_level of ClinkKc705 is
    signal dlyClk : sl;
    signal dlyRst : sl;
 
+   signal ccCount : slv(11 downto 0);
+   signal camCtrl : Slv4Array(0 downto 0);
+
    attribute MARK_DEBUG : string;
    attribute MARK_DEBUG of intMasterA  : signal is "TRUE";
    attribute MARK_DEBUG of intSlave    : signal is "TRUE";
@@ -231,6 +234,25 @@ begin
    -- Application
    ---------------------------------------
 
+   -- Drive CC bit when opcode received
+   U_CcGen: process ( clk ) begin
+      if rising_edge(clk) then
+         if rst = '1' then
+            ccCount <= (others=>'0') after TPD_G;
+            camCtrl <= (others=>(others=>'0')) after TPD_G;
+         else
+            if pgpRxOut.opCodeEn = '1' then
+               ccCount <= (others=>'1') after TPD_G;
+               camCtrl(0)(0) <= '1' after TPD_G;
+            elsif ccCount = 0 then
+               camCtrl(0)(0) <= '0' after TPD_G;
+            else
+               ccCount <= ccCount - 1 after TPD_G;
+            end if;
+         end if;
+      end if;
+   end process;
+
    U_ClinkTop : entity work.ClinkTop
       generic map (
          TPD_G              => TPD_G,
@@ -255,7 +277,7 @@ begin
          dlyRst          => dlyRst,
          sysClk          => clk,
          sysRst          => rst,
-         camCtrl         => (others=>(others=>'0')),
+         camCtrl         => camCtrl,
          dataClk         => clk,
          dataRst         => rst,
          dataMasters     => dataMasters,
