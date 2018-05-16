@@ -2,7 +2,7 @@
 -- File       : ClinkKc705.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -- Created    : 2015-02-23
--- Last update: 2016-02-09
+-- Last update: 2018-05-15
 -------------------------------------------------------------------------------
 -- Description: Example using 10G-BASER Protocol
 -------------------------------------------------------------------------------
@@ -241,13 +241,13 @@ begin
       if rising_edge(clk) then
          if rst = '1' then
             ccCount <= (others=>'0') after TPD_G;
-            camCtrl <= (others=>(others=>'0')) after TPD_G;
+            camCtrl <= (others=>(others=>'1')) after TPD_G;
          else
             if pgpRxOut.opCodeEn = '1' then
                ccCount <= (others=>'1') after TPD_G;
-               camCtrl(0)(0) <= '1' after TPD_G;
-            elsif ccCount = 0 then
                camCtrl(0)(0) <= '0' after TPD_G;
+            elsif ccCount = 0 then
+               camCtrl(0)(0) <= '1' after TPD_G;
             else
                ccCount <= ccCount - 1 after TPD_G; -- 6.4nS * 4095 = 26.2uS
             end if;
