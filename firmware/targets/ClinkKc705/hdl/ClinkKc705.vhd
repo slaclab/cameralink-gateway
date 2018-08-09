@@ -35,7 +35,8 @@ entity ClinkKc705 is
       TPD_G         : time    := 1 ns;
       BUILD_INFO_G  : BuildInfoType;
       SIM_SPEEDUP_G : boolean := false;
-      SIMULATION_G  : boolean := false);
+      SIMULATION_G  : boolean := false;
+      DEBUG_G       : boolean := true);
    port (
       extRst          : in  sl;
       led             : out slv(7 downto 0);
@@ -119,6 +120,11 @@ architecture top_level of ClinkKc705 is
    attribute MARK_DEBUG of intSlave    : signal is "TRUE";
    attribute MARK_DEBUG of dataMasters : signal is "TRUE";
    attribute MARK_DEBUG of dataSlaves  : signal is "TRUE";
+
+   component ila_1
+      port ( clk    : sl;
+            probe0 : slv(511 downto 0) );
+   end component;
 
 begin
 
@@ -305,6 +311,22 @@ begin
 
    txMasters(2)   <= mUartMasters(0);
    mUartSlaves(0) <= txSlaves(2);
+
+
+   ---------------------------
+   --ILA core
+   ---------------------------
+
+   GEN_DEBUG : if DEBUG_G generate
+       U_ILA : ila_1
+           port map ( clk   => clk,
+                      probe0(0)                   => dataMasters(0).tValid,
+                      probe0(1)                   => dataMasters(1).tValid,
+                      probe0(129 downto 2)        => dataMasters(0).tData,
+                      probe0(257 downto 130)      => dataMasters(1).tData,
+                      probe0(511 downto 258)      => (others=>'0'));
+   end generate;
+
 
    U_DataFifoA: entity work.AxiStreamFifoV2
       generic map (

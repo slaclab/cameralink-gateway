@@ -7,3 +7,6 @@ loadRuckusTcl $::env(TOP_DIR)/submodules/surf
 # Load local source Code and constraints
 loadSource      -dir "$::DIR_PATH/hdl/"
 loadConstraints -dir "$::DIR_PATH/hdl/"
+
+# Load ila core for debugging
+loadIpCore -path "$::DIR_PATH/coregen/ila_1.xci"
