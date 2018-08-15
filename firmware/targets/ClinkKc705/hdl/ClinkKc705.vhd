@@ -121,7 +121,7 @@ architecture top_level of ClinkKc705 is
    attribute MARK_DEBUG of dataMasters : signal is "TRUE";
    attribute MARK_DEBUG of dataSlaves  : signal is "TRUE";
 
-   component ila_1
+   component ila_0
       port ( clk    : sl;
             probe0 : slv(511 downto 0) );
    end component;
@@ -318,7 +318,7 @@ begin
    ---------------------------
 
    GEN_DEBUG : if DEBUG_G generate
-       U_ILA : ila_1
+       U_ILA : ila_0
            port map ( clk   => clk,
                       probe0(0)                   => dataMasters(0).tValid,
                       probe0(1)                   => dataMasters(1).tValid,

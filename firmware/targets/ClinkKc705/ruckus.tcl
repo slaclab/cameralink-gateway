@@ -9,4 +9,4 @@ loadSource      -dir "$::DIR_PATH/hdl/"
 loadConstraints -dir "$::DIR_PATH/hdl/"
 
 # Load ila core for debugging
-loadIpCore -path "$::DIR_PATH/coregen/ila_1.xci"
+loadIpCore -path "$::DIR_PATH/coregen/ila_0.xci"

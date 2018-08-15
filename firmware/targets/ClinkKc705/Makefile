@@ -8,6 +8,9 @@ export PRJ_VERSION = 0x00000004
 # Define target part
 export PRJ_PART = XC7K325TFFG900-2
 
+.PHONY: all
+all: ; $(info $$var is [${var}])echo Hello world
+
 # Define the Microblaze source path
 #export SDK_SRC_PATH = $(PROJ_DIR)/../../../common/core/src
 
