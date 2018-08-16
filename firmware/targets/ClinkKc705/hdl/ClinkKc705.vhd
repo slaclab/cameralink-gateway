@@ -321,10 +321,8 @@ begin
        U_ILA : ila_0
            port map ( clk   => clk,
                       probe0(0)                   => dataMasters(0).tValid,
-                      probe0(1)                   => dataMasters(1).tValid,
-                      probe0(129 downto 2)        => dataMasters(0).tData,
-                      probe0(257 downto 130)      => dataMasters(1).tData,
-                      probe0(511 downto 258)      => (others=>'0'));
+                      probe0(128 downto 1)        => dataMasters(0).tData,
+                      probe0(511 downto 129)      => (others=>'0'));
    end generate;
 
 
