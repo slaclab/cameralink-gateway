@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import pyrogue as pr
-import rogue.hardware.data
+import rogue.hardware.axi
 import rogue.protocols
 import surf.axi
 import surf.protocols.clink
@@ -41,10 +41,15 @@ class ClinkDev(pr.Root):
         pr.Root.__init__(self,name='ClinkDev',description='CameraLink Dev')
 
         # Create the stream interface
-        self._pgpVc0 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,0) # Registers
-        self._pgpVc1 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,1) # Data
-        self._pgpVc2 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,2) # Serial
-        self._pgpVc3 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,3) # Serial
+        #self._pgpVc0 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,0) # Registers
+        #self._pgpVc1 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,1) # Data
+        #self._pgpVc2 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,2) # Serial
+        #self._pgpVc3 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,3) # Serial
+
+        self._pgpVc0 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',0,True) # Registers
+        self._pgpVc1 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',1,True) # Data
+        self._pgpVc2 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',2,True) # Serial
+        self._pgpVc3 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',3,True) # Serial
 
         # SRP
         self._srp = rogue.protocols.srp.SrpV3()
