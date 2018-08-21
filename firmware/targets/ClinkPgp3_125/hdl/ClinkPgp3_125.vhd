@@ -382,12 +382,12 @@ begin
          ledBlu(0) <= '1';
       elsif pgpRxOut.remLinkReady = '0' then
          ledRed(0) <= '1';
-         ledGrn(0) <= '0';
-         ledBlu(0) <= '1';
-      else
-         ledRed(0) <= '1';
          ledGrn(0) <= '1';
          ledBlu(0) <= '0';
+      else
+         ledRed(0) <= '1';
+         ledGrn(0) <= '0';
+         ledBlu(0) <= '1';
       end if;
 
       if camStatus(0).running = '1' then
