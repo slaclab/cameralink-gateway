@@ -1,5 +1,5 @@
 
-export GIT_BYPASS  = 1
+#export GIT_BYPASS  = 1
 
 # Define target output
 target: prom
