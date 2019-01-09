@@ -134,6 +134,7 @@ begin
          DIVCLK_DIVIDE_G    => 1,
          CLKFBOUT_MULT_F_G  => 6.4,
          CLKOUT0_DIVIDE_F_G => 6.4,
+         VC_INTERLEAVE_G    => 1,
          -- CPLL Configurations (gtClkP = 312.5 MHz Configuration)
          CPLL_REFCLK_SEL_G  => "001",
          CPLL_FBDIV_G       => 2,
