@@ -9,5 +9,5 @@
 ##############################################################################
 # Program using: s25fl128sxxxxxx0-spi-x1_x2_x4
 set format     "mcs"
-set inteface   "spix1"
+set inteface   "spix2"
 set size       "128"

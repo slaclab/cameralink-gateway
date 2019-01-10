@@ -2,6 +2,9 @@
 # Define target output
 target: prom
 
+# Prom type:
+# s25fl128sxxxxxx0-spi-x1_x2_x4
+
 # Define Firmware Version Number
 export PRJ_VERSION = 0x00000005
 
