@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
--- File       : ClinkPgp3_2ch.vhd
+-- File       : ClinkFebPgp3_1ch.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
--- Description: Camera link gateway with PGPv3 and 2 CLink channels
+-- Description: Camera link gateway with PGPv3 and 1 CLink channels
 -------------------------------------------------------------------------------
 -- This file is part of 'Camera link gateway'.
 -- It is subject to the license terms in the LICENSE.txt file found in the 
@@ -20,7 +20,7 @@ use ieee.std_logic_unsigned.all;
 
 use work.StdRtlPkg.all;
 
-entity ClinkPgp3_2ch is
+entity ClinkFebPgp3_1ch is
    generic (
       TPD_G        : time    := 1 ns;
       BUILD_INFO_G : BuildInfoType;
@@ -69,16 +69,16 @@ entity ClinkPgp3_2ch is
       tempAlertL    : in    sl;
       vPIn          : in    sl;
       vNIn          : in    sl);
-end ClinkPgp3_2ch;
+end ClinkFebPgp3_1ch;
 
-architecture top_level of ClinkPgp3_2ch is
+architecture top_level of ClinkFebPgp3_1ch is
 
 begin
 
    U_Core : entity work.CLinkGateway
       generic map (
          TPD_G        => TPD_G,
-         CHAN_COUNT_G => 2,             -- Two CLink channels
+         CHAN_COUNT_G => 1,             -- One CLink channel
          PGP_TYPE_G   => true,          -- True: PGPv3@10.3125Gb/s
          BUILD_INFO_G => BUILD_INFO_G,
          SIMULATION_G => SIMULATION_G)
