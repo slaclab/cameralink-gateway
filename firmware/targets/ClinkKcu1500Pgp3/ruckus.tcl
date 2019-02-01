@@ -1,11 +1,23 @@
 # Load RUCKUS environment and library
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
-# Load common and sub-module ruckus.tcl files
+# Load base sub-modules
 loadRuckusTcl $::env(PROJ_DIR)/../../submodules/surf
+loadRuckusTcl $::env(PROJ_DIR)/../../submodules/lcls-timing-core
 loadRuckusTcl $::env(PROJ_DIR)/../../submodules/axi-pcie-core/hardware/XilinxKcu1500
-loadRuckusTcl $::env(PROJ_DIR)/../../common/pgp3/hardware/XilinxKcu1500
 
-# Load local source Code and constraints
+# Load only MIG[3] source code (located in SSI1)
+set DdrPath $::env(PROJ_DIR)/../../submodules/axi-pcie-core/hardware/XilinxKcu1500/ddr
+loadSource      -path "${DdrPath}/rtl/MigPkg.vhd"
+loadSource      -path "${DdrPath}/rtl/Mig3.vhd"
+loadIpCore      -path "${DdrPath}/ip/XilinxKcu1500Mig3Core.xci"
+loadConstraints -path "${DdrPath}/xdc/XilinxKcu1500Mig3.xdc"
+
+# Load the L2SI source code
+loadSource -dir $::env(PROJ_DIR)/../../submodules/l2si-core/base/rtl
+
+# Load common source code
+loadRuckusTcl $::env(PROJ_DIR)/../../common/pcie
+
+# Load local source Code
 loadSource      -dir "$::DIR_PATH/hdl"
-loadConstraints -dir "$::DIR_PATH/hdl"

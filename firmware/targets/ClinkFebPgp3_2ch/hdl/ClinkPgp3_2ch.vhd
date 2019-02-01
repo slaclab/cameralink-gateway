@@ -2,7 +2,7 @@
 -- File       : ClinkFebPgp3_2ch.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
--- Description: Camera link gateway with PGPv3 and 2 CLink channels
+-- Description: Camera link gateway FEB with PGPv3 and 2 CLink channels
 -------------------------------------------------------------------------------
 -- This file is part of 'Camera link gateway'.
 -- It is subject to the license terms in the LICENSE.txt file found in the 
