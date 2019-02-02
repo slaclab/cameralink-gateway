@@ -397,16 +397,16 @@ architecture mapping of DdrAxiXbar is
          );
    end component;
 
-   signal mAxiRstL : sl;
+   signal sAxiRstL : sl;
 
 begin
 
-   mAxiRstL <= not(mAxiRst);
+   sAxiRstL <= not(sAxiRst);
 
-   U_XBAR : DdrXbar
+   U_XBAR : DdrAxiXbarIpCore
       port map (
-         INTERCONNECT_ACLK    => mAxiClk,
-         INTERCONNECT_ARESETN => mAxiRstL,
+         INTERCONNECT_ACLK    => sAxiClk,
+         INTERCONNECT_ARESETN => sAxiRstL,
          -- SLAVE[0]
          S00_AXI_ARESET_OUT_N => open,
          S00_AXI_ACLK         => sAxiClk,

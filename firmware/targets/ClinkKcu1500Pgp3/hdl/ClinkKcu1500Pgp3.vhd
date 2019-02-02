@@ -112,10 +112,10 @@ architecture top_level of ClinkKcu1500Pgp3 is
 
    signal dmaClk       : sl;
    signal dmaRst       : sl;
-   signal dmaObMasters : AxiStreamMasterArray(7 downto 0);
-   signal dmaObSlaves  : AxiStreamSlaveArray(7 downto 0);
-   signal dmaIbMasters : AxiStreamMasterArray(7 downto 0);
-   signal dmaIbSlaves  : AxiStreamSlaveArray(7 downto 0);
+   signal dmaObMasters : AxiStreamMasterArray(3 downto 0);
+   signal dmaObSlaves  : AxiStreamSlaveArray(3 downto 0);
+   signal dmaIbMasters : AxiStreamMasterArray(3 downto 0);
+   signal dmaIbSlaves  : AxiStreamSlaveArray(3 downto 0);
 
    signal pgpIbMasters : AxiStreamMasterArray(3 downto 0);
    signal pgpIbSlaves  : AxiStreamSlaveArray(3 downto 0);
@@ -174,7 +174,7 @@ begin
          TPD_G             => TPD_G,
          BUILD_INFO_G      => BUILD_INFO_G,
          DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
-         DMA_SIZE_G        => 8)
+         DMA_SIZE_G        => 4)
       port map (
          ------------------------      
          --  Top Level Interfaces

@@ -8,14 +8,25 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-create_generated_clock -name pgpTxClk   [get_pins {U_Core/GEN_PGP3.U_PGP/U_PGPv3/REAL_PGP.U_TX_PLL/PllGen.U_Pll/CLKOUT0}] 
-create_generated_clock -name pgpRxClk00 [get_pins {U_Core/GEN_PGP3.U_PGP/U_PGPv3/REAL_PGP.GEN_LANE[0].U_Pgp/U_Pgp3Gtx7IpWrapper/U_RX_PLL/PllGen.U_Pll/CLKOUT0}] 
-create_generated_clock -name pgpRxClk01 [get_pins {U_Core/GEN_PGP3.U_PGP/U_PGPv3/REAL_PGP.GEN_LANE[0].U_Pgp/U_Pgp3Gtx7IpWrapper/U_RX_PLL/PllGen.U_Pll/CLKOUT1}] 
-create_generated_clock -name pgpRxClk10 [get_pins {U_Core/GEN_PGP3.U_PGP/U_PGPv3/REAL_PGP.GEN_LANE[1].U_Pgp/U_Pgp3Gtx7IpWrapper/U_RX_PLL/PllGen.U_Pll/CLKOUT0}] 
-create_generated_clock -name pgpRxClk11 [get_pins {U_Core/GEN_PGP3.U_PGP/U_PGPv3/REAL_PGP.GEN_LANE[1].U_Pgp/U_Pgp3Gtx7IpWrapper/U_RX_PLL/PllGen.U_Pll/CLKOUT1}] 
+#######
+# PGP #
+#######
 
-set_clock_groups -asynchronous \
-    -group [get_clocks -include_generated_clocks -of_objects [get_pins -hier -filter {name=~*gt0_Pgp3Gtx7Ip10G_i*gtxe2_i*TXOUTCLK}]] \
-    -group [get_clocks -include_generated_clocks -of_objects [get_pins -hier -filter {name=~*gt0_Pgp3Gtx7Ip10G_i*gtxe2_i*RXOUTCLK}]]
+create_clock -name pgp3PhyRxClk0 -period 3.200 [get_pins {U_Hardware/GEN_LANE[0].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/RXOUTCLK}]
+create_clock -name pgp3PhyRxClk1 -period 3.200 [get_pins {U_Hardware/GEN_LANE[1].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/RXOUTCLK}]
+create_clock -name pgp3PhyRxClk2 -period 3.200 [get_pins {U_Hardware/GEN_LANE[2].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/RXOUTCLK}]
+create_clock -name pgp3PhyRxClk3 -period 3.200 [get_pins {U_Hardware/GEN_LANE[3].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/RXOUTCLK}]
 
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/GEN_PGP3.U_PGP/U_PGPv3/REAL_PGP.U_TX_PLL/PllGen.U_Pll/CLKOUT1]] -group [get_clocks -of_objects [get_pins U_Core/GEN_PGP3.U_PGP/U_MMCM/MmcmGen.U_Mmcm/CLKOUT1]]
+create_clock -name pgp3PhyTxClk0 -period 3.200 [get_pins {U_Hardware/GEN_LANE[0].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/TXOUTCLK}]
+create_clock -name pgp3PhyTxClk1 -period 3.200 [get_pins {U_Hardware/GEN_LANE[1].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/TXOUTCLK}]
+create_clock -name pgp3PhyTxClk2 -period 3.200 [get_pins {U_Hardware/GEN_LANE[2].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/TXOUTCLK}]
+create_clock -name pgp3PhyTxClk3 -period 3.200 [get_pins {U_Hardware/GEN_LANE[3].GEN_PGP3.U_Lane/U_Pgp/U_Pgp3GthUsIpWrapper_1/GEN_10G.U_Pgp3GthUsIp/inst/gen_gtwizard_gthe3_top.Pgp3GthUsIp10G_gtwizard_gthe3_inst/gen_gtwizard_gthe3.gen_channel_container[2].gen_enabled_channel.gthe3_channel_wrapper_inst/channel_inst/gthe3_channel_gen.gen_gthe3_channel_inst[0].GTHE3_CHANNEL_PRIM_INST/TXOUTCLK}]
+
+######################
+# Timing Constraints #
+######################
+
+set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {pgp3PhyRxClk0}] -group [get_clocks -include_generated_clocks {pgp3PhyTxClk0}] -group [get_clocks -include_generated_clocks {qsfp0RefClkP0}] -group [get_clocks -include_generated_clocks {pciRefClkP}] -group [get_clocks -include_generated_clocks {userClkP}]
+set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {pgp3PhyRxClk1}] -group [get_clocks -include_generated_clocks {pgp3PhyTxClk1}] -group [get_clocks -include_generated_clocks {qsfp0RefClkP0}] -group [get_clocks -include_generated_clocks {pciRefClkP}] -group [get_clocks -include_generated_clocks {userClkP}]
+set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {pgp3PhyRxClk2}] -group [get_clocks -include_generated_clocks {pgp3PhyTxClk2}] -group [get_clocks -include_generated_clocks {qsfp0RefClkP0}] -group [get_clocks -include_generated_clocks {pciRefClkP}] -group [get_clocks -include_generated_clocks {userClkP}]
+set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {pgp3PhyRxClk3}] -group [get_clocks -include_generated_clocks {pgp3PhyTxClk3}] -group [get_clocks -include_generated_clocks {qsfp0RefClkP0}] -group [get_clocks -include_generated_clocks {pciRefClkP}] -group [get_clocks -include_generated_clocks {userClkP}]

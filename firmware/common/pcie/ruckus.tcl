@@ -24,5 +24,5 @@ if { [info exists ::env(INCLUDE_PGP3_10G)] != 1 || $::env(INCLUDE_PGP3_10G) == 0
 # set_property STEPS.PLACE_DESIGN.TCL.PRE     "$::DIR_PATH/vivado/pthread_pre.tcl"  [get_runs impl_1]
 # set_property STEPS.PLACE_DESIGN.TCL.POST    "$::DIR_PATH/vivado/pthread_post.tcl" [get_runs impl_1] 
 
-# # Updating the impl_1 strategy
-# set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
+# Updating the impl_1 strategy
+set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]

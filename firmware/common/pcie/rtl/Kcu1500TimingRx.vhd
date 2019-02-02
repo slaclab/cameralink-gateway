@@ -21,16 +21,15 @@ use work.AxiLitePkg.all;
 use work.AxiStreamPkg.all;
 use work.TimingPkg.all;
 use work.TDetPkg.all;
-use work.SsiPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
 
 entity Kcu1500TimingRx is
    generic (
-      TPD_G             : time                := 1 ns;
-      DMA_AXIS_CONFIG_G : AxiStreamConfigType := ssiAxiStreamConfig(8);
-      AXI_BASE_ADDR_G   : slv(31 downto 0)    := (others => '0'));
+      TPD_G             : time := 1 ns;
+      DMA_AXIS_CONFIG_G : AxiStreamConfigType;
+      AXI_BASE_ADDR_G   : slv(31 downto 0));
    port (
       -- Trigger Interface
       trigger         : out slv(3 downto 0);

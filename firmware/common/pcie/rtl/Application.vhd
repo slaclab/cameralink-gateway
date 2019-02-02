@@ -50,10 +50,10 @@ entity Application is
       -- DMA Interface (dmaClk domain)
       dmaClk          : in  sl;
       dmaRst          : in  sl;
-      dmaIbMasters    : out AxiStreamMasterArray(7 downto 0);
-      dmaIbSlaves     : in  AxiStreamSlaveArray(7 downto 0);
-      dmaObMasters    : in  AxiStreamMasterArray(7 downto 0);
-      dmaObSlaves     : out AxiStreamSlaveArray(7 downto 0);
+      dmaIbMasters    : out AxiStreamMasterArray(3 downto 0);
+      dmaIbSlaves     : in  AxiStreamSlaveArray(3 downto 0);
+      dmaObMasters    : in  AxiStreamMasterArray(3 downto 0);
+      dmaObSlaves     : out AxiStreamSlaveArray(3 downto 0);
       -- DDR MEM Interface (ddrClk domain)
       ddrClk          : in  sl;
       ddrRst          : in  sl;
@@ -82,17 +82,13 @@ architecture mapping of Application is
 
 begin
 
-   dmaIbMasters(3 downto 0) <= pgpObMasters;
-   dmaIbMasters(7 downto 4) <= tdetTransMaster;
+   dmaIbMasters <= pgpObMasters;
+   pgpObSlaves  <= dmaIbSlaves;
 
-   pgpObSlaves    <= dmaIbSlaves(3 downto 0);
-   tdetTransSlave <= dmaIbSlaves(7 downto 4);
+   pgpIbMasters <= dmaObMasters;
+   dmaObSlaves  <= pgpIbSlaves;
 
-   pgpIbMasters <= dmaObMasters(3 downto 0);
-
-   dmaObSlaves(3 downto 0) <= pgpIbSlaves;
-   dmaObSlaves(7 downto 4) <= (others => AXI_STREAM_SLAVE_FORCE_C);
-
+   tdetTransSlave <= (others => AXI_STREAM_SLAVE_FORCE_C);
    tdetEventSlave <= (others => AXI_STREAM_SLAVE_FORCE_C);
 
    axilReadSlaves  <= (others => AXI_LITE_READ_SLAVE_EMPTY_OK_C);
