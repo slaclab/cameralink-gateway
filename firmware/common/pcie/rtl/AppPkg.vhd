@@ -24,4 +24,6 @@ package AppPkg is
 
    constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(4, TKEEP_COMP_C, TUSER_FIRST_LAST_C, 8, 2);-- 32-bit interface
 
+   constant BUILD_SIF_C : boolean := false;
+   
 end package AppPkg;

@@ -1,8 +1,6 @@
 -------------------------------------------------------------------------------
 -- File       : Application.vhd
 -- Company    : SLAC National Accelerator Laboratory
--- Created    : 2017-10-26
--- Last update: 2019-02-01
 -------------------------------------------------------------------------------
 -- This file is part of 'Camera link gateway'.
 -- It is subject to the license terms in the LICENSE.txt file found in the 
@@ -27,7 +25,7 @@ use work.AppPkg.all;
 entity Application is
    generic (
       TPD_G           : time             := 1 ns;
-      AXI_BASE_ADDR_G : slv(31 downto 0) := x"0080_0000");
+      AXI_BASE_ADDR_G : slv(31 downto 0) := x"00C0_0000");
    port (
       -- AXI-Lite Interface
       axilClk         : in  sl;
@@ -41,12 +39,9 @@ entity Application is
       pgpIbSlaves     : in  AxiStreamSlaveArray(3 downto 0);
       pgpObMasters    : in  AxiStreamMasterArray(3 downto 0);
       pgpObSlaves     : out AxiStreamSlaveArray(3 downto 0);
-      -- Event streams (axilClk domain)
-      tdetEventMaster : in  AxiStreamMasterArray(3 downto 0);
-      tdetEventSlave  : out AxiStreamSlaveArray(3 downto 0);
-      -- Transition streams (axilClk domain)
-      tdetTransMaster : in  AxiStreamMasterArray(3 downto 0);
-      tdetTransSlave  : out AxiStreamSlaveArray(3 downto 0);
+      -- Trigger Event streams (axilClk domain)
+      trigMasters     : in  AxiStreamMasterArray(3 downto 0);
+      trigSlaves      : out AxiStreamSlaveArray(3 downto 0);
       -- DMA Interface (dmaClk domain)
       dmaClk          : in  sl;
       dmaRst          : in  sl;
@@ -65,41 +60,32 @@ end Application;
 
 architecture mapping of Application is
 
-   constant NUM_AXIL_MASTERS_C : positive := 1;
+   constant AXI_OFFSET_C : Slv64Array(3 downto 0) := (
+      0 => x"0000_0000_0000_0000",
+      1 => x"0000_0000_4000_0000",
+      2 => x"0000_0000_8000_0000",
+      3 => x"0000_0000_C000_0000");
 
-   constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 20, 16);
+   constant NUM_AXIL_MASTERS_C : positive := 4;
+
+   constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 22, 20);
 
    signal axilWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
    signal axilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0);
    signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
    signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0);
 
-   signal ddrWriteMasters : AxiWriteMasterArray(7 downto 0);
-   signal ddrWriteSlaves  : AxiWriteSlaveArray(7 downto 0);
-   signal ddrReadMasters  : AxiReadMasterArray(7 downto 0);
-   signal ddrReadSlaves   : AxiReadSlaveArray(7 downto 0);
+   signal axiWriteMasters : AxiWriteMasterArray(7 downto 0);
+   signal axiWriteSlaves  : AxiWriteSlaveArray(7 downto 0);
+   signal axiReadMasters  : AxiReadMasterArray(7 downto 0);
+   signal axiReadSlaves   : AxiReadSlaveArray(7 downto 0);
 
 
 begin
 
-   dmaIbMasters <= pgpObMasters;
-   pgpObSlaves  <= dmaIbSlaves;
-
-   pgpIbMasters <= dmaObMasters;
-   dmaObSlaves  <= pgpIbSlaves;
-
-   tdetTransSlave <= (others => AXI_STREAM_SLAVE_FORCE_C);
-   tdetEventSlave <= (others => AXI_STREAM_SLAVE_FORCE_C);
-
-   axilReadSlaves  <= (others => AXI_LITE_READ_SLAVE_EMPTY_OK_C);
-   axilWriteSlaves <= (others => AXI_LITE_WRITE_SLAVE_EMPTY_OK_C);
-
-   ddrReadMasters  <= (others => AXI_READ_MASTER_FORCE_C);
-   ddrWriteMasters <= (others => AXI_WRITE_MASTER_FORCE_C);
-
-   ---------------------
+   --------------------
    -- AXI-Lite Crossbar
-   ---------------------
+   --------------------
    U_AXIL_XBAR : entity work.AxiLiteCrossbar
       generic map (
          TPD_G              => TPD_G,
@@ -118,9 +104,9 @@ begin
          mAxiReadMasters     => axilReadMasters,
          mAxiReadSlaves      => axilReadSlaves);
 
-   ---------------------
+   ---------------
    -- AXI Crossbar
-   ---------------------
+   ---------------
    U_AXI_XBAR : entity work.DdrAxiXbar
       generic map (
          TPD_G => TPD_G)
@@ -128,10 +114,10 @@ begin
          -- Slave Interfaces
          sAxiClk          => axilClk,
          sAxiRst          => axilRst,
-         sAxiWriteMasters => ddrWriteMasters,
-         sAxiWriteSlaves  => ddrWriteSlaves,
-         sAxiReadMasters  => ddrReadMasters,
-         sAxiReadSlaves   => ddrReadSlaves,
+         sAxiWriteMasters => axiWriteMasters,
+         sAxiWriteSlaves  => axiWriteSlaves,
+         sAxiReadMasters  => axiReadMasters,
+         sAxiReadSlaves   => axiReadSlaves,
          -- Master Interface
          mAxiClk          => ddrClk,
          mAxiRst          => ddrRst,
@@ -139,5 +125,45 @@ begin
          mAxiWriteSlave   => ddrWriteSlave,
          mAxiReadMaster   => ddrReadMaster,
          mAxiReadSlave    => ddrReadSlave);
+
+   -------------------
+   -- Application Lane
+   -------------------
+   GEN_VEC :
+   for i in 3 downto 0 generate
+      U_Lane : entity work.AppLane
+         generic map (
+            TPD_G           => TPD_G,
+            AXI_BASE_ADDR_G => AXIL_CONFIG_C(i).baseAddr)
+         port map (
+            -- AXI-Lite Interface
+            axilClk         => axilClk,
+            axilRst         => axilRst,
+            axilReadMaster  => axilReadMasters(i),
+            axilReadSlave   => axilReadSlaves(i),
+            axilWriteMaster => axilWriteMasters(i),
+            axilWriteSlave  => axilWriteSlaves(i),
+            -- PGP Streams (axilClk domain)
+            pgpIbMaster     => pgpIbMasters(i),
+            pgpIbSlave      => pgpIbSlaves(i),
+            pgpObMaster     => pgpObMasters(i),
+            pgpObSlave      => pgpObSlaves(i),
+            -- Trigger Event streams (axilClk domain)
+            trigMaster      => trigMasters(i),
+            trigSlave       => trigSlaves(i),
+            -- DMA Interface (dmaClk domain)
+            dmaClk          => dmaClk,
+            dmaRst          => dmaRst,
+            dmaIbMaster     => dmaIbMasters(i),
+            dmaIbSlave      => dmaIbSlaves(i),
+            dmaObMaster     => dmaObMasters(i),
+            dmaObSlave      => dmaObSlaves(i),
+            -- AXI MEM Interface (axilClk domain)
+            axiOffset       => AXI_OFFSET_C(i),
+            axiWriteMasters => axiWriteMasters(2*i+1 downto 2*i),
+            axiWriteSlaves  => axiWriteSlaves(2*i+1 downto 2*i),
+            axiReadMasters  => axiReadMasters(2*i+1 downto 2*i),
+            axiReadSlaves   => axiReadSlaves(2*i+1 downto 2*i));
+   end generate GEN_VEC;
 
 end mapping;

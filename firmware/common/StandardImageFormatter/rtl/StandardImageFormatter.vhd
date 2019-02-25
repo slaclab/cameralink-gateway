@@ -25,7 +25,7 @@ use work.SsiPkg.all;
 entity StandardImageFormatter is
    generic (
       TPD_G            : time                := 1 ns;
-      AXI_ADDR_WIDTH_C : positive            := 30;-- 2^30 = 1GB buffer
+      AXI_ADDR_WIDTH_C : positive            := 30;  -- 2^30 = 1GB buffer
       AXIS_CONFIG_G    : AxiStreamConfigType := ssiAxiStreamConfig(4);
       AXIL_BASE_ADDR_G : slv(31 downto 0)    := x"0000_0000");
    port (
@@ -37,28 +37,28 @@ entity StandardImageFormatter is
       axilWriteMaster : in  AxiLiteWriteMasterType;
       axilWriteSlave  : out AxiLiteWriteSlaveType;
       -- AXI Stream Interface (axilClk domain)
-      sAxisMaster    : in  AxiStreamMasterType;
-      sAxisSlave     : out AxiStreamSlaveType;
-      mAxisMaster    : out AxiStreamMasterType;
-      mAxisSlave     : in  AxiStreamSlaveType;      
+      sAxisMaster     : in  AxiStreamMasterType;
+      sAxisSlave      : out AxiStreamSlaveType;
+      mAxisMaster     : out AxiStreamMasterType;
+      mAxisSlave      : in  AxiStreamSlaveType;
       -- AXI MEM Interface (axilClk domain)
-      axiOffset        : in slv(63 downto 0); --! Used to apply an address offset to the master AXI transactions
-      axiWriteMasters  : out AxiWriteMasterArray(1 downto 0);
-      axiWriteSlaves   : in  AxiWriteSlaveArray(1 downto 0);
-      axiReadMasters   : out AxiReadMasterArray(1 downto 0);
-      axiReadSlaves    : in  AxiReadSlaveArray(1 downto 0));
+      axiOffset       : in  slv(63 downto 0);  --! Used to apply an address offset to the master AXI transactions
+      axiWriteMasters : out AxiWriteMasterArray(1 downto 0);
+      axiWriteSlaves  : in  AxiWriteSlaveArray(1 downto 0);
+      axiReadMasters  : out AxiReadMasterArray(1 downto 0);
+      axiReadSlaves   : in  AxiReadSlaveArray(1 downto 0));
 end StandardImageFormatter;
 
 architecture mapping of StandardImageFormatter is
 
    constant AXI_CONFIG_C : AxiConfigType := (
-      ADDR_WIDTH_C => AXI_ADDR_WIDTH_C, -- 2^30 = 1GB buffer
-      DATA_BYTES_C => 16,               -- 16 bytes = 128-bits
+      ADDR_WIDTH_C => AXI_ADDR_WIDTH_C,  -- 2^30 = 1GB buffer
+      DATA_BYTES_C => 16,                -- 16 bytes = 128-bits
       ID_BITS_C    => 2,
-      LEN_BITS_C   => 8); -- Up to 4kB bursting
-      
-   constant AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(AXI_CONFIG_C.DATA_BYTES_C, TKEEP_COMP_C, TUSER_FIRST_LAST_C, 8, 2);-- Match the AXIS width to AXI width     
-      
+      LEN_BITS_C   => 8);                -- Up to 4kB bursting
+
+   constant AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(AXI_CONFIG_C.DATA_BYTES_C, TKEEP_COMP_C, TUSER_FIRST_LAST_C, 8, 2);  -- Match the AXIS width to AXI width     
+
    constant NUM_AXIL_MASTERS_C : positive := 2;
 
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXIL_BASE_ADDR_G, 14, 13);
@@ -71,19 +71,20 @@ architecture mapping of StandardImageFormatter is
    signal initLutReadMaster  : AxiLiteReadMasterType;
    signal initLutReadSlave   : AxiLiteReadSlaveType;
    signal initLutWriteMaster : AxiLiteWriteMasterType;
-   signal initLutWriteSlave  : AxiLiteWriteSlaveType;   
-   
+   signal initLutWriteSlave  : AxiLiteWriteSlaveType;
+
    signal rxAxisMaster : AxiStreamMasterType;
    signal rxAxisSlave  : AxiStreamSlaveType;
    signal txAxisMaster : AxiStreamMasterType;
-   signal txAxisSlave  : AxiStreamSlaveType;     
-   
-   signal axilReq  : AxiLiteReqType;
-   signal axilAck  : AxiLiteAckType;
-   
+   signal txAxisSlave  : AxiStreamSlaveType;
+
+   signal axilReq : AxiLiteReqType;
+   signal axilAck : AxiLiteAckType;
+
+   signal wrRam    : sl;
    signal row      : slv(10 downto 0);
    signal remapRow : slv(10 downto 0);
-   
+
 begin
 
    -----------------------
@@ -126,18 +127,19 @@ begin
          mAxiWriteSlaves     => axilWriteSlaves,
          mAxiReadMasters     => axilReadMasters,
          mAxiReadSlaves      => axilReadSlaves);
-         
+
    -------------------------      
    -- LUT for remapping rows
    -------------------------      
    U_ROW_REMAP_LUT : entity work.AxiDualPortRam
       generic map (
-         TPD_G              => TPD_G,
-         BRAM_EN_G        => true,
-         REG_EN_G         => false,
-         COMMON_CLK_G     => true,
-         ADDR_WIDTH_G     => 11, -- 2k
-         DATA_WIDTH_G     => 11) -- 2k
+         TPD_G        => TPD_G,
+         BRAM_EN_G    => true,
+         REG_EN_G     => false,
+         SYS_WR_EN_G  => true,
+         COMMON_CLK_G => true,
+         ADDR_WIDTH_G => 11,            -- 2k
+         DATA_WIDTH_G => 11)            -- 2k
       port map (
          -- Axi Port
          axiClk         => axilClk,
@@ -148,9 +150,11 @@ begin
          axiWriteSlave  => axilWriteSlaves(0),
          -- Standard Port
          clk            => axilClk,
+         we             => wrRam,
          addr           => row,
+         din            => row,
          dout           => remapRow);
- 
+
    -------------------------------- 
    -- Resize the Inbound AXI Stream
    -------------------------------- 
@@ -171,17 +175,16 @@ begin
          sAxisSlave  => sAxisSlave,
          -- Master Port
          mAxisMaster => rxAxisMaster,
-         mAxisSlave  => rxAxisSlave); 
-         
+         mAxisSlave  => rxAxisSlave);
+
    -------------------------------- 
    -- Resize the Inbound AXI Stream
    -------------------------------- 
    U_Fsm : entity work.StandardImageFormatterFsm
       generic map (
-         TPD_G            => TPD_G,
-         AXI_CONFIG_G     => AXI_CONFIG_C,
-         AXIS_CONFIG_G    => AXIS_CONFIG_C,
-         AXIL_BASE_ADDR_G => AXIL_BASE_ADDR_G)
+         TPD_G         => TPD_G,
+         AXI_CONFIG_G  => AXI_CONFIG_C,
+         AXIS_CONFIG_G => AXIS_CONFIG_C)
       port map (
          -- AXI-Lite Interface (axilClk domain)
          axilClk         => axilClk,
@@ -191,22 +194,21 @@ begin
          axilWriteMaster => axilWriteMasters(1),
          axilWriteSlave  => axilWriteSlaves(1),
          -- Row Remapping LUT Interface (axilClk domain)
-         axilReq        => axilReq,
-         axilAck        => axilAck,
-         row            => row,
-         remapRow       => remapRow,
+         wrRam           => wrRam,
+         row             => row,
+         remapRow        => remapRow,
          -- AXI Stream Interface (axilClk domain)
-         sAxisMaster    => rxAxisMaster,
-         sAxisSlave     => rxAxisSlave,
-         mAxisMaster    => txAxisMaster,
-         mAxisSlave     => txAxisSlave,
+         sAxisMaster     => rxAxisMaster,
+         sAxisSlave      => rxAxisSlave,
+         mAxisMaster     => txAxisMaster,
+         mAxisSlave      => txAxisSlave,
          -- AXI MEM Interface (axilClk domain)
-         axiOffset        => axiOffset,
-         axiWriteMasters  => axiWriteMasters,
-         axiWriteSlaves   => axiWriteSlaves,
-         axiReadMasters   => axiReadMasters,
-         axiReadSlaves    => axiReadSlaves);
-         
+         axiOffset       => axiOffset,
+         axiWriteMasters => axiWriteMasters,
+         axiWriteSlaves  => axiWriteSlaves,
+         axiReadMasters  => axiReadMasters,
+         axiReadSlaves   => axiReadSlaves);
+
    ---------------------------------
    -- Resize the Outbound AXI Stream
    --------------------------------- 
@@ -227,6 +229,6 @@ begin
          sAxisSlave  => txAxisSlave,
          -- Master Port
          mAxisMaster => mAxisMaster,
-         mAxisSlave  => mAxisSlave);          
+         mAxisSlave  => mAxisSlave);
 
 end mapping;

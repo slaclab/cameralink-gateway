@@ -32,10 +32,9 @@ use work.SsiPkg.all;
 
 entity StandardImageFormatterFsm is
    generic (
-      TPD_G            : time := 1 ns;
-      AXI_CONFIG_G     : AxiConfigType;
-      AXIS_CONFIG_G    : AxiStreamConfigType;
-      AXIL_BASE_ADDR_G : slv(31 downto 0));
+      TPD_G         : time := 1 ns;
+      AXI_CONFIG_G  : AxiConfigType;
+      AXIS_CONFIG_G : AxiStreamConfigType);
    port (
       -- AXI-Lite Interface (axilClk domain)
       axilClk         : in  sl;
@@ -45,8 +44,7 @@ entity StandardImageFormatterFsm is
       axilWriteMaster : in  AxiLiteWriteMasterType;
       axilWriteSlave  : out AxiLiteWriteSlaveType;
       -- Row Remapping LUT Interface (axilClk domain)
-      axilReq         : out AxiLiteReqType;
-      axilAck         : in  AxiLiteAckType;
+      wrRam           : out sl;
       row             : out slv(10 downto 0);
       remapRow        : in  slv(10 downto 0);
       -- AXI Stream Interface (axilClk domain)
@@ -64,15 +62,10 @@ end StandardImageFormatterFsm;
 
 architecture rtl of StandardImageFormatterFsm is
 
-   constant MAX_IMAGE_SIZE_C : positive := 2**24;  -- in units of bytes (4096 pixels x 4096 pixels) = 2^24
-   constant NUM_BUFF_C       : positive := 2**(AXI_CONFIG_G.ADDR_WIDTH_C-24);  -- Number of image buffers
-
-   type InitStateType is (
-      REQ_S,
-      ACK_S,
-      DONE_S);
+   constant NUM_BUFF_C : positive := 2**(AXI_CONFIG_G.ADDR_WIDTH_C-23);  -- Number of image buffers (2k rows x 4kB per row)
 
    type WrStateType is (
+      INIT_S,
       IDLE_S,
       WADDR_S,
       WDATA_S);
@@ -92,15 +85,11 @@ architecture rtl of StandardImageFormatterFsm is
       updateBlackImage : sl;
       axilReadSlave    : AxiLiteReadSlaveType;
       axilWriteSlave   : AxiLiteWriteSlaveType;
-      -- Initialization
-      initCnt          : natural range 0 to 2047;
-      axilReq          : AxiLiteReqType;
-      initDone         : sl;
-      initState        : InitStateType;
       -- AXI Write Logic
+      wrRam            : sl;
       wrIndex          : natural range 0 to NUM_BUFF_C-2;
-      wrRow            : natural range 0 to 2047;
-      wrCol            : natural range 0 to 255;
+      wrRow            : slv(10 downto 0);
+      wrCol            : slv(7 downto 0);
       wrRowSize        : slv(10 downto 0);
       wrColSize        : slv(7 downto 0);
       wrBlackImage     : sl;
@@ -111,8 +100,8 @@ architecture rtl of StandardImageFormatterFsm is
       rdIndex          : natural range 0 to NUM_BUFF_C-2;
       rdRowSize        : slv(10 downto 0);
       rdColSize        : slv(7 downto 0);
-      rdRow            : natural range 0 to 2047;
-      rdCol            : natural range 0 to 255;
+      rdRow            : slv(10 downto 0);
+      rdCol            : slv(7 downto 0);
       rdBlackImage     : sl;
       mAxisMaster      : AxiStreamMasterType;
       axiReadMasters   : AxiReadMasterArray(1 downto 0);
@@ -129,27 +118,23 @@ architecture rtl of StandardImageFormatterFsm is
       updateBlackImage => '0',
       axilReadSlave    => AXI_LITE_READ_SLAVE_INIT_C,
       axilWriteSlave   => AXI_LITE_WRITE_SLAVE_INIT_C,
-      -- Initialization
-      initCnt          => 0,
-      axilReq          => AXI_LITE_REQ_INIT_C,
-      initDone         => '0',
-      initState        => REQ_S,
       -- AXI Write Logic
+      wrRam            => '0',
       wrIndex          => 0,
       wrRowSize        => (others => '1'),
       wrColSize        => (others => '1'),
-      wrRow            => 0,
-      wrCol            => 0,
+      wrRow            => (others => '1'),
+      wrCol            => (others => '0'),
       wrBlackImage     => '0',
       sAxisSlave       => AXI_STREAM_SLAVE_INIT_C,
       axiWriteMasters  => (others => axiWriteMasterInit(AXI_CONFIG_G, '1', "01", "1111")),
-      wrState          => IDLE_S,
+      wrState          => INIT_S,
       -- AXI read Logic
       rdIndex          => 0,
       rdRowSize        => (others => '1'),
       rdColSize        => (others => '1'),
-      rdRow            => 0,
-      rdCol            => 0,
+      rdRow            => (others => '0'),
+      rdCol            => (others => '0'),
       rdBlackImage     => '0',
       mAxisMaster      => AXI_STREAM_MASTER_INIT_C,
       axiReadMasters   => (others => axiReadMasterInit(AXI_CONFIG_G, "01", "1111")),
@@ -160,19 +145,15 @@ architecture rtl of StandardImageFormatterFsm is
 
 begin
 
-   comb : process (axiOffset, axiReadSlaves, axiWriteSlaves, axilAck,
-                   axilReadMaster, axilRst, axilWriteMaster, mAxisSlave, r,
-                   remapRow, sAxisMaster) is
-      variable v        : RegType;
-      variable axilEp   : AxiLiteEndpointType;
-      variable i        : natural;
-      variable remapIdx : natural;
+   comb : process (axiOffset, axiReadSlaves, axiWriteSlaves, axilReadMaster,
+                   axilRst, axilWriteMaster, mAxisSlave, r, remapRow,
+                   sAxisMaster) is
+      variable v      : RegType;
+      variable axilEp : AxiLiteEndpointType;
+      variable i      : natural;
    begin
       -- Latch the current value
       v := r;
-
-      -- Update variable
-      remapIdx := conv_integer(remapRow);
 
       -- AXI flow control
       for i in 1 downto 0 loop
@@ -219,126 +200,84 @@ begin
       axiSlaveDefault(axilEp, v.axilWriteSlave, v.axilReadSlave, AXI_RESP_DECERR_C);
 
       -------------------------------------------------------------------------
-      --                      Initialization State Machine
-      -------------------------------------------------------------------------
-      case (r.initState) is
-         ----------------------------------------------------------------------
-         when REQ_S =>
-            -- Check if transaction completed
-            if (axilAck.done = '0') then
-
-               -- Setup the AXI-Lite Master request
-               v.axilReq.request := '1';
-               v.axilReq.rnw     := '0';                   -- Write operation
-               v.axilReq.address := AXIL_BASE_ADDR_G + toSlv((4*r.initCnt), 32);
-               v.axilReq.wrData  := toSlv(r.initCnt, 32);  -- Initialization LUT RAM to standard ordering
-
-               -- Next state
-               v.initState := ACK_S;
-
-            end if;
-         ----------------------------------------------------------------------
-         when ACK_S =>
-            -- Wait for DONE to set
-            if (axilAck.done = '1') then
-
-               -- Reset the flag
-               v.axilReq.request := '0';
-
-               -- Check for last transfer
-               if (r.initCnt = 2047) then
-
-                  -- Reset the counter
-                  v.initCnt := 0;
-
-                  -- Next state
-                  v.initState := DONE_S;
-
-               else
-
-                  -- Increment the counter
-                  v.initCnt := r.initCnt + 1;
-
-                  -- Next state
-                  v.initState := REQ_S;
-
-               end if;
-
-            end if;
-         ----------------------------------------------------------------------
-         when DONE_S =>
-            v.initDone := '1';
-      ----------------------------------------------------------------------
-      end case;
-
-      -------------------------------------------------------------------------
       --                      AXI Write State Machine
       -------------------------------------------------------------------------
       case (r.wrState) is
          ----------------------------------------------------------------------
+         when INIT_S =>
+            -- Increment the counter
+            v.wrRow := r.wrRow + 1;
+            -- Set the flag
+            v.wrRam := '1';
+            -- Check for last write
+            if (v.wrRow = 2047) then
+               -- Next State
+               v.wrState := IDLE_S;
+            end if;
+         ----------------------------------------------------------------------
          when IDLE_S =>
             -- Reset signals
-            v.wrRow        := 0;
-            v.wrCol        := 0;
+            v.wrRow        := (others => '0');
+            v.wrCol        := (others => '0');
             v.wrBlackImage := '0';
+            v.wrRam        := '0';
 
-            -- Wait for Initialization to be done 
-            if (r.initDone = '1') then
+            -- New inbound AXIS frame
+            if (sAxisMaster.tValid = '1') then
 
-               -- New inbound AXIS frame
-               if (sAxisMaster.tValid = '1') then
+               -- Check for SOF
+               if (ssiGetUserSof(AXIS_CONFIG_G, sAxisMaster) = '1') then
 
-                  -- Check for SOF
-                  if (ssiGetUserSof(AXIS_CONFIG_G, sAxisMaster) = '1') then
+                  -- Make local copy in case configuration change during transfer
+                  v.wrColSize := r.colSize;
+                  v.wrRowSize := r.rowSize;
 
-                     -- Make local copy in case configuration change during transfer
-                     v.wrColSize := r.colSize;
-                     v.wrRowSize := r.rowSize;
+                  -- Check if armed to take a black image
+                  if (r.updateBlackImage = '1') then
 
-                     -- Check if armed to take a black image
-                     if (r.updateBlackImage = '1') then
+                     -- Set the flag
+                     v.wrBlackImage := '1';
 
-                        -- Set the flag
-                        v.wrBlackImage := '1';
+                     -- Check if read pending is empty
+                     if (r.pending = 0) then
 
-                        -- Check if read pending is empty
-                        if (r.pending = 0) then
-
-                           -- Reset the flag
-                           v.updateBlackImage := '0';
-
-                           -- Next State
-                           v.wrState := WADDR_S;
-
-                        end if;
-
-                     -- Check if room in pending queue
-                     elsif (r.pending /= (NUM_BUFF_C-1)) then
+                        -- Reset the flag
+                        v.updateBlackImage := '0';
 
                         -- Next State
                         v.wrState := WADDR_S;
+
                      end if;
 
-                  else
-                     -- Blow off the misaligned data
-                     v.sAxisSlave.tReady := '1';
+                  -- Check if room in pending queue
+                  elsif (r.pending /= (NUM_BUFF_C-1)) then
 
+                     -- Next State
+                     v.wrState := WADDR_S;
                   end if;
 
+               else
+                  -- Blow off the misaligned data
+                  v.sAxisSlave.tReady := '1';
+
                end if;
+
             end if;
+
          ----------------------------------------------------------------------
          when WADDR_S =>
             -- Check if ready to preform write transaction
             if (v.axiWriteMasters(0).awvalid = '0') and (v.axiWriteMasters(1).awvalid = '0') then
 
                -- Write Address data channel
-               v.axiWriteMasters(0).awvalid := '1';
-               v.axiWriteMasters(0).awaddr  := toSlv((MAX_IMAGE_SIZE_C*r.wrIndex) + (4096*remapIdx), 64);
+               v.axiWriteMasters(0).awvalid              := '1';
+               v.axiWriteMasters(0).awaddr(22 downto 12) := remapRow;
+               v.axiWriteMasters(0).awaddr(63 downto 23) := toSlv(r.wrIndex, 41);
 
                -- Write Address black image channel
-               v.axiWriteMasters(1).awvalid := r.wrBlackImage;
-               v.axiWriteMasters(1).awaddr  := toSlv((MAX_IMAGE_SIZE_C*(NUM_BUFF_C-1)) + (4096*remapIdx), 64);
+               v.axiWriteMasters(1).awvalid              := r.wrBlackImage;
+               v.axiWriteMasters(1).awaddr(22 downto 12) := remapRow;
+               v.axiWriteMasters(1).awaddr(63 downto 23) := toSlv((NUM_BUFF_C-1), 41);
 
                -- Next State
                v.wrState := WDATA_S;
@@ -372,7 +311,7 @@ begin
                if (r.wrCol = 255) then
 
                   -- Reset the counter
-                  v.wrCol := 0;
+                  v.wrCol := (others => '0');
 
                   -- Set the flags
                   v.axiWriteMasters(0).wlast := '1';
@@ -382,7 +321,7 @@ begin
                   if (r.wrRow = r.wrRowSize) then
 
                      -- Reset the counter
-                     v.wrRow := 0;
+                     v.wrRow := (others => '0');
 
                      -- Check for index roll over    
                      if (r.wrIndex = NUM_BUFF_C-2) then
@@ -421,8 +360,8 @@ begin
       case (r.rdState) is
          when IDLE_S =>
             -- Reset signals
-            v.rdRow := 0;
-            v.rdCol := 0;
+            v.rdRow := (others => '0');
+            v.rdCol := (others => '0');
 
             -- Make local copy in case configuration change during transfer
             v.rdColSize    := r.colSize;
@@ -440,12 +379,14 @@ begin
             if (v.axiReadMasters(0).arvalid = '0') and (v.axiReadMasters(1).arvalid = '0') then
 
                -- Read Address data channel
-               v.axiReadMasters(0).arvalid := '1';
-               v.axiReadMasters(0).araddr  := toSlv((MAX_IMAGE_SIZE_C*r.rdIndex) + (4096*r.rdRow), 64);
+               v.axiReadMasters(0).arvalid              := '1';
+               v.axiReadMasters(0).araddr(22 downto 12) := r.rdRow;
+               v.axiReadMasters(0).araddr(63 downto 23) := toSlv(r.rdIndex, 41);
 
                -- Read Address black image channel
-               v.axiReadMasters(1).arvalid := r.rdBlackImage;
-               v.axiReadMasters(1).araddr  := toSlv((MAX_IMAGE_SIZE_C*(NUM_BUFF_C-1)) + (4096*r.rdRow), 64);
+               v.axiReadMasters(1).arvalid              := r.rdBlackImage;
+               v.axiReadMasters(1).araddr(22 downto 12) := r.rdRow;
+               v.axiReadMasters(1).araddr(63 downto 23) := toSlv((NUM_BUFF_C-1), 41);
 
                -- Next State
                v.rdState := RDATA_S;
@@ -498,13 +439,13 @@ begin
                if (axiReadSlaves(0).rlast = '1') then
 
                   -- Reset the counter
-                  v.rdCol := 0;
+                  v.rdCol := (others => '0');
 
                   -- Check for the last row
                   if (r.rdRow = r.rdRowSize) then
 
                      -- Reset the counter
-                     v.rdRow := 0;
+                     v.rdRow := (others => '0');
 
                      -- Check for index roll over    
                      if (r.rdIndex = NUM_BUFF_C-2) then
@@ -538,8 +479,8 @@ begin
       end case;
 
       -- Outputs
-      axilReq <= r.axilReq;
-      row     <= toSlv(v.wrRow, 11);
+      wrRam <= v.wrRam;
+      row   <= v.wrRow;
 
       sAxisSlave  <= v.sAxisSlave;
       mAxisMaster <= r.mAxisMaster;

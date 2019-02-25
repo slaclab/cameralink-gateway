@@ -53,7 +53,7 @@ architecture rtl of TimingPhyMonitor is
       mmcmRst        : sl;
       rxUserRst      : sl;
       txUserRst      : sl;
-      txDiffCtrl     : slv(3 downto 0);
+      txDiffCtrl     : slv(3 downto 0);      
       txPreCursor    : slv(4 downto 0);
       txPostCursor   : slv(4 downto 0);
       loopback       : slv(2 downto 0);
@@ -182,7 +182,7 @@ begin
       axiSlaveRegisterR(regCon, x"44", 0, txClkFreq);
       axiSlaveRegisterR(regCon, x"48", 0, rxReset);
       axiSlaveRegisterR(regCon, x"4C", 0, rxClkFreq);
-
+      
       axiSlaveRegisterR(regCon, x"60", 0, refClkFreq(0));
       axiSlaveRegisterR(regCon, x"64", 0, refClkFreq(1));
 

@@ -19,8 +19,8 @@ use ieee.std_logic_arith.all;
 use work.StdRtlPkg.all;
 use work.AxiLitePkg.all;
 use work.AxiStreamPkg.all;
+use work.SsiPkg.all;
 use work.TimingPkg.all;
-use work.TDetPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -31,17 +31,10 @@ entity Kcu1500TimingRx is
       DMA_AXIS_CONFIG_G : AxiStreamConfigType;
       AXI_BASE_ADDR_G   : slv(31 downto 0));
    port (
-      -- Trigger Interface
-      trigger         : out slv(3 downto 0);
-      -- Readout Interface (axilClk domain)
-      tdetTiming      : in  TDetTimingArray(3 downto 0) := (others => TDET_TIMING_INIT_C);
-      tdetStatus      : out TDetStatusArray(3 downto 0);
-      -- Event stream (axilClk domain)
-      tdetEventMaster : out AxiStreamMasterArray(3 downto 0);
-      tdetEventSlave  : in  AxiStreamSlaveArray(3 downto 0);
-      -- Transition stream (axilClk domain)
-      tdetTransMaster : out AxiStreamMasterArray(3 downto 0);
-      tdetTransSlave  : in  AxiStreamSlaveArray(3 downto 0);
+      -- Trigger Interface (axilClk domain)
+      triggers        : out slv(3 downto 0);
+      trigMasters     : out AxiStreamMasterArray(3 downto 0);
+      trigSlaves      : in  AxiStreamSlaveArray(3 downto 0);
       -- Reference Clock and Reset
       userClk25       : in  sl;
       userRst25       : in  sl;
@@ -61,12 +54,13 @@ end Kcu1500TimingRx;
 
 architecture mapping of Kcu1500TimingRx is
 
-   constant NUM_AXIL_MASTERS_C : positive := 4;
+   constant NUM_AXIL_MASTERS_C : positive := 5;
 
    constant RX_PHY0_INDEX_C : natural := 0;
    constant RX_PHY1_INDEX_C : natural := 1;
    constant TIMING_INDEX_C  : natural := 2;
    constant MON_INDEX_C     : natural := 3;
+   constant TRIG_INDEX_C    : natural := 4;
 
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 20, 16);
 
@@ -111,23 +105,23 @@ architecture mapping of Kcu1500TimingRx is
    signal txPostCursor : slv(4 downto 0);
    signal gtTxStatus   : TimingPhyStatusArray(1 downto 0);
    signal txStatus     : TimingPhyStatusType := TIMING_PHY_STATUS_INIT_C;
-   signal timingPhy    : TimingPhyType;
-   signal timingBus    : TimingBusType;
 
-   signal trigBus : TDetTrigArray(3 downto 0);
+   signal appTimingPhy  : TimingPhyType;
+   signal appTimingBus  : TimingBusType;
+   signal appTimingTrig : TimingTrigType;
+   signal appTimingMode : sl;
+
+   signal appTrigMasters : AxiStreamMasterArray(3 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
+   signal appTrigCtrl    : AxiStreamCtrlArray(3 downto 0);
+
+   signal txMasters : AxiStreamMasterArray(3 downto 0);
+   signal txSlaves  : AxiStreamSlaveArray(3 downto 0);
 
 begin
 
    txRst   <= txUserRst;
    rxReset <= rxUserRst or not(rxStatus.resetDone);
    rxRst   <= rxUserRst;
-
-   --------------------------------------------------
-   -- Send the trigger to the PGP's sideband opCodeEn 
-   --------------------------------------------------
-   GEN_LANE : for i in 3 downto 0 generate
-      trigger(i) <= trigBus(i).valid;
-   end generate GEN_LANE;
 
    -------------------------   
    -- Reference LCLS-I Clock
@@ -246,12 +240,12 @@ begin
             rxDecErr        => gtRxDecErr(i),
             rxOutClk        => gtRxClk(i),
             -- Tx Ports
-            txControl       => timingPhy.control,
+            txControl       => appTimingPhy.control,
             txStatus        => gtTxStatus(i),
             txUsrClk        => gtTxClk(i),
             txUsrClkActive  => mmcmLocked(i),
-            txData          => timingPhy.data,
-            txDataK         => timingPhy.dataK,
+            txData          => appTimingPhy.data,
+            txDataK         => appTimingPhy.dataK,
             txOutClk        => gtTxClk(i),
             -- Misc.
             loopback        => loopback);
@@ -299,8 +293,8 @@ begin
       generic map (
          TPD_G             => TPD_G,
          DEFAULT_CLK_SEL_G => '0',  -- '0': default LCLS-I, '1': default LCLS-II
-         USE_TPGMINI_G     => false,
-         ASYNC_G           => false,
+         USE_TPGMINI_G     => true,
+         ASYNC_G           => true,
          AXIL_BASE_ADDR_G  => AXIL_CONFIG_C(TIMING_INDEX_C).baseAddr)
       port map (
          -- GT Interface
@@ -316,8 +310,9 @@ begin
          -- Decoded timing message interface
          appTimingClk    => axilClk,
          appTimingRst    => axilRst,
-         appTimingBus    => timingBus,
-         timingPhy       => open,       -- TPGMINI
+         appTimingMode   => appTimingMode,
+         appTimingBus    => appTimingBus,
+         timingPhy       => appTimingPhy,
          timingClkSel    => timingClockSel,
          -- AXI Lite interface
          axilClk         => axilClk,
@@ -357,37 +352,93 @@ begin
          axilWriteSlave  => axilWriteSlaves(MON_INDEX_C));
 
    ---------------------
-   -- Event Header Cache
+   -- Timing PHY Monitor
    ---------------------         
-   U_HeaderCache : entity work.EventHeaderCacheWrapper
+   U_Trig : entity work.EvrV2CoreTriggers
       generic map (
-         TPD_G              => TPD_G,
-         NDET_G             => 4,
-         USER_AXIS_CONFIG_G => DMA_AXIS_CONFIG_G,
-         PIPE_STAGES_G      => 1)
+         TPD_G           => TPD_G,
+         NCHANNELS_G     => 4,
+         NTRIGGERS_G     => 4,
+         TRIG_DEPTH_G    => 19,         -- bitSize(125MHz/360Hz)
+         TRIG_PIPE_G     => 0,
+         COMMON_CLK_G    => true,
+         AXIL_BASEADDR_G => AXIL_CONFIG_C(TRIG_INDEX_C).baseAddr)
       port map (
-         -- Trigger Interface (rxClk domain)
-         trigBus         => trigBus,
-         -- Readout Interface (tdetClk domain)
-         tdetClk         => axilClk,
-         tdetRst         => axilRst,
-         tdetTiming      => tdetTiming,
-         tdetStatus      => tdetStatus,
-         -- Event stream (tdetClk domain)
-         tdetEventMaster => tdetEventMaster,
-         tdetEventSlave  => tdetEventSlave,
-         -- Transition stream (tdetClk domain)
-         tdetTransMaster => tdetTransMaster,
-         tdetTransSlave  => tdetTransSlave,
-         -- LCLS RX Timing Interface (rxClk domain)
-         rxClk           => rxClk,
-         rxRst           => rxRst,
-         rxControl       => rxControl,
-         timingBus       => timingBus,
-         -- LCLS RX Timing Interface (txClk domain)
-         txClk           => txClk,
-         txRst           => txRst,
-         txStatus        => txStatus,
-         timingPhy       => timingPhy);
+         -- AXI-Lite and IRQ Interface
+         axilClk         => axilClk,
+         axilRst         => axilRst,
+         axilWriteMaster => axilWriteMasters(TRIG_INDEX_C),
+         axilWriteSlave  => axilWriteSlaves(TRIG_INDEX_C),
+         axilReadMaster  => axilReadMasters(TRIG_INDEX_C),
+         axilReadSlave   => axilReadSlaves(TRIG_INDEX_C),
+         -- EVR Ports
+         evrClk          => axilClk,
+         evrRst          => axilRst,
+         evrBus          => appTimingBus,
+         -- Trigger and Sync Port
+         trigOut         => appTimingTrig,
+         evrModeSel      => appTimingMode);
+
+   GEN_LANE : for i in 3 downto 0 generate
+
+      -- Outputs
+      triggers(i)  <= appTrigMasters(i).tValid;
+
+      appTrigMasters(i).tValid                <= appTimingTrig.trigPulse(i) and not (appTrigCtrl(i).pause);
+      appTrigMasters(i).tData(63 downto 0)    <= appTimingTrig.timeStamp;
+      appTrigMasters(i).tData(191 downto 64)  <= appTimingTrig.bsa;
+      appTrigMasters(i).tData(383 downto 192) <= appTimingTrig.dmod;
+      appTrigMasters(i).tLast                 <= '1';  -- EOF
+      appTrigMasters(i).tUser(SSI_SOF_C)      <= '1';  -- SOF
+
+      U_Trig_Info_Fifo : entity work.AxiStreamFifoV2
+         generic map (
+            -- General Configurations
+            TPD_G               => TPD_G,
+            SLAVE_READY_EN_G    => false,
+            -- FIFO configurations
+            BRAM_EN_G           => true,
+            GEN_SYNC_FIFO_G     => true,
+            FIFO_ADDR_WIDTH_G   => 4,
+            FIFO_FIXED_THRESH_G => true,
+            FIFO_PAUSE_THRESH_G => 12,
+            -- AXI Stream Port Configurations
+            SLAVE_AXI_CONFIG_G  => ssiAxiStreamConfig(48),  -- 48 bytes = 384-bits wide
+            MASTER_AXI_CONFIG_G => ssiAxiStreamConfig(48))
+         port map (
+            -- Slave Port
+            sAxisClk    => axilClk,
+            sAxisRst    => axilRst,
+            sAxisMaster => appTrigMasters(i),
+            sAxisCtrl   => appTrigCtrl(i),
+            -- Master Port
+            mAxisClk    => axilClk,
+            mAxisRst    => axilRst,
+            mAxisMaster => txMasters(i),
+            mAxisSlave  => txSlaves(i));
+
+      ---------------------------------
+      -- Resize the Outbound AXI Stream
+      --------------------------------- 
+      U_TxResize : entity work.AxiStreamResize
+         generic map (
+            -- General Configurations
+            TPD_G               => TPD_G,
+            READY_EN_G          => true,
+            -- AXI Stream Port Configurations
+            SLAVE_AXI_CONFIG_G  => ssiAxiStreamConfig(48),
+            MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_G)
+         port map (
+            -- Clock and reset
+            axisClk     => axilClk,
+            axisRst     => axilRst,
+            -- Slave Port
+            sAxisMaster => txMasters(i),
+            sAxisSlave  => txSlaves(i),
+            -- Master Port
+            mAxisMaster => trigMasters(i),
+            mAxisSlave  => trigSlaves(i));
+
+   end generate GEN_LANE;
 
 end mapping;

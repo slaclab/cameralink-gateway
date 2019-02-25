@@ -122,15 +122,11 @@ architecture top_level of ClinkKcu1500Pgp3 is
    signal pgpObMasters : AxiStreamMasterArray(3 downto 0);
    signal pgpObSlaves  : AxiStreamSlaveArray(3 downto 0);
 
-   signal tdetEventMaster : AxiStreamMasterArray(3 downto 0);
-   signal tdetEventSlave  : AxiStreamSlaveArray(3 downto 0);
-
-   signal tdetTransMaster : AxiStreamMasterArray(3 downto 0);
-   signal tdetTransSlave  : AxiStreamSlaveArray(3 downto 0);
+   signal trigMasters : AxiStreamMasterArray(3 downto 0);
+   signal trigSlaves  : AxiStreamSlaveArray(3 downto 0);
 
    signal ddrClk         : sl;
    signal ddrRst         : sl;
-   signal ddrReady       : sl;
    signal ddrWriteMaster : AxiWriteMasterType;
    signal ddrWriteSlave  : AxiWriteSlaveType;
    signal ddrReadMaster  : AxiReadMasterType;
@@ -228,24 +224,26 @@ begin
 
    -------------------------------------         
    -- Memory Interface Generator IP core
-   -------------------------------------         
-   U_Mig3 : entity work.Mig3  -- Note: Using MIG[3] because located in FPGA's SLR1 region
-      generic map (
-         TPD_G => TPD_G)
-      port map (
-         extRst         => dmaRst,
-         -- AXI MEM Interface
-         axiClk         => ddrClk,
-         axiRst         => ddrRst,
-         axiWriteMaster => ddrWriteMaster,
-         axiWriteSlave  => ddrWriteSlave,
-         axiReadMaster  => ddrReadMaster,
-         axiReadSlave   => ddrReadSlave,
-         -- DDR Ports
-         ddrClkP        => ddrClkP(3),
-         ddrClkN        => ddrClkN(3),
-         ddrOut         => ddrOut(3),
-         ddrInOut       => ddrInOut(3));
+   ------------------------------------- 
+   BUILD_SIF : if (BUILD_SIF_C = true) generate
+      U_Mig3 : entity work.Mig3  -- Note: Using MIG[3] because located in FPGA's SLR1 region
+         generic map (
+            TPD_G => TPD_G)
+         port map (
+            extRst         => dmaRst,
+            -- AXI MEM Interface
+            axiClk         => ddrClk,
+            axiRst         => ddrRst,
+            axiWriteMaster => ddrWriteMaster,
+            axiWriteSlave  => ddrWriteSlave,
+            axiReadMaster  => ddrReadMaster,
+            axiReadSlave   => ddrReadSlave,
+            -- DDR Ports
+            ddrClkP        => ddrClkP(3),
+            ddrClkN        => ddrClkN(3),
+            ddrOut         => ddrOut(3),
+            ddrInOut       => ddrInOut(3));
+   end generate;
 
    ---------------------
    -- AXI-Lite Crossbar
@@ -285,12 +283,9 @@ begin
          pgpIbSlaves     => pgpIbSlaves,
          pgpObMasters    => pgpObMasters,
          pgpObSlaves     => pgpObSlaves,
-         -- Event streams (axilClk domain)
-         tdetEventMaster => tdetEventMaster,
-         tdetEventSlave  => tdetEventSlave,
-         -- Transition streams (axilClk domain)
-         tdetTransMaster => tdetTransMaster,
-         tdetTransSlave  => tdetTransSlave,
+         -- Trigger Event streams (axilClk domain)
+         trigMasters     => trigMasters,
+         trigSlaves      => trigSlaves,
          -- DMA Interface (dmaClk domain)
          dmaClk          => dmaClk,
          dmaRst          => dmaRst,
@@ -330,12 +325,9 @@ begin
          pgpIbSlaves     => pgpIbSlaves,
          pgpObMasters    => pgpObMasters,
          pgpObSlaves     => pgpObSlaves,
-         -- Event streams (axilClk domain)
-         tdetEventMaster => tdetEventMaster,
-         tdetEventSlave  => tdetEventSlave,
-         -- Transition streams (axilClk domain)
-         tdetTransMaster => tdetTransMaster,
-         tdetTransSlave  => tdetTransSlave,
+         -- Trigger Event streams (axilClk domain)
+         trigMasters     => trigMasters,
+         trigSlaves      => trigSlaves,
          ------------------
          --  Hardware Ports
          ------------------       

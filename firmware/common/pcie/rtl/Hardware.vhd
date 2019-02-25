@@ -1,8 +1,6 @@
 -------------------------------------------------------------------------------
 -- File       : Hardware.vhd
 -- Company    : SLAC National Accelerator Laboratory
--- Created    : 2017-10-26
--- Last update: 2019-02-01
 -------------------------------------------------------------------------------
 -- Description: Hardware File
 -------------------------------------------------------------------------------
@@ -52,12 +50,9 @@ entity Hardware is
       pgpIbSlaves     : out AxiStreamSlaveArray(3 downto 0);
       pgpObMasters    : out AxiStreamMasterArray(3 downto 0);
       pgpObSlaves     : in  AxiStreamSlaveArray(3 downto 0);
-      -- Event streams (axilClk domain)
-      tdetEventMaster : out AxiStreamMasterArray(3 downto 0);
-      tdetEventSlave  : in  AxiStreamSlaveArray(3 downto 0);
-      -- Transition streams (axilClk domain)
-      tdetTransMaster : out AxiStreamMasterArray(3 downto 0);
-      tdetTransSlave  : in  AxiStreamSlaveArray(3 downto 0);
+      -- Trigger Event streams (axilClk domain)
+      trigMasters     : out AxiStreamMasterArray(3 downto 0);
+      trigSlaves      : in  AxiStreamSlaveArray(3 downto 0);
       ---------------------
       --  Hardware Ports
       ---------------------    
@@ -119,7 +114,7 @@ architecture mapping of Hardware is
    signal refClk    : slv(3 downto 0);
    signal refClkDiv : slv(3 downto 0);
 
-   signal trigger : slv(3 downto 0);
+   signal triggers : slv(3 downto 0);
 
    attribute dont_touch              : string;
    attribute dont_touch of refClk    : signal is "TRUE";
@@ -209,7 +204,7 @@ begin
                AXI_BASE_ADDR_G => AXIL_CONFIG_C(i).baseAddr)
             port map (
                -- Trigger Interface
-               trigger         => trigger(i),
+               trigger         => triggers(i),
                -- QPLL Interface
                qpllLock        => qpllLock(i),
                qpllClk         => qpllClk(i),
@@ -241,7 +236,7 @@ begin
                AXI_BASE_ADDR_G => AXIL_CONFIG_C(i).baseAddr)
             port map (
                -- Trigger Interface
-               trigger         => trigger(i),
+               trigger         => triggers(i),
                -- PGP Serial Ports
                pgpRxP          => qsfp0RxP(i),
                pgpRxN          => qsfp0RxN(i),
@@ -273,14 +268,10 @@ begin
          DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
          AXI_BASE_ADDR_G   => AXIL_CONFIG_C(TIMING_INDEX_C).baseAddr)
       port map (
-         -- Trigger Interface
-         trigger         => trigger,
-         -- Event stream (axilClk domain)
-         tdetEventMaster => tdetEventMaster,
-         tdetEventSlave  => tdetEventSlave,
-         -- Transition stream (axilClk domain)
-         tdetTransMaster => tdetTransMaster,
-         tdetTransSlave  => tdetTransSlave,
+         -- Trigger Event streams (axilClk domain)
+         triggers        => triggers,
+         trigMasters     => trigMasters,
+         trigSlaves      => trigSlaves,
          -- Reference Clock and Reset
          userClk25       => userClk25,
          userRst25       => userRst25,
