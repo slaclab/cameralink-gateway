@@ -107,25 +107,27 @@ begin
    ---------------
    -- AXI Crossbar
    ---------------
-   U_AXI_XBAR : entity work.DdrAxiXbar
-      generic map (
-         TPD_G => TPD_G)
-      port map (
-         -- Slave Interfaces
-         sAxiClk          => axilClk,
-         sAxiRst          => axilRst,
-         sAxiWriteMasters => axiWriteMasters,
-         sAxiWriteSlaves  => axiWriteSlaves,
-         sAxiReadMasters  => axiReadMasters,
-         sAxiReadSlaves   => axiReadSlaves,
-         -- Master Interface
-         mAxiClk          => ddrClk,
-         mAxiRst          => ddrRst,
-         mAxiWriteMaster  => ddrWriteMaster,
-         mAxiWriteSlave   => ddrWriteSlave,
-         mAxiReadMaster   => ddrReadMaster,
-         mAxiReadSlave    => ddrReadSlave);
-
+   BUILD_SIF : if (BUILD_SIF_C = true) generate
+      U_AXI_XBAR : entity work.DdrAxiXbar
+         generic map (
+            TPD_G => TPD_G)
+         port map (
+            -- Slave Interfaces
+            sAxiClk          => axilClk,
+            sAxiRst          => axilRst,
+            sAxiWriteMasters => axiWriteMasters,
+            sAxiWriteSlaves  => axiWriteSlaves,
+            sAxiReadMasters  => axiReadMasters,
+            sAxiReadSlaves   => axiReadSlaves,
+            -- Master Interface
+            mAxiClk          => ddrClk,
+            mAxiRst          => ddrRst,
+            mAxiWriteMaster  => ddrWriteMaster,
+            mAxiWriteSlave   => ddrWriteSlave,
+            mAxiReadMaster   => ddrReadMaster,
+            mAxiReadSlave    => ddrReadSlave);
+   end generate;
+   
    -------------------
    -- Application Lane
    -------------------

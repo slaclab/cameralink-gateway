@@ -59,7 +59,7 @@ end AppLane;
 
 architecture mapping of AppLane is
 
-   constant NUM_AXIL_MASTERS_C : positive := 1;
+   constant NUM_AXIL_MASTERS_C : positive := 2;
 
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 20, 16);
 

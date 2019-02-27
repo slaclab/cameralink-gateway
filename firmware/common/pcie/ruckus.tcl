@@ -3,7 +3,7 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
 # Load local source Code 
 loadSource -dir "$::DIR_PATH/rtl"
-loadIpCore -dir "$::DIR_PATH/ip"
+# loadIpCore -dir "$::DIR_PATH/ip"
 
 # Load local source Code
 loadConstraints -path "$::DIR_PATH/xdc/ClinkGateway.xdc"

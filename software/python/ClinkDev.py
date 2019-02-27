@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
+#-----------------------------------------------------------------------------
+# This file is part of the 'Camera link gateway'. It is subject to 
+# the license terms in the LICENSE.txt file found in the top-level directory 
+# of this distribution and at: 
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
+# No part of the 'Camera link gateway', including this file, may be 
+# copied, modified, propagated, or distributed except according to the terms 
+# contained in the LICENSE.txt file.
+#-----------------------------------------------------------------------------
 import pyrogue as pr
 import rogue.hardware.axi
 import rogue.protocols
+import pyrogue.interfaces.simulation
 
 import surf.axi             as axiVer
 import surf.xilinx          as xil
-import surf.devices.micron  as prom
+import surf.devices.cypress as prom
 import surf.devices.linear  as linear
 import surf.devices.nxp     as nxp
 import surf.protocols.clink as cl
+import XilinxKcu1500Pgp     as pgp
 
 import time
 
@@ -96,41 +107,27 @@ class ClinkTrigCtrl(pr.Device):
             offset       = 0x010,
             bitSize      = 4,
             mode         = "RW",
-        ))             
-            
-class ClinkDev(pr.Root):
+        ))   
 
-    def __init__(self):
 
-        pr.Root.__init__(self,name='ClinkDev',description='CameraLink Dev')
+class ClinkFeb(pr.Device):
+    def __init__(   self,       
+            name        = "ClinkFeb",
+            description = "ClinkFeb Container",
+            serialA     = None,
+            serialB     = None,
+            **kwargs):
+        super().__init__(name=name, description=description, **kwargs) 
 
-        # Create the stream interface
-        #self._pgpVc0 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,0) # Registers
-        #self._pgpVc1 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,1) # Data
-        #self._pgpVc2 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,2) # Serial
-        #self._pgpVc3 = rogue.hardware.pgp.PgpCard('/dev/pgpcard_0',0,3) # Serial
-
-        self._pgpVc0 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',0,True) # Registers
-        self._pgpVc1 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',1,True) # Data
-        self._pgpVc2 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',2,True) # Serial
-        self._pgpVc3 = rogue.hardware.axi.AxiStreamDma('/dev/datadev_0',3,True) # Serial
-
-        # SRP
-        self._srp = rogue.protocols.srp.SrpV3()
-        pr.streamConnectBiDir(self._pgpVc0,self._srp)
-
-        
         # Add devices
         self.add(axiVer.AxiVersion( 
             name        = 'AxiVersion', 
-            memBase     = self._srp, 
             offset      = 0x00000000, 
             expand      = False,
         ))
         
-        self.add(prom.AxiMicronN25Q(
-            name        = 'AxiMicronN25Q', 
-            memBase     = self._srp, 
+        self.add(prom.CypressS25Fl(
+            name        = 'CypressS25Fl', 
             offset      = 0x00001000, 
             hidden      = True, # Hidden in GUI because indented for scripting
         ))
@@ -138,7 +135,6 @@ class ClinkDev(pr.Root):
         self.add(nxp.Sa56004x(      
             name        = 'BoardTemp', 
             description = 'This device monitors the board temperature and FPGA junction temperature', 
-            memBase     = self._srp, 
             offset      = 0x00002000, 
             expand      = False,
         ))
@@ -146,7 +142,6 @@ class ClinkDev(pr.Root):
         self.add(linear.Ltc4151(
             name        = 'BoardPwr', 
             description = 'This device monitors the board power, input voltage and input current', 
-            memBase     = self._srp, 
             offset      = 0x00002400, 
             senseRes    = 20.E-3, # Units of Ohms
             expand      = False,
@@ -154,22 +149,20 @@ class ClinkDev(pr.Root):
         
         self.add(xil.Xadc(
             name        = 'Xadc', 
-            memBase     = self._srp,
             offset      = 0x00003000, 
             expand      = False,
         ))        
         
         self.add(cl.ClinkTop(
-            memBase     = self._srp,
             offset      = 0x00010000,
-            serialA     = self._pgpVc2,
-            serialB     = self._pgpVc3
+            serialA     = serialA,
+            serialB     = serialB,
+            expand      = False,
         ))
 
         self.add(ClinkTrigCtrl(      
             name        = 'TrigCtrl[0]', 
             description = 'Channel A trigger control', 
-            memBase     = self._srp, 
             offset      = 0x00020000, 
             expand      = False,
         )) 
@@ -177,15 +170,89 @@ class ClinkDev(pr.Root):
         self.add(ClinkTrigCtrl(      
             name        = 'TrigCtrl[1]', 
             description = 'Channel B trigger control', 
-            memBase     = self._srp, 
             offset      = 0x00020100, 
             expand      = False,
-        ))         
-        
-        # Debug slave
-        self._dbg = ClTestRx()
-        pr.streamConnect(self._pgpVc1,self._dbg)
+        ))        
+            
+class ClinkDev(pr.Root):
 
+    def __init__(self,
+            name        = 'ClinkDev',
+            description = 'Container for CameraLink Dev',
+            dev         = '/dev/datadev_0',# path to PCIe device
+            numLane     = 1,               # number of PGP Lanes
+            version3    = False,           # true = PGPv3, false = PGP2b
+            pollEn      = True,            # Enable automatic polling registers
+            initRead    = True,            # Read all registers at start of the system
+            **kwargs):
+        super().__init__(name=name, description=description, **kwargs)
+        
+        # Check the number of lanes requested
+        if ( (numLane<1) or (numLane>4) ):
+            raise ValueError('numLane must be between 1 to 4: (%i) is out of range' % (numLane) )
+        
+        # Create arrays to be filled
+        self._dma = [[None for vc in range(4)] for lane in range(numLane)] # self._dma[lane][vc]
+        self._srp =  [None for lane in range(numLane)]
+        self._dbg =  [None for lane in range(numLane)]
+        
+        # Create the stream interface
+        for lane in range(numLane):
+        
+            # Map the virtual channels 
+            if (dev != 'sim'):
+                self._dma[lane][0] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+0,True) # VC0 = Registers
+                self._dma[lane][1] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+1,True) # VC1 = Data
+                self._dma[lane][2] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+2,True) # VC2 = Serial
+                self._dma[lane][3] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+3,True) # VC3 = Serial
+            else:
+                # FW/SW co-simulation
+                self._dma[lane][0] = rogue.interfaces.stream.TcpClient('localhost',8002+(512*lane)+2*0,True) # VC0 = Registers
+                self._dma[lane][1] = rogue.interfaces.stream.TcpClient('localhost',8002+(512*lane)+2*1,True) # VC1 = Data
+                self._dma[lane][2] = rogue.interfaces.stream.TcpClient('localhost',8002+(512*lane)+2*2,True) # VC2 = Serial
+                self._dma[lane][3] = rogue.interfaces.stream.TcpClient('localhost',8002+(512*lane)+2*3,True) # VC3 = Serial
+                
+            # SRP
+            self._srp[lane] = rogue.protocols.srp.SrpV3()
+            pr.streamConnectBiDir(self._dma[lane][0],self._srp[lane])
+            
+            # Debug slave
+            self._dbg[lane] = ClTestRx()
+            pr.streamConnect(self._dma[lane][1],self._dbg[lane])            
+            
+            # CameraLink Feb Board
+            self.add(ClinkFeb(      
+                name        = ('ClinkFeb[%i]' % lane), 
+                memBase     = self._srp[lane], 
+                serialA     = self._dma[lane][2],
+                serialB     = self._dma[lane][3],
+                expand      = False,
+            ))             
+            
+        # Create PCIE memory mapped interface
+        if (dev != 'sim'):
+            # BAR0 access
+            self.memMap = rogue.hardware.axi.AxiMemMap(dev)     
+            # Set the timeout
+            self._timeout = 1.0 # 1.0 default
+        else:
+            # FW/SW co-simulation
+            self.memMap = rogue.interfaces.memory.TcpClient('localhost',8000)            
+            # Set the timeout
+            self._timeout = 100.0 # firmware simulation slow and timeout base on real time (not simulation time)
+            
+        # PGP Hardware on PCIe 
+        self.add(pgp.Hardware(            
+            memBase  = self.memMap,
+            numLane  = numLane,
+            version3 = version3,
+            expand   = False,
+        ))              
+            
         # Start the system
-        self.start(pollEn=False)
+        self.start(
+            pollEn   = pollEn,
+            initRead = initRead,
+            timeout  = self._timeout,
+        )
         
