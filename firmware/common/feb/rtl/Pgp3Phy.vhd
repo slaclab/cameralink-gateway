@@ -26,8 +26,10 @@ use unisim.vcomponents.all;
 
 entity Pgp3Phy is
    generic (
-      TPD_G        : time    := 1 ns;
-      SIMULATION_G : boolean := false);
+      TPD_G           : time    := 1 ns;
+      SIMULATION_G    : boolean := false;
+      AXI_CLK_FREQ_G  : real    := 125.0E+6;  -- units of Hz
+      PHY_BASE_ADDR_G : slv(31 downto 0));
    port (
       -- AXI-Lite Interface (axilClk domain)
       axilClk          : out sl;
@@ -36,6 +38,11 @@ entity Pgp3Phy is
       axilReadSlaves   : in  AxiLiteReadSlaveArray(1 downto 0);
       axilWriteMasters : out AxiLiteWriteMasterArray(1 downto 0);
       axilWriteSlaves  : in  AxiLiteWriteSlaveArray(1 downto 0);
+      -- PHY AXI-Lite Interface (axilClk domain)
+      phyReadMaster    : in  AxiLiteReadMasterType;
+      phyReadSlave     : out AxiLiteReadSlaveType;
+      phyWriteMaster   : in  AxiLiteWriteMasterType;
+      phyWriteSlave    : out AxiLiteWriteSlaveType;
       -- Camera Data Interface (axilClk domain)
       dataMasters      : in  AxiStreamMasterArray(1 downto 0);
       dataSlaves       : out AxiStreamSlaveArray(1 downto 0);
@@ -119,16 +126,18 @@ begin
 
    U_PGPv3 : entity work.Pgp3Gtx7Wrapper
       generic map(
-         TPD_G               => TPD_G,
-         ROGUE_SIM_EN_G      => SIMULATION_G,
-         ROGUE_SIM_USER_ID_G => 12,
-         NUM_LANES_G         => 2,
-         NUM_VC_G            => 4,
-         RATE_G              => "10.3125Gbps",
-         REFCLK_TYPE_G       => PGP3_REFCLK_312_C,
-         EN_PGP_MON_G        => false,
-         EN_GTH_DRP_G        => false,
-         EN_QPLL_DRP_G       => false)
+         TPD_G                => TPD_G,
+         ROGUE_SIM_EN_G       => SIMULATION_G,
+         ROGUE_SIM_PORT_NUM_G => 8000,
+         NUM_LANES_G          => 2,
+         NUM_VC_G             => 4,
+         RATE_G               => "10.3125Gbps",
+         REFCLK_TYPE_G        => PGP3_REFCLK_312_C,
+         EN_PGP_MON_G         => true,
+         EN_GTH_DRP_G         => false,
+         EN_QPLL_DRP_G        => false,
+         AXIL_BASE_ADDR_G     => PHY_BASE_ADDR_G,
+         AXIL_CLK_FREQ_G      => AXI_CLK_FREQ_G)
       port map (
          -- Stable Clock and Reset
          stableClk         => sysClk,
@@ -161,10 +170,10 @@ begin
          -- AXI-Lite Register Interface (axilClk domain)
          axilClk           => sysClk,
          axilRst           => sysRst,
-         axilReadMaster    => AXI_LITE_READ_MASTER_INIT_C,
-         axilReadSlave     => open,
-         axilWriteMaster   => AXI_LITE_WRITE_MASTER_INIT_C,
-         axilWriteSlave    => open);
+         axilReadMaster    => phyReadMaster,
+         axilReadSlave     => phyReadSlave,
+         axilWriteMaster   => phyWriteMaster,
+         axilWriteSlave    => phyWriteSlave);
 
    GEN_VEC :
    for i in 1 downto 0 generate

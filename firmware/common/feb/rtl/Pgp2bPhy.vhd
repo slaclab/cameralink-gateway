@@ -27,8 +27,10 @@ use unisim.vcomponents.all;
 
 entity Pgp2bPhy is
    generic (
-      TPD_G        : time    := 1 ns;
-      SIMULATION_G : boolean := false);
+      TPD_G           : time    := 1 ns;
+      SIMULATION_G    : boolean := false;
+      AXI_CLK_FREQ_G  : real    := 125.0E+6;  -- units of Hz
+      PHY_BASE_ADDR_G : slv(31 downto 0));
    port (
       -- AXI-Lite Interface (axilClk domain)
       axilClk          : out sl;
@@ -37,6 +39,11 @@ entity Pgp2bPhy is
       axilReadSlaves   : in  AxiLiteReadSlaveArray(1 downto 0);
       axilWriteMasters : out AxiLiteWriteMasterArray(1 downto 0);
       axilWriteSlaves  : in  AxiLiteWriteSlaveArray(1 downto 0);
+      -- PHY AXI-Lite Interface (axilClk domain)
+      phyReadMaster    : in  AxiLiteReadMasterType;
+      phyReadSlave     : out AxiLiteReadSlaveType;
+      phyWriteMaster   : in  AxiLiteWriteMasterType;
+      phyWriteSlave    : out AxiLiteWriteSlaveType;
       -- Camera Data Interface (axilClk domain)
       dataMasters      : in  AxiStreamMasterArray(1 downto 0);
       dataSlaves       : out AxiStreamSlaveArray(1 downto 0);
@@ -61,6 +68,14 @@ end Pgp2bPhy;
 
 architecture mapping of Pgp2bPhy is
 
+   constant XBAR_CONFIG_C : AxiLiteCrossbarMasterConfigArray(1 downto 0) := genAxiLiteConfig(2, PHY_BASE_ADDR_G, 16, 13);
+
+   signal phyReadMasters  : AxiLiteReadMasterArray(1 downto 0);
+   signal phyReadSlaves   : AxiLiteReadSlaveArray(1 downto 0);
+   signal phyWriteMasters : AxiLiteWriteMasterArray(1 downto 0);
+   signal phyWriteSlaves  : AxiLiteWriteSlaveArray(1 downto 0);
+
+
    signal pgpRxIn  : Pgp2bRxInArray(1 downto 0)  := (others => PGP2B_RX_IN_INIT_C);
    signal pgpRxOut : Pgp2bRxOutArray(1 downto 0) := (others => PGP2B_RX_OUT_INIT_C);
 
@@ -80,9 +95,9 @@ architecture mapping of Pgp2bPhy is
 
    signal sysClk : sl;
    signal sysRst : sl;
-   
+
    signal pgpClk : sl;
-   signal pgpRst : sl;   
+   signal pgpRst : sl;
 
 begin
 
@@ -135,6 +150,24 @@ begin
          rstOut(0) => refRst200MHz,
          rstOut(1) => sysRst,
          rstOut(2) => pgpRst);
+
+   U_XBAR : entity work.AxiLiteCrossbar
+      generic map (
+         TPD_G              => TPD_G,
+         NUM_SLAVE_SLOTS_G  => 1,
+         NUM_MASTER_SLOTS_G => 2,
+         MASTERS_CONFIG_G   => XBAR_CONFIG_C)
+      port map (
+         axiClk              => sysClk,
+         axiClkRst           => sysRst,
+         sAxiWriteMasters(0) => phyWriteMaster,
+         sAxiWriteSlaves(0)  => phyWriteSlave,
+         sAxiReadMasters(0)  => phyReadMaster,
+         sAxiReadSlaves(0)   => phyReadSlave,
+         mAxiWriteMasters    => phyWriteMasters,
+         mAxiWriteSlaves     => phyWriteSlaves,
+         mAxiReadMasters     => phyReadMasters,
+         mAxiReadSlaves      => phyReadSlaves);
 
    GEN_VEC :
    for i in 1 downto 0 generate
@@ -238,6 +271,37 @@ begin
             pgpRxMasters    => pgpRxMasters(4*i+3 downto 4*i),
             pgpRxCtrl       => pgpRxCtrl(4*i+3 downto 4*i),
             pgpRxSlaves     => pgpRxSlaves(4*i+3 downto 4*i));
+
+      --------------         
+      -- PGP Monitor
+      --------------         
+      U_PgpMon : entity work.Pgp2bAxi
+         generic map (
+            TPD_G              => TPD_G,
+            COMMON_TX_CLK_G    => false,
+            COMMON_RX_CLK_G    => false,
+            WRITE_EN_G         => false,
+            AXI_CLK_FREQ_G     => AXI_CLK_FREQ_G,
+            STATUS_CNT_WIDTH_G => 16,
+            ERROR_CNT_WIDTH_G  => 16)
+         port map (
+            -- TX PGP Interface (pgpTxClk)
+            pgpTxClk        => pgpClk,
+            pgpTxClkRst     => pgpRst,
+            pgpTxIn         => pgpTxIn(i),
+            pgpTxOut        => pgpTxOut(i),
+            -- RX PGP Interface (pgpRxClk)
+            pgpRxClk        => pgpClk,
+            pgpRxClkRst     => pgpRst,
+            pgpRxIn         => pgpRxIn(i),
+            pgpRxOut        => pgpRxOut(i),
+            -- AXI-Lite Register Interface (axilClk domain)
+            axilClk         => sysClk,
+            axilRst         => sysRst,
+            axilReadMaster  => phyReadMasters(i),
+            axilReadSlave   => phyReadSlaves(i),
+            axilWriteMaster => phyWriteMasters(i),
+            axilWriteSlave  => phyWriteSlaves(i));
 
    end generate GEN_VEC;
 

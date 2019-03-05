@@ -30,7 +30,7 @@ entity FpgaSystem is
       TPD_G           : time             := 1 ns;
       SIMULATION_G    : boolean          := false;
       BUILD_INFO_G    : BuildInfoType;
-      AXI_CLK_FREQ_G  : real             := 156.25E+6;  -- units of Hz
+      AXI_CLK_FREQ_G  : real             := 125.0E+6;  -- units of Hz
       AXI_BASE_ADDR_G : slv(31 downto 0) := (others => '0'));
    port (
       -- AXI-Lite Interface (axilClk domain)

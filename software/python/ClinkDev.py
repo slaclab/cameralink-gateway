@@ -19,7 +19,8 @@ import surf.devices.cypress as prom
 import surf.devices.linear  as linear
 import surf.devices.nxp     as nxp
 import surf.protocols.clink as cl
-import XilinxKcu1500Pgp     as pgp
+import surf.protocols.pgp   as pgp
+import XilinxKcu1500Pgp     as kcu1500
 
 import time
 
@@ -107,8 +108,7 @@ class ClinkTrigCtrl(pr.Device):
             offset       = 0x010,
             bitSize      = 4,
             mode         = "RW",
-        ))   
-
+        ))
 
 class ClinkFeb(pr.Device):
     def __init__(   self,       
@@ -116,6 +116,7 @@ class ClinkFeb(pr.Device):
             description = "ClinkFeb Container",
             serialA     = None,
             serialB     = None,
+            version3    = False, # true = PGPv3, false = PGP2b
             **kwargs):
         super().__init__(name=name, description=description, **kwargs) 
 
@@ -172,7 +173,25 @@ class ClinkFeb(pr.Device):
             description = 'Channel B trigger control', 
             offset      = 0x00020100, 
             expand      = False,
-        ))        
+        ))     
+
+        for i in range(2):
+        
+            if (version3):
+                self.add(pgp.Pgp3AxiL(            
+                    name    = ('PgpMon[%i]' % i), 
+                    offset  = (0x00040000 + i*0x2000), 
+                    numVc   = 4,
+                    writeEn = False,
+                    expand  = False,
+                )) 
+            else:
+                self.add(pgp.Pgp2bAxi(            
+                    name    = ('PgpMon[%i]' % i), 
+                    offset  = (0x00040000 + i*0x2000), 
+                    writeEn = False,
+                    expand  = False,
+                ))           
             
 class ClinkDev(pr.Root):
 
@@ -226,6 +245,7 @@ class ClinkDev(pr.Root):
                 memBase     = self._srp[lane], 
                 serialA     = self._dma[lane][2],
                 serialB     = self._dma[lane][3],
+                version3    = version3,
                 expand      = False,
             ))             
             
@@ -242,11 +262,11 @@ class ClinkDev(pr.Root):
             self._timeout = 100.0 # firmware simulation slow and timeout base on real time (not simulation time)
             
         # PGP Hardware on PCIe 
-        self.add(pgp.Hardware(            
+        self.add(kcu1500.Hardware(            
             memBase  = self.memMap,
             numLane  = numLane,
             version3 = version3,
-            expand   = False,
+            # expand   = False,
         ))              
             
         # Start the system

@@ -261,8 +261,8 @@ begin
          NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
          MASTERS_CONFIG_G   => AXIL_CONFIG_C)
       port map (
-         axiClk              => dmaClk,
-         axiClkRst           => dmaRst,
+         axiClk              => axilClk,
+         axiClkRst           => axilRst,
          sAxiWriteMasters(0) => axilWriteMaster,
          sAxiWriteSlaves(0)  => axilWriteSlave,
          sAxiReadMasters(0)  => axilReadMaster,

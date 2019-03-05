@@ -79,12 +79,13 @@ architecture mapping of CLinkGateway is
 
    constant AXIL_CLK_FREQ_C : real := 125.0E+6;  -- units of Hz
 
-   constant NUM_AXIL_MASTERS_C : natural := 4;
+   constant NUM_AXIL_MASTERS_C : natural := 5;
 
    constant SYS_INDEX_C    : natural := 0;
    constant CLINK_INDEX_C  : natural := 1;
    constant TIMING_INDEX_C : natural := 2;
    constant PROM_INDEX_C   : natural := 3;
+   constant PGP_INDEX_C    : natural := 4;
 
    constant XBAR_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, x"00000000", 24, 16);
 
@@ -119,8 +120,10 @@ begin
    GEN_PGP3 : if (PGP_TYPE_G = true) generate
       U_PGP : entity work.Pgp3Phy
          generic map (
-            TPD_G        => TPD_G,
-            SIMULATION_G => SIMULATION_G)
+            TPD_G           => TPD_G,
+            SIMULATION_G    => SIMULATION_G,
+            AXI_CLK_FREQ_G  => AXIL_CLK_FREQ_C,
+            PHY_BASE_ADDR_G => XBAR_CONFIG_C(PGP_INDEX_C).baseAddr)
          port map (
             -- AXI-Lite Interface (axilClk domain)
             axilClk          => axilClk,
@@ -129,6 +132,11 @@ begin
             axilReadSlaves   => mAxilReadSlaves,
             axilWriteMasters => mAxilWriteMasters,
             axilWriteSlaves  => mAxilWriteSlaves,
+            -- PHY AXI-Lite Interface (axilClk domain)
+            phyReadMaster    => axilReadMasters(PGP_INDEX_C),
+            phyReadSlave     => axilReadSlaves(PGP_INDEX_C),
+            phyWriteMaster   => axilWriteMasters(PGP_INDEX_C),
+            phyWriteSlave    => axilWriteSlaves(PGP_INDEX_C),
             -- Camera Data Interface
             dataMasters      => dataMasters,
             dataSlaves       => dataSlaves,
@@ -154,8 +162,10 @@ begin
    GEN_PGP2b : if (PGP_TYPE_G = false) generate
       U_PGP : entity work.Pgp2bPhy
          generic map (
-            TPD_G        => TPD_G,
-            SIMULATION_G => SIMULATION_G)
+            TPD_G           => TPD_G,
+            SIMULATION_G    => SIMULATION_G,
+            AXI_CLK_FREQ_G  => AXIL_CLK_FREQ_C,
+            PHY_BASE_ADDR_G => XBAR_CONFIG_C(PGP_INDEX_C).baseAddr)
          port map (
             -- AXI-Lite Interface (axilClk domain)
             axilClk          => axilClk,
@@ -164,6 +174,11 @@ begin
             axilReadSlaves   => mAxilReadSlaves,
             axilWriteMasters => mAxilWriteMasters,
             axilWriteSlaves  => mAxilWriteSlaves,
+            -- PHY AXI-Lite Interface (axilClk domain)
+            phyReadMaster    => axilReadMasters(PGP_INDEX_C),
+            phyReadSlave     => axilReadSlaves(PGP_INDEX_C),
+            phyWriteMaster   => axilWriteMasters(PGP_INDEX_C),
+            phyWriteSlave    => axilWriteSlaves(PGP_INDEX_C),
             -- Camera Data Interface
             dataMasters      => dataMasters,
             dataSlaves       => dataSlaves,

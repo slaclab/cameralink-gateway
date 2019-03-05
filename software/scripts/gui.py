@@ -51,7 +51,7 @@ parser.add_argument(
     "--pollEn", 
     type     = argBool,
     required = False,
-    default  = False,
+    default  = True,
     help     = "Enable auto-polling",
 ) 
 
@@ -59,7 +59,7 @@ parser.add_argument(
     "--initRead", 
     type     = argBool,
     required = False,
-    default  = False,
+    default  = True,
     help     = "Enable read all variables at start",
 )  
 
@@ -78,10 +78,14 @@ cl = ClinkDev.ClinkDev(
 
 #################################################################
 
+# # Dump the address map
+# pr.generateAddressMap(cl,'addressMapDummp.txt')
+
 # Create GUI
 appTop = pyrogue.gui.application(sys.argv)
 guiTop = pyrogue.gui.GuiTop(group='ClinkDev')
 guiTop.addTree(cl)
+guiTop.resize(800, 1200)
 
 # Run gui
 appTop.exec_()
