@@ -1,0 +1,79 @@
+ClinkDev:
+  #########################################################################################################
+  ClinkFeb[:]: # [:] is a wildcard for all devices
+    enable: True
+    BoardTemp:
+      RemoteTcritSetpoint: 100 # Prevent FEB from thermal shutdown until FPGA Tj = 100 degC (max. operating temp)
+    ClinkTop:
+      ChannelA:
+        enable: True
+        LinkMode: Deca
+        DataMode: 8Bit
+        FrameMode: Frame
+        TapCount: 10
+        DataEn: True
+        BaudRate: 9600 
+        SwControlValue: 0x0
+        SwControlEn: 0x0
+      ChannelB:
+        enable: True
+        LinkMode: Deca
+        DataMode: 8Bit
+        FrameMode: Frame
+        TapCount: 10
+        DataEn: True
+        BaudRate: 9600
+        SwControlValue: 0x0
+        SwControlEn: 0x0
+    TrigCtrl[0]:
+      EnableTrig: True
+      InvCC: False
+      TrigMap: ChA
+      TrigPulseWidth: 0xfff
+      TrigMask: 0x1
+    TrigCtrl[1]:
+      EnableTrig: True
+      InvCC: False
+      TrigMap: ChB
+      TrigPulseWidth: 0xfff
+      TrigMask: 0x1
+  #########################################################################################################
+  Application:
+    AppLane[:]: # [:] is a wildcard for all devices
+      EventBuilder:
+        Timeout: 781250 # (156.25 MHz) x 5 ms = 781,250  
+  #########################################################################################################
+  Hardware:
+    Timing:
+      ###################
+      TimingDbgMon:
+        Loopback: 0x0
+        # UseMiniTpg: False
+        UseMiniTpg: True # True for standalone testing
+      ###################
+      EvrV2CoreTriggers: # https://confluence.slac.stanford.edu/download/attachments/216713616/ConfigEvrV2CoreTriggersYaml.pdf
+        ###################
+        EvrV2ChannelReg[:]: # [:] is a wildcard for all devices
+          EnableReg: True
+          RateSel: 0x1028
+          DestSel: 0x20000
+        ###################
+        EvrV2TriggerReg[0:4]: # Apply the configurations to 0 through 3
+          EnableTrig: True
+          Polarity: Rising
+          Delay: 0x0
+          Width: 0x1 # 0x1 = one cycle pulse
+        EvrV2TriggerReg[0]:
+          Source: 0x0 # CH0
+        EvrV2TriggerReg[1]:
+          Source: 0x1 # CH1
+        EvrV2TriggerReg[2]:
+          Source: 0x2 # CH2
+        EvrV2TriggerReg[3]:
+          Source: 0x3 # CH3          
+      ###################
+      TimingFrameRx:
+        ClkSel: 0x0 # 0x0 = LCLS-I timing
+        RxDown: 0x0 # Reset the latching register
+      ###################
+      
