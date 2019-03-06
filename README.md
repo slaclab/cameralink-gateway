@@ -82,7 +82,7 @@ $ make gui
 # How to load the driver
 
 ```
-# Confirm that you have the board the computer with VID=1a4a ("SLAC") and PID=2030 ("DataDev")
+# Confirm that you have the board the computer with VID=1a4a ("SLAC") and PID=2030 ("AXI Stream DAQ")
 $ lspci -nn | grep SLAC
 04:00.0 Signal processing controller [1180]: SLAC National Accelerator Lab TID-AIR AXI Stream DAQ PCIe card [1a4a:2030]
 
