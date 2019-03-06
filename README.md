@@ -95,10 +95,10 @@ $ cd aes-stream-drivers/data_dev/driver/
 # Build the driver
 $ make
 
-# add new driver
+# Load the driver
 $ sudo /sbin/insmod ./datadev.ko cfgSize=0x50000 cfgRxCount=256 cfgTxCount=16
 
-# give appropriate group/permissions
+# Give appropriate group/permissions
 $ sudo chmod 666 /dev/data_dev*
 
 # Check for the loaded device
