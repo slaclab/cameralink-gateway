@@ -149,7 +149,7 @@ sudo reboot
 
 <!--- ######################################################## -->
 
-# How to run the Rogue GUI
+# How to run the Rogue PyQT GUI
 
 1) Setup the rogue environment
 ```
