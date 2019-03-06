@@ -84,7 +84,7 @@ $ make gui
 ```
 # Confirm that you have the board the computer with VID=1a4a ("SLAC") and PID=2030 ("DataDev")
 $ lspci -nn | grep SLAC
-04:00.0 Signal processing controller [1180]: SLAC National Accelerator Lab PPA-REG Device [1a4a:2030]
+04:00.0 Signal processing controller [1180]: SLAC National Accelerator Lab TID-AIR AXI Stream DAQ PCIe card [1a4a:2030]
 
 # Clone the driver github repo:
 $ git clone --recursive https://github.com/slaclab/aes-stream-drivers
