@@ -28,6 +28,7 @@ entity TriggerTop is
    generic (
       TPD_G           : time             := 1 ns;
       SIMULATION_G    : boolean          := false;
+      AXIL_CLK_FREQ_G : real             := 125.0E+6;  -- units of Hz
       AXI_BASE_ADDR_G : slv(31 downto 0) := (others => '0'));
    port (
       -- Trigger Interface
@@ -55,6 +56,8 @@ end TriggerTop;
 architecture mapping of TriggerTop is
 
    type RegType is record
+      cntRst         : slv(1 downto 0);
+      trigCnt        : Slv16Array(3 downto 0);
       enable         : slv(1 downto 0);
       inv            : slv(1 downto 0);
       trigMap        : slv(1 downto 0);
@@ -67,6 +70,8 @@ architecture mapping of TriggerTop is
    end record RegType;
 
    constant REG_INIT_C : RegType := (
+      cntRst         => "00",
+      trigCnt        => (others => (others => '0')),
       enable         => "00",
       inv            => "00",
       trigMap        => "10",
@@ -82,6 +87,8 @@ architecture mapping of TriggerTop is
 
    signal timingClkDiv2 : sl;
    signal timingClk     : sl;
+
+   signal trigFreq : Slv32Array(1 downto 0);
 
 begin
 
@@ -107,13 +114,48 @@ begin
          gtTxP  => timingTxP,
          gtTxN  => timingTxN);
 
-   comb : process (axilReadMaster, axilRst, axilWriteMaster, pgpTrigger, r) is
+   GEN_TRIG_FREQ :
+   for i in 1 downto 0 generate
+
+      U_trigFreq : entity work.SyncTrigRate
+         generic map (
+            TPD_G          => TPD_G,
+            COMMON_CLK_G   => true,
+            ONE_SHOT_G     => false,
+            REF_CLK_FREQ_G => AXIL_CLK_FREQ_G)
+         port map (
+            -- Trigger Input (locClk domain)
+            trigIn      => pgpTrigger(i),
+            -- Trigger Rate Output (locClk domain)
+            trigRateOut => trigFreq(i),
+            -- Clocks
+            locClk      => axilClk,
+            refClk      => axilClk);
+
+   end generate GEN_TRIG_FREQ;
+
+   comb : process (axilReadMaster, axilRst, axilWriteMaster, pgpTrigger, r,
+                   trigFreq) is
       variable v      : RegType;
       variable axilEp : AxiLiteEndpointType;
       variable trig   : slv(1 downto 0);
    begin
       -- Latch the current value
       v := r;
+
+      -- Reset strobes
+      v.cntRst := (others => '0');
+
+      -- Check for counter reset
+      for i in 1 downto 0 loop
+         if (r.cntRst(i) = '1') then
+            v.trigCnt(i) := (others => '0');
+         else
+            if pgpTrigger(i) = '1' then
+               v.trigCnt(i) := r.trigCnt(i) + 1;
+            end if;
+         end if;
+      end loop;
 
       ------------------------      
       -- AXI-Lite Transactions
@@ -122,17 +164,23 @@ begin
       -- Determine the transaction type
       axiSlaveWaitTxn(axilEp, axilWriteMaster, axilReadMaster, v.axilWriteSlave, v.axilReadSlave);
 
-      axiSlaveRegister(axilEp, x"000", 0, v.enable(0));
-      axiSlaveRegister(axilEp, x"004", 0, v.inv(0));
-      axiSlaveRegister(axilEp, x"008", 0, v.trigMap(0));
-      axiSlaveRegister(axilEp, x"00C", 0, v.ccCntSize(0));
-      axiSlaveRegister(axilEp, x"010", 0, v.ccTrigMask(0));
+      axiSlaveRegister (axilEp, x"000", 0, v.enable(0));
+      axiSlaveRegister (axilEp, x"004", 0, v.inv(0));
+      axiSlaveRegister (axilEp, x"008", 0, v.trigMap(0));
+      axiSlaveRegister (axilEp, x"00C", 0, v.ccCntSize(0));
+      axiSlaveRegister (axilEp, x"010", 0, v.ccTrigMask(0));
+      axiSlaveRegisterR(axilEp, x"0F4", 0, trigFreq(0));
+      axiSlaveRegisterR(axilEp, x"0F8", 0, r.trigCnt(0));
+      axiSlaveRegister (axilEp, x"0FC", 0, v.cntRst(0));
 
-      axiSlaveRegister(axilEp, x"100", 0, v.enable(1));
-      axiSlaveRegister(axilEp, x"104", 0, v.inv(1));
-      axiSlaveRegister(axilEp, x"108", 0, v.trigMap(1));
-      axiSlaveRegister(axilEp, x"10C", 0, v.ccCntSize(1));
-      axiSlaveRegister(axilEp, x"110", 0, v.ccTrigMask(1));
+      axiSlaveRegister (axilEp, x"100", 0, v.enable(1));
+      axiSlaveRegister (axilEp, x"104", 0, v.inv(1));
+      axiSlaveRegister (axilEp, x"108", 0, v.trigMap(1));
+      axiSlaveRegister (axilEp, x"10C", 0, v.ccCntSize(1));
+      axiSlaveRegister (axilEp, x"110", 0, v.ccTrigMask(1));
+      axiSlaveRegisterR(axilEp, x"1F4", 0, trigFreq(1));
+      axiSlaveRegisterR(axilEp, x"1F8", 0, r.trigCnt(1));
+      axiSlaveRegister (axilEp, x"1FC", 0, v.cntRst(1));
 
       -- Close out the transaction
       axiSlaveDefault(axilEp, v.axilWriteSlave, v.axilReadSlave, AXI_RESP_DECERR_C);

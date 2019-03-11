@@ -230,7 +230,7 @@ begin
 
    -------------------------------------         
    -- Memory Interface Generator IP core
-   ------------------------------------- 
+   -------------------------------------         
    BUILD_SIF : if (BUILD_SIF_C = true) generate
       U_Mig3 : entity work.Mig3  -- Note: Using MIG[3] because located in FPGA's SLR1 region
          generic map (
@@ -261,8 +261,8 @@ begin
          NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
          MASTERS_CONFIG_G   => AXIL_CONFIG_C)
       port map (
-         axiClk              => dmaClk,
-         axiClkRst           => dmaRst,
+         axiClk              => axilClk,
+         axiClkRst           => axilRst,
          sAxiWriteMasters(0) => axilWriteMaster,
          sAxiWriteSlaves(0)  => axilWriteSlave,
          sAxiReadMasters(0)  => axilReadMaster,

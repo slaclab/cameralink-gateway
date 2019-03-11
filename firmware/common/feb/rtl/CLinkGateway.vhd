@@ -330,6 +330,7 @@ begin
       generic map (
          TPD_G           => TPD_G,
          SIMULATION_G    => SIMULATION_G,
+         AXIL_CLK_FREQ_G => AXIL_CLK_FREQ_C,
          AXI_BASE_ADDR_G => XBAR_CONFIG_C(TIMING_INDEX_C).baseAddr)
       port map (
          -- Trigger Input

@@ -75,7 +75,43 @@ class ClinkTrigCtrl(pr.Device):
             bitSize      = 4,
             mode         = "RW",
         ))
+        
+        self.add(pr.RemoteVariable(    
+            name         = "TrigRate",
+            description  = "Trigger Rate",
+            offset       = 0x0F4,
+            units        = 'Hz',
+            disp         = '{:d}',
+            mode         = "RO",
+            pollInterval = 1,
+        ))
+        
+        self.add(pr.RemoteVariable(    
+            name         = "TrigCnt",
+            description  = "Trigger Counter",
+            offset       = 0x0F8,
+            disp         = '{:d}',
+            mode         = "RO",
+            pollInterval = 1,
+        ))           
 
+        self.add(pr.RemoteVariable(
+            name         = "CntRst",                 
+            description  = "Counter Reset",
+            mode         = 'WO',
+            offset       = 0x0FC,
+            hidden       = True,
+        ))          
+        
+    def hardReset(self):
+        self.CntRst.set(0x1)
+
+    def softReset(self):
+        self.CntRst.set(0x1)
+
+    def countReset(self):
+        self.CntRst.set(0x1)            
+        
 class ClinkFeb(pr.Device):
     def __init__(   self,       
             name        = "ClinkFeb",

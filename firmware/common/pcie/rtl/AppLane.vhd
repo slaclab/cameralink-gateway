@@ -151,7 +151,7 @@ begin
          TAP_DEST_G           => 1,
          PIPE_STAGES_G        => 1,
          ILEAVE_ON_NOTVALID_G => true,
-         ILEAVE_REARB_G       => 1)       
+         ILEAVE_REARB_G       => 128)       
       port map (
          -- Slave
          sAxisMaster  => pgpObMaster,
