@@ -47,7 +47,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--pgpLane", 
+    "--lane", 
     type     = int,
     required = True,
     help     = "PGP lane index (range from 0 to 3)",
@@ -60,20 +60,23 @@ args = parser.parse_args()
 
 cl = ClinkDev.ClinkDev(
     dev      = args.dev,
-    numLane  = 4,
     version3 = args.version3,
     pollEn   = False,
     initRead = False,
 )
     
 # Create useful pointers
-AxiVersion = cl.ClinkFeb[args.pgpLane].AxiVersion
-PROM       = cl.ClinkFeb[args.pgpLane].CypressS25Fl
+AxiVersion = cl.ClinkFeb[args.lane].AxiVersion
+PROM       = cl.ClinkFeb[args.lane].CypressS25Fl
 
-print ( '###################################################')
-print ( '#                 Old Firmware                    #')
-print ( '###################################################')
-AxiVersion.printStatus()
+if (cl.Hardware.PgpMon[args.lane].RxRemLinkReady.get()):
+    print ( '###################################################')
+    print ( '#                 Old Firmware                    #')
+    print ( '###################################################')
+    AxiVersion.printStatus()
+else:
+    # PGP Link down
+    raise ValueError(f'Pgp[lane={args.lane}] is down')
 
 # Program the FPGA's PROM
 PROM.LoadMcsFile(args.mcs)

@@ -8,11 +8,11 @@
 # copied, modified, propagated, or distributed except according to the terms 
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
-import pyrogue as pr
-import pyrogue.gui
+
 import ClinkDev
 import sys
 import argparse
+import time
 
 #################################################################
 
@@ -40,19 +40,18 @@ parser.add_argument(
 ) 
 
 parser.add_argument(
-    "--pollEn", 
-    type     = argBool,
+    "--serCh", 
+    type     = int,
     required = False,
-    default  = True,
-    help     = "Enable auto-polling",
+    default  = 0,
+    help     = "serial channel",
 ) 
 
 parser.add_argument(
-    "--initRead", 
-    type     = argBool,
-    required = False,
-    default  = True,
-    help     = "Enable read all variables at start",
+    "--lane", 
+    type     = int,
+    required = True,
+    help     = "PGP lane index (range from 0 to 3)",
 )  
 
 # Get the arguments
@@ -63,22 +62,33 @@ args = parser.parse_args()
 cl = ClinkDev.ClinkDev(
     dev      = args.dev,
     version3 = args.version3,
-    pollEn   = args.pollEn,
-    initRead = args.initRead,
+    pollEn   = False,
+    initRead = False,
 )
+    
+# Create useful pointers
+ch =  [None for lane in range(2)]
+ch[0] = cl.ClinkFeb[args.lane].ClinkTop.ChannelA
+ch[1] = cl.ClinkFeb[args.lane].ClinkTop.ChannelB
 
-#################################################################
+if (cl.Hardware.PgpMon[args.lane].RxRemLinkReady.get()):
+    # Set the baud rate to 57600
+    ch[args.serCh].BaudRate.set(57600)
+    
+    # Serial commands for setup w/ normal polarity CC1 trigger:
+    ch[args.serCh].SendString('@CCE0;0\r')
+    time.sleep(0.1) 
+    
+    # Pulse width exposure control
+    ch[args.serCh].SendString('@MO1\r')
+    time.sleep(0.1) 
+    
+    # Enable vertical remapping (deinterlace on camera w/ 4ms delay)
+    ch[args.serCh].SendString('@VR1\r')
+    time.sleep(0.1) 
+else:
+    # PGP Link down
+    raise ValueError(f'Pgp[lane={args.pgpLane}] is down')
 
-# # Dump the address map
-# pr.generateAddressMap(cl,'addressMapDummp.txt')
-
-# Create GUI
-appTop = pyrogue.gui.application(sys.argv)
-guiTop = pyrogue.gui.GuiTop(group='ClinkDev')
-guiTop.addTree(cl)
-guiTop.resize(800, 1200)
-
-# Run gui
-appTop.exec_()
 cl.stop()
-
+exit()

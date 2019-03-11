@@ -145,7 +145,7 @@ class ClinkFeb(pr.Device):
         
             if (version3):
                 self.add(pgp.Pgp3AxiL(            
-                    name    = ('PgpMon[%i]' % i), 
+                    name    = (f'PgpMon[{i}]'), 
                     offset  = (0x00040000 + i*0x2000), 
                     numVc   = 4,
                     writeEn = False,
@@ -153,7 +153,7 @@ class ClinkFeb(pr.Device):
                 )) 
             else:
                 self.add(pgp.Pgp2bAxi(            
-                    name    = ('PgpMon[%i]' % i), 
+                    name    = (f'PgpMon[{i}]'), 
                     offset  = (0x00040000 + i*0x2000), 
                     writeEn = False,
                     expand  = False,
