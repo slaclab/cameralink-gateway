@@ -7,8 +7,8 @@ ClinkDev:
       ###################
       ChannelA:
         enable: True
-        LinkMode: Deca
-        DataMode: 8Bit
+        LinkMode: Base
+        DataMode: 12Bit
         FrameMode: Frame
         TapCount: 10
         DataEn: True
@@ -18,8 +18,8 @@ ClinkDev:
       ###################
       ChannelB:
         enable: True
-        LinkMode: Deca
-        DataMode: 8Bit
+        LinkMode: Base
+        DataMode: 12Bit
         FrameMode: Frame
         TapCount: 10
         DataEn: True
