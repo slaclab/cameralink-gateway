@@ -72,87 +72,97 @@ ch[0] = cl.ClinkFeb[args.lane].ClinkTop.ChannelA
 ch[1] = cl.ClinkFeb[args.lane].ClinkTop.ChannelB
 
 if (cl.Hardware.PgpMon[args.lane].RxRemLinkReady.get()):
+
+    timeout = 0.1
+
     # Set the baud rate to 57600
     ch[args.serCh].BaudRate.set(57600)
-    time.sleep(0.1)    
-    
-    # Serial commands for setup w/ normal polarity CC1 trigger  (value from Bruce Hill)
-    ch[args.serCh].SendString('@CCE0;0\r')
-    time.sleep(0.1)    
-    
-    # Set CCFS to default value of [0,0]
-    ch[args.serCh].SendString('@CCFS0;0\r')
-    time.sleep(0.1)    
-    
-    # Set DPE to default value of 1
-    ch[args.serCh].SendString('@DPE1\r')  
-    time.sleep(0.1)    
-
-    # Set FP to default value of 815
-    ch[args.serCh].SendString('@FP815\r')
-    time.sleep(0.1)    
-
-    # Set FSM to default value of 0
-    ch[args.serCh].SendString('@FSM0\r')    
-    time.sleep(0.1)    
-    
-    # Set FST to default value of [0,1]
-    ch[args.serCh].SendString('@FST0;1\r')   
-    time.sleep(0.1)    
-
-    # Set GA to default value of 100
-    ch[args.serCh].SendString('@GA100\r')       
-    time.sleep(0.1)    
-    
-    # Set IT to default value of 814
-    ch[args.serCh].SendString('@IT814\r')  
-    time.sleep(0.1)    
-
-    # Set MI to default value of 0
-    ch[args.serCh].SendString('@MI0\r')      
-    time.sleep(0.1)    
-    
-    # Pulse width exposure control (value from Bruce Hill)
-    ch[args.serCh].SendString('@MO1\r')
-    time.sleep(0.1)    
-    
-    # Set OFS to default value of 20
-    ch[args.serCh].SendString('@OFS20\r')  
-    time.sleep(0.1)    
 
     # Output resolution, i.e. bits per pixel.  Set to 12. (value from Bruce Hill)
     ch[args.serCh].SendString('@OR12\r')  
-    time.sleep(0.1)    
-    
-    # Set TP to default value of 0
-    ch[args.serCh].SendString('@TP0\r')      
-    time.sleep(0.1)    
-    
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@OR?\r') 
+    time.sleep(timeout)           
+       
+    # Pulse width exposure control (value from Bruce Hill)
+    ch[args.serCh].SendString('@MO1\r')
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@MO?\r') 
+    time.sleep(timeout)    
+       
     # Vertical binning, set to 1. (value from Bruce Hill)
     ch[args.serCh].SendString('@VBIN1\r')    
-    time.sleep(0.1)    
-    
-    # Set WB to default value of [100,100,100]
-    ch[args.serCh].SendString('@WB100;100;100\r')    
-    time.sleep(0.1)    
-    
-    # Set BL to default value of 20
-    ch[args.serCh].SendString('@BL20\r')     
-    time.sleep(0.1)    
-    
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@VBIN?\r') 
+    time.sleep(timeout)           
+       
     # Enable vertical remapping (deinterlace on camera w/ 4ms delay, value from Bruce Hill)
     ch[args.serCh].SendString('@VR1\r')
-    time.sleep(0.1)    
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@VR?\r') 
+    time.sleep(timeout)         
+       
+    # Normal Polarity CC1 trigger  (value from Bruce Hill)
+    ch[args.serCh].SendString('@CCE0;0\r')
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@CCE?\r')
+    time.sleep(timeout)    
     
-    # Set FSP to default value of 0
-    ch[args.serCh].SendString('@FSP0\r')     
-    time.sleep(0.1)    
+    # Set CCFS to default value of [0,0]
+    ch[args.serCh].SendString('@CCFS0;0\r')
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@CCFS?\r')
+    time.sleep(timeout)    
+    
+    # Set DPE to default value of 1
+    ch[args.serCh].SendString('@DPE1\r')  
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@DPE?\r') 
+    time.sleep(timeout)    
+ 
+    # Set FSM to default value of 0
+    ch[args.serCh].SendString('@FSM0\r')    
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@FSM?\r') 
+    time.sleep(timeout)    
+    
+    # Set FST to default value of [0,1]
+    ch[args.serCh].SendString('@FST0;1\r')   
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@FST?\r') 
+    time.sleep(timeout)    
+
+    # Set GA to default value of 100
+    ch[args.serCh].SendString('@GA100\r')       
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@GA?\r') 
+    time.sleep(timeout)    
+
+    # Set MI to default value of 0
+    ch[args.serCh].SendString('@MI0\r')      
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@MI?\r') 
+    time.sleep(timeout)    
+        
+    # Set TP to default value of 0
+    ch[args.serCh].SendString('@TP0\r')      
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@TP?\r') 
+    time.sleep(timeout)    
+      
+    # Set BL to default value of 20
+    ch[args.serCh].SendString('@BL20\r')     
+    time.sleep(timeout)    
+    ch[args.serCh].SendString('@BL?\r') 
+    time.sleep(timeout)    
     
 else:
     # PGP Link down
     raise ValueError(f'Pgp[lane={args.pgpLane}] is down')
-
-time.sleep(0.1)    
     
+time.sleep(timeout)    
+time.sleep(timeout)    
+time.sleep(timeout)    
+
 cl.stop()
 exit()
