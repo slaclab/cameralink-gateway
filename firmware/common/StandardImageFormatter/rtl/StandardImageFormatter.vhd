@@ -134,8 +134,6 @@ begin
    U_ROW_REMAP_LUT : entity work.AxiDualPortRam
       generic map (
          TPD_G        => TPD_G,
-         BRAM_EN_G    => true,
-         REG_EN_G     => false,
          SYS_WR_EN_G  => true,
          COMMON_CLK_G => true,
          ADDR_WIDTH_G => 11,            -- 2k

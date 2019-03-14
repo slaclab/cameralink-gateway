@@ -121,8 +121,8 @@ architecture top_level of ClinkKcu1500Pgp2b is
 
    signal pgpIbMasters : AxiStreamMasterArray(3 downto 0);
    signal pgpIbSlaves  : AxiStreamSlaveArray(3 downto 0);
-   signal pgpObMasters : AxiStreamMasterArray(3 downto 0);
-   signal pgpObSlaves  : AxiStreamSlaveArray(3 downto 0);
+   signal pgpObMasters : AxiStreamQuadMasterArray(3 downto 0);
+   signal pgpObSlaves  : AxiStreamQuadSlaveArray(3 downto 0);
 
    signal trigMasters : AxiStreamMasterArray(3 downto 0);
    signal trigSlaves  : AxiStreamSlaveArray(3 downto 0);

@@ -80,6 +80,9 @@ class ClinkDev(pr.Root):
                 self._dma[lane][2] = rogue.interfaces.stream.TcpClient('localhost',8002+(512*lane)+2*2,True) # VC2 = Serial
                 self._dma[lane][3] = rogue.interfaces.stream.TcpClient('localhost',8002+(512*lane)+2*3,True) # VC3 = Serial
                 
+            # Disabling zero copy on the data stream
+            self._dma[lane][1].setZeroCopyEn(False)    
+                
             # SRP
             self._srp[lane] = rogue.protocols.srp.SrpV3()
             pr.streamConnectBiDir(self._dma[lane][0],self._srp[lane])
@@ -90,6 +93,8 @@ class ClinkDev(pr.Root):
                 memBase     = self._srp[lane], 
                 serialA     = self._dma[lane][2],
                 serialB     = self._dma[lane][3],
+                camTypeA    = 'Opal000', # Assuming OPA 1000 camera
+                camTypeB    = 'Opal000', # Assuming OPA 1000 camera
                 version3    = version3,
                 enableDeps  = [self.Hardware.PgpMon[lane].RxRemLinkReady], # Only allow access if the PGP link is established
                 expand      = False,

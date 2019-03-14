@@ -62,12 +62,15 @@ cl = ClinkDev.ClinkDev(
     dev      = args.dev,
     version3 = args.version3,
     pollEn   = False,
-    initRead = False,
+    initRead = True,
 )
     
 # Create useful pointers
 AxiVersion = cl.ClinkFeb[args.lane].AxiVersion
 PROM       = cl.ClinkFeb[args.lane].CypressS25Fl
+
+# Read all the variables
+cl.ReadAll()
 
 if (cl.Hardware.PgpMon[args.lane].RxRemLinkReady.get()):
     print ( '###################################################')

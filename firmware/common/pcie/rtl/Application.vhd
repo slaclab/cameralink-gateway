@@ -37,8 +37,8 @@ entity Application is
       -- PGP Streams (axilClk domain)
       pgpIbMasters    : out AxiStreamMasterArray(3 downto 0);
       pgpIbSlaves     : in  AxiStreamSlaveArray(3 downto 0);
-      pgpObMasters    : in  AxiStreamMasterArray(3 downto 0);
-      pgpObSlaves     : out AxiStreamSlaveArray(3 downto 0);
+      pgpObMasters    : in  AxiStreamQuadMasterArray(3 downto 0);
+      pgpObSlaves     : out AxiStreamQuadSlaveArray(3 downto 0);
       -- Trigger Event streams (axilClk domain)
       trigMasters     : in  AxiStreamMasterArray(3 downto 0);
       trigSlaves      : out AxiStreamSlaveArray(3 downto 0);
@@ -127,7 +127,7 @@ begin
             mAxiReadMaster   => ddrReadMaster,
             mAxiReadSlave    => ddrReadSlave);
    end generate;
-   
+
    -------------------
    -- Application Lane
    -------------------
@@ -148,8 +148,8 @@ begin
             -- PGP Streams (axilClk domain)
             pgpIbMaster     => pgpIbMasters(i),
             pgpIbSlave      => pgpIbSlaves(i),
-            pgpObMaster     => pgpObMasters(i),
-            pgpObSlave      => pgpObSlaves(i),
+            pgpObMasters    => pgpObMasters(i),
+            pgpObSlaves     => pgpObSlaves(i),
             -- Trigger Event streams (axilClk domain)
             trigMaster      => trigMasters(i),
             trigSlave       => trigSlaves(i),
