@@ -8,11 +8,11 @@
 # copied, modified, propagated, or distributed except according to the terms 
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
-import pyrogue as pr
-import pyrogue.gui
+
 import ClinkDev
 import sys
 import argparse
+import time
 
 #################################################################
 
@@ -40,19 +40,17 @@ parser.add_argument(
 ) 
 
 parser.add_argument(
-    "--pollEn", 
-    type     = argBool,
-    required = False,
-    default  = True,
-    help     = "Enable auto-polling",
-) 
+    "--mcs", 
+    type     = str,
+    required = True,
+    help     = "path to mcs file",
+)
 
 parser.add_argument(
-    "--initRead", 
-    type     = argBool,
-    required = False,
-    default  = True,
-    help     = "Enable read all variables at start",
+    "--lane", 
+    type     = int,
+    required = True,
+    help     = "PGP lane index (range from 0 to 3)",
 )  
 
 # Get the arguments
@@ -63,22 +61,41 @@ args = parser.parse_args()
 cl = ClinkDev.ClinkDev(
     dev      = args.dev,
     version3 = args.version3,
-    pollEn   = args.pollEn,
-    initRead = args.initRead,
+    pollEn   = False,
+    initRead = True,
 )
+    
+# Create useful pointers
+AxiVersion = cl.ClinkFeb[args.lane].AxiVersion
+PROM       = cl.ClinkFeb[args.lane].CypressS25Fl
 
-#################################################################
+# Read all the variables
+cl.ReadAll()
 
-# # Dump the address map
-# pr.generateAddressMap(cl,'addressMapDummp.txt')
+if (cl.Hardware.PgpMon[args.lane].RxRemLinkReady.get()):
+    print ( '###################################################')
+    print ( '#                 Old Firmware                    #')
+    print ( '###################################################')
+    AxiVersion.printStatus()
+else:
+    # PGP Link down
+    raise ValueError(f'Pgp[lane={args.lane}] is down')
 
-# Create GUI
-appTop = pyrogue.gui.application(sys.argv)
-guiTop = pyrogue.gui.GuiTop(group='ClinkDev')
-guiTop.addTree(cl)
-guiTop.resize(800, 1200)
+# Program the FPGA's PROM
+PROM.LoadMcsFile(args.mcs)
 
-# Run gui
-appTop.exec_()
+if(PROM._progDone):
+    print('\nReloading FPGA firmware from PROM ....')
+    AxiVersion.FpgaReload()
+    time.sleep(5)
+    print('\nReloading FPGA done')
+
+    print ( '###################################################')
+    print ( '#                 New Firmware                    #')
+    print ( '###################################################')
+    AxiVersion.printStatus()
+else:
+    print('Failed to program FPGA')
+
 cl.stop()
-
+exit()

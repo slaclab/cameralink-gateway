@@ -26,6 +26,7 @@
 ehthumbs.db
 Thumps.db
 build.info
+net_log.txt
 
 # Vivado Build
 build*
@@ -34,3 +35,5 @@ build*
 *.bit
 *.mcs
 *.gz
+*.ltx
+*.dcp

@@ -1,0 +1,286 @@
+-------------------------------------------------------------------------------
+-- File       : AppLane.vhd
+-- Company    : SLAC National Accelerator Laboratory
+-------------------------------------------------------------------------------
+-- This file is part of 'Camera link gateway'.
+-- It is subject to the license terms in the LICENSE.txt file found in the 
+-- top-level directory of this distribution and at: 
+--    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
+-- No part of 'Camera link gateway', including this file, 
+-- may be copied, modified, propagated, or distributed except according to 
+-- the terms contained in the LICENSE.txt file.
+-------------------------------------------------------------------------------
+
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
+
+use work.StdRtlPkg.all;
+use work.AxiPkg.all;
+use work.AxiLitePkg.all;
+use work.AxiStreamPkg.all;
+use work.AppPkg.all;
+
+entity AppLane is
+   generic (
+      TPD_G           : time             := 1 ns;
+      AXI_BASE_ADDR_G : slv(31 downto 0) := x"00C0_0000");
+   port (
+      -- AXI-Lite Interface
+      axilClk         : in  sl;
+      axilRst         : in  sl;
+      axilReadMaster  : in  AxiLiteReadMasterType;
+      axilReadSlave   : out AxiLiteReadSlaveType;
+      axilWriteMaster : in  AxiLiteWriteMasterType;
+      axilWriteSlave  : out AxiLiteWriteSlaveType;
+      -- PGP Streams (axilClk domain)
+      pgpIbMaster     : out AxiStreamMasterType;
+      pgpIbSlave      : in  AxiStreamSlaveType;
+      pgpObMasters    : in  AxiStreamQuadMasterType;
+      pgpObSlaves     : out AxiStreamQuadSlaveType;
+      -- Trigger Event streams (axilClk domain)
+      trigMaster      : in  AxiStreamMasterType;
+      trigSlave       : out AxiStreamSlaveType;
+      -- DMA Interface (dmaClk domain)
+      dmaClk          : in  sl;
+      dmaRst          : in  sl;
+      dmaIbMaster     : out AxiStreamMasterType;
+      dmaIbSlave      : in  AxiStreamSlaveType;
+      dmaObMaster     : in  AxiStreamMasterType;
+      dmaObSlave      : out AxiStreamSlaveType;
+      -- AXI MEM Interface (axilClk domain)
+      axiOffset       : in  slv(63 downto 0);
+      axiWriteMasters : out AxiWriteMasterArray(1 downto 0);
+      axiWriteSlaves  : in  AxiWriteSlaveArray(1 downto 0);
+      axiReadMasters  : out AxiReadMasterArray(1 downto 0);
+      axiReadSlaves   : in  AxiReadSlaveArray(1 downto 0));
+end AppLane;
+
+architecture mapping of AppLane is
+
+   constant NUM_AXIL_MASTERS_C : positive := 2;
+
+   constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 20, 16);
+
+   signal axilWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
+   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0) := (others => AXI_LITE_WRITE_SLAVE_EMPTY_SLVERR_C);
+   signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
+   signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0)  := (others => AXI_LITE_READ_SLAVE_EMPTY_SLVERR_C);
+
+   signal sifClMaster : AxiStreamMasterType;
+   signal sifClSlave  : AxiStreamSlaveType;
+
+   signal eventMaster : AxiStreamMasterType;
+   signal eventSlave  : AxiStreamSlaveType;
+
+   signal txMaster : AxiStreamMasterType;
+   signal txSlave  : AxiStreamSlaveType;
+
+   signal appObMaster : AxiStreamMasterType;
+   signal appObSlave  : AxiStreamSlaveType;
+
+begin
+
+   -----------------------
+   -- DMA to HW ASYNC FIFO
+   -----------------------
+   U_DMA_to_HW : entity work.AxiStreamFifoV2
+      generic map (
+         -- General Configurations
+         TPD_G               => TPD_G,
+         INT_PIPE_STAGES_G   => 1,
+         PIPE_STAGES_G       => 0,
+         SLAVE_READY_EN_G    => true,
+         VALID_THOLD_G       => 1,
+         -- FIFO configurations
+         BRAM_EN_G           => true,
+         GEN_SYNC_FIFO_G     => false,
+         FIFO_ADDR_WIDTH_G   => 9,
+         -- AXI Stream Port Configurations
+         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_C,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_C)
+      port map (
+         -- Slave Port
+         sAxisClk    => dmaClk,
+         sAxisRst    => dmaRst,
+         sAxisMaster => dmaObMaster,
+         sAxisSlave  => dmaObSlave,
+         -- Master Port
+         mAxisClk    => axilClk,
+         mAxisRst    => axilRst,
+         mAxisMaster => pgpIbMaster,
+         mAxisSlave  => pgpIbSlave);
+
+   --------------------
+   -- AXI-Lite Crossbar
+   --------------------
+   U_AXIL_XBAR : entity work.AxiLiteCrossbar
+      generic map (
+         TPD_G              => TPD_G,
+         NUM_SLAVE_SLOTS_G  => 1,
+         NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
+         MASTERS_CONFIG_G   => AXIL_CONFIG_C)
+      port map (
+         axiClk              => axilClk,
+         axiClkRst           => axilRst,
+         sAxiWriteMasters(0) => axilWriteMaster,
+         sAxiWriteSlaves(0)  => axilWriteSlave,
+         sAxiReadMasters(0)  => axilReadMaster,
+         sAxiReadSlaves(0)   => axilReadSlave,
+         mAxiWriteMasters    => axilWriteMasters,
+         mAxiWriteSlaves     => axilWriteSlaves,
+         mAxiReadMasters     => axilReadMasters,
+         mAxiReadSlaves      => axilReadSlaves);
+
+   ----------------------------------
+   -- Standard Image Formatter Module
+   ----------------------------------
+   BUILD_SIF : if (BUILD_SIF_C = true) generate
+      U_SIF : entity work.StandardImageFormatter
+         generic map (
+            TPD_G            => TPD_G,
+            AXI_ADDR_WIDTH_C => 30,     -- 2^30 = 1GB buffer
+            AXIS_CONFIG_G    => DMA_AXIS_CONFIG_C,
+            AXIL_BASE_ADDR_G => AXI_BASE_ADDR_G)
+         port map (
+            -- AXI-Lite Interface (axilClk domain)
+            axilClk         => axilClk,
+            axilRst         => axilRst,
+            axilReadMaster  => axilReadMasters(1),
+            axilReadSlave   => axilReadSlaves(1),
+            axilWriteMaster => axilWriteMasters(1),
+            axilWriteSlave  => axilWriteSlaves(1),
+            -- AXI Stream Interface (axilClk domain)
+            sAxisMaster     => pgpObMasters(1),
+            sAxisSlave      => pgpObSlaves(1),
+            mAxisMaster     => sifClMaster,
+            mAxisSlave      => sifClSlave,
+            -- AXI MEM Interface (axilClk domain)
+            axiOffset       => axiOffset,
+            axiWriteMasters => axiWriteMasters,
+            axiWriteSlaves  => axiWriteSlaves,
+            axiReadMasters  => axiReadMasters,
+            axiReadSlaves   => axiReadSlaves);
+   end generate;
+   BYP_SIF : if (BUILD_SIF_C = false) generate
+      sifClMaster    <= pgpObMasters(1);
+      pgpObSlaves(1) <= sifClSlave;
+   end generate;
+
+   ----------------------------------
+   -- Event Builder
+   ----------------------------------         
+   U_EventBuilder : entity work.AxiStreamBatcherEventBuilder
+      generic map (
+         TPD_G         => TPD_G,
+         NUM_SLAVES_G  => 2,
+         AXIS_CONFIG_G => DMA_AXIS_CONFIG_C)
+      port map (
+         -- Clock and Reset
+         axisClk         => axilClk,
+         axisRst         => axilRst,
+         -- AXI-Lite Interface (axilClk domain)
+         axilReadMaster  => axilReadMasters(0),
+         axilReadSlave   => axilReadSlaves(0),
+         axilWriteMaster => axilWriteMasters(0),
+         axilWriteSlave  => axilWriteSlaves(0),
+         -- AXIS Interfaces
+         sAxisMasters(0) => trigMaster,
+         sAxisMasters(1) => sifClMaster,
+         sAxisSlaves(0)  => trigSlave,
+         sAxisSlaves(1)  => sifClSlave,
+         mAxisMaster     => eventMaster,
+         mAxisSlave      => eventSlave);
+
+   -------------------------------------
+   -- Burst Fifo before interleaving MUX
+   -------------------------------------
+   U_FIFO : entity work.AxiStreamFifoV2
+      generic map (
+         -- General Configurations
+         TPD_G               => TPD_G,
+         INT_PIPE_STAGES_G   => 1,
+         PIPE_STAGES_G       => 1,
+         SLAVE_READY_EN_G    => true,
+         VALID_THOLD_G       => 128,  -- Hold until enough to burst into the interleaving MUX
+         VALID_BURST_MODE_G  => true,
+         -- FIFO configurations
+         BRAM_EN_G           => true,
+         GEN_SYNC_FIFO_G     => true,
+         FIFO_ADDR_WIDTH_G   => 9,
+         -- AXI Stream Port Configurations
+         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_C,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_C)
+      port map (
+         -- Slave Port
+         sAxisClk    => axilClk,
+         sAxisRst    => axilRst,
+         sAxisMaster => eventMaster,
+         sAxisSlave  => eventSlave,
+         -- Master Port
+         mAxisClk    => axilClk,
+         mAxisRst    => axilRst,
+         mAxisMaster => txMaster,
+         mAxisSlave  => txSlave);
+
+   -----------------
+   -- AXI Stream MUX
+   -----------------
+   U_Mux : entity work.AxiStreamMux
+      generic map (
+         TPD_G                => TPD_G,
+         NUM_SLAVES_G         => 4,
+         ILEAVE_EN_G          => true,
+         ILEAVE_ON_NOTVALID_G => false,
+         ILEAVE_REARB_G       => 128,
+         PIPE_STAGES_G        => 1)
+      port map (
+         -- Clock and reset
+         axisClk         => axilClk,
+         axisRst         => axilRst,
+         -- Inbound Master Ports
+         sAxisMasters(0) => pgpObMasters(0),
+         sAxisMasters(1) => txMaster,
+         sAxisMasters(2) => pgpObMasters(2),
+         sAxisMasters(3) => pgpObMasters(3),
+         -- Inbound Slave Ports
+         sAxisSlaves(0)  => pgpObSlaves(0),
+         sAxisSlaves(1)  => txSlave,
+         sAxisSlaves(2)  => pgpObSlaves(2),
+         sAxisSlaves(3)  => pgpObSlaves(3),
+         -- Outbound Port
+         mAxisMaster     => appObMaster,
+         mAxisSlave      => appObSlave);
+
+   -----------------------
+   -- App to DMA ASYNC FIFO
+   -----------------------
+   U_APP_to_DMA : entity work.AxiStreamFifoV2
+      generic map (
+         -- General Configurations
+         TPD_G               => TPD_G,
+         INT_PIPE_STAGES_G   => 1,
+         PIPE_STAGES_G       => 0,
+         SLAVE_READY_EN_G    => true,
+         VALID_THOLD_G       => 1,
+         -- FIFO configurations
+         BRAM_EN_G           => true,
+         GEN_SYNC_FIFO_G     => false,
+         FIFO_ADDR_WIDTH_G   => 9,
+         -- AXI Stream Port Configurations
+         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_C,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_C)
+      port map (
+         -- Slave Port
+         sAxisClk    => axilClk,
+         sAxisRst    => axilRst,
+         sAxisMaster => appObMaster,
+         sAxisSlave  => appObSlave,
+         -- Master Port
+         mAxisClk    => dmaClk,
+         mAxisRst    => dmaRst,
+         mAxisMaster => dmaIbMaster,
+         mAxisSlave  => dmaIbSlave);
+
+end mapping;
