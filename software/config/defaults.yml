@@ -5,7 +5,7 @@ ClinkDev:
     ClinkTop:
     ###################
       ###################
-      ChannelA:
+      Channel[:]:
         LinkMode: Base 
         DataMode: 12Bit
         FrameMode: Frame
@@ -15,7 +15,7 @@ ClinkDev:
         BaudRate: 57600 # units of bps
         SerThrottle: 10000 # (10ms x 1us throttle rate) = 10000
         SwControlValue: 0x0
-        SwControlEn: 0x0
+        SwControlEn: 0x0     
     ###################
     UartOpal000[:]: # OPAL 1000 UART interface
       OR: '12'     # Output resolution, i.e. bits per pixel.  Set to 12. (value from Bruce Hill)

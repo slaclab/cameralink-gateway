@@ -14,8 +14,8 @@
 source -quiet $::env(RUCKUS_DIR)/vivado_env_var.tcl
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
-# Bypass the debug chipscope generation
-return
+# # Bypass the debug chipscope generation
+# return
 
 ############################
 ## Open the synthesis design
@@ -35,38 +35,42 @@ CreateDebugCore ${ilaName}
 #######################
 ## Set the record depth
 #######################
-set_property C_DATA_DEPTH 8192 [get_debug_cores ${ilaName}]
-# set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
+set_property C_DATA_DEPTH 1024 [get_debug_cores ${ilaName}]
 
 #################################
 ## Set the clock for the ILA core
 #################################
-SetDebugCoreClk ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/clinkClk}
-# SetDebugCoreClk ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/sysClk}
+SetDebugCoreClk ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/sysClk}
 
 #######################
 ## Set the debug Probes
 #######################
 
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/rstFsm}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/chanConfig[dataMode][*]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/chanConfig[frameMode][*]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/chanConfig[linkMode][*]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/chanConfig[tapCount][*]}
 
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/parValid}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/parClock[*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/parReady}
-
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[state][*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[delayLd]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[bitSlip]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[count][*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[delay][*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[lastClk][*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[status][delay][*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[status][shiftCnt][*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/r[status][locked]}
-
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/linkStatus[locked]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/linkStatus[delay][*]}
-ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Cbl0Half1/linkStatus[shiftCnt][*]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[master][tUser][72]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[master][tUser][73]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/intCtrl[overflow]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/intCtrl[pause]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/packMaster[tLast]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/packMaster[tValid]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/parReady}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[byteData][dv]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[byteData][fv]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[byteData][lv]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[byteData][valid]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[dump]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[inFrame]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[master][tLast]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[master][tValid]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[portData][dv]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[portData][fv]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[portData][lv]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[portData][valid]}
+ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[ready]}
 
 ##########################
 ## Write the port map file
