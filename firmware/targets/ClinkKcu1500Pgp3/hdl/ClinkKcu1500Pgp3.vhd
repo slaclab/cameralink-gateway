@@ -28,10 +28,10 @@ use unisim.vcomponents.all;
 
 entity ClinkKcu1500Pgp3 is
    generic (
-      TPD_G                : time                     := 1 ns;
-      ROGUE_SIM_EN_G       : boolean                  := false;
-      ROGUE_SIM_PORT_NUM_G : natural range 0 to 65535 := 1;
-      BUILD_INFO_G         : BuildInfoType);
+      TPD_G          : time    := 1 ns;
+      ROGUE_SIM_EN_G : boolean := false;
+      PGP_TYPE_G     : boolean := true;  -- True: PGPv3@10.3125Gb/s
+      BUILD_INFO_G   : BuildInfoType);
    port (
       ---------------------
       --  Application Ports
@@ -172,8 +172,7 @@ begin
       generic map (
          TPD_G                => TPD_G,
          ROGUE_SIM_EN_G       => ROGUE_SIM_EN_G,
-         ROGUE_SIM_PORT_NUM_G => ROGUE_SIM_PORT_NUM_G,
-         ROGUE_SIM_CH_COUNT_G => 4, -- 4 Virtual Channels per DMA lane
+         ROGUE_SIM_CH_COUNT_G => 4,     -- 4 Virtual Channels per DMA lane
          BUILD_INFO_G         => BUILD_INFO_G,
          DMA_AXIS_CONFIG_G    => DMA_AXIS_CONFIG_C,
          DMA_SIZE_G           => 4)
@@ -310,8 +309,8 @@ begin
    U_Hardware : entity work.Hardware
       generic map (
          TPD_G             => TPD_G,
-         SIMULATION_G      => ROGUE_SIM_EN_G,
-         PGP_TYPE_G        => true,     -- True: PGPv3@10.3125Gb/s
+         ROGUE_SIM_EN_G    => ROGUE_SIM_EN_G,
+         PGP_TYPE_G        => PGP_TYPE_G,
          DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
          AXIL_CLK_FREQ_G   => AXIL_CLK_FREQ_C,
          AXI_BASE_ADDR_G   => AXIL_CONFIG_C(HW_INDEX_C).baseAddr)

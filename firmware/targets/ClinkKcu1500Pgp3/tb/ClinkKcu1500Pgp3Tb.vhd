@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- File       : ClinkKcu1500Pgp2bTb.vhd
+-- File       : ClinkKcu1500Pgp3Tb.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
 -- Description: Simulation Testbed for testing the FPGA module
@@ -21,9 +21,9 @@ use ieee.std_logic_arith.all;
 use work.StdRtlPkg.all;
 use work.BuildInfoPkg.all;
 
-entity ClinkKcu1500Pgp2bTb is end ClinkKcu1500Pgp2bTb;
+entity ClinkKcu1500Pgp3Tb is end ClinkKcu1500Pgp3Tb;
 
-architecture testbed of ClinkKcu1500Pgp2bTb is
+architecture testbed of ClinkKcu1500Pgp3Tb is
 
    constant TPD_G : time := 1 ns;
 
@@ -41,7 +41,7 @@ begin
          clkP => userClkP,
          clkN => userClkN);
 
-   U_Fpga : entity work.ClinkKcu1500Pgp2b
+   U_Fpga : entity work.ClinkKcu1500Pgp3
       generic map (
          TPD_G          => TPD_G,
          ROGUE_SIM_EN_G => true,

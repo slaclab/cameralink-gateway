@@ -129,7 +129,7 @@ $ source setup_env_template.sh
 
 2) Run the FEB firmware update script:
 ```
-$ python3 scripts/updateFeb --lane <PGP_LANE> --mcs <PATH_TO_MCS>
+$ python scripts/updateFeb --lane <PGP_LANE> --mcs <PATH_TO_MCS>
 ```
 where <PGP_LANE> is the PGP lane index (range from 0 to 3)
 and <PATH_TO_MCS> is the path to the firmware .MCS file
@@ -147,7 +147,7 @@ $ source setup_env_template.sh
 
 2) Run the FEB firmware update script:
 ```
-$ python3 scripts/updateKcu1500.py --path <PATH_TO_IMAGE_DIR>
+$ python scripts/updateKcu1500.py --path <PATH_TO_IMAGE_DIR>
 ```
 where <PATH_TO_IMAGE_DIR> is path to image directory (example: ../firmware/targets/ClinkKcu1500Pgp2b/images/)
 
@@ -168,7 +168,7 @@ $ source setup_env_template.sh
 
 2) Lauch the GUI:
 ```
-$ python3 scripts/gui.py
+$ python scripts/gui.py
 ```
 
 <!--- ######################################################## -->

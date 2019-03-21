@@ -55,6 +55,14 @@ parser.add_argument(
     help     = "Enable read all variables at start",
 )  
 
+parser.add_argument(
+    "--numLane", 
+    type     = int,
+    required = False,
+    default  = 4,
+    help     = "PGP lane index (range from 1 to 4)",
+)  
+
 # Get the arguments
 args = parser.parse_args()
 
@@ -65,6 +73,7 @@ cl = ClinkDev.ClinkDev(
     version3 = args.version3,
     pollEn   = args.pollEn,
     initRead = args.initRead,
+    numLane  = args.numLane,
 )
 
 #################################################################
