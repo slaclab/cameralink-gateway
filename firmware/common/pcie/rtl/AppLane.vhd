@@ -180,7 +180,7 @@ begin
          -- Clock and Reset
          axisClk         => axilClk,
          axisRst         => axilRst,
-         -- AXI-Lite Interface (axilClk domain)
+         -- AXI-Lite Interface (axisClk domain)
          axilReadMaster  => axilReadMasters(0),
          axilReadSlave   => axilReadSlaves(0),
          axilWriteMaster => axilWriteMasters(0),

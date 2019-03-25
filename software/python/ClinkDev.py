@@ -105,15 +105,13 @@ class ClinkDev(kcu1500.Core):
                          
                 # CameraLink Feb Board
                 self.add(feb.ClinkFeb(      
-                    name        = (f'ClinkFeb[{lane}]'), 
-                    memBase     = self._srp[lane], 
-                    serialA     = self._dma[lane][2],
-                    serialB     = self._dma[lane][3],
-                    camTypeA    = 'Opal000', # Assuming OPA 1000 camera
-                    camTypeB    = 'Opal000', # Assuming OPA 1000 camera
-                    version3    = version3,
-                    enableDeps  = [self.Hardware.PgpMon[lane].RxRemLinkReady], # Only allow access if the PGP link is established
-                    expand      = False,
+                    name       = (f'ClinkFeb[{lane}]'), 
+                    memBase    = self._srp[lane], 
+                    serial     = [self._dma[lane][2],self._dma[lane][3]],
+                    camType    = ['Opal000','Opal000'],
+                    version3   = version3,
+                    enableDeps = [self.Hardware.PgpMon[lane].RxRemLinkReady], # Only allow access if the PGP link is established
+                    expand     = False,
                 ))         
                 
         # Else doing Rogue VCS simulation
@@ -139,8 +137,8 @@ class ClinkDev(kcu1500.Core):
                 
         # Start the system
         self.start(
-            pollEn   = pollEn,
-            initRead = initRead,
+            pollEn   = self._pollEn,
+            initRead = self._initRead,
             timeout  = self._timeout,
         )
         
