@@ -1,7 +1,7 @@
 export INCLUDE_PGP3_10G = 0
 
 # Define Firmware Version Number
-export PRJ_VERSION = 0x00000025
+export PRJ_VERSION = 0x00000026
 
 # Define target output
 target: prom
