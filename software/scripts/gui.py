@@ -66,8 +66,7 @@ parser.add_argument(
 parser.add_argument(
     "--camTypeA", 
     type     = str,
-    required = False,
-    default  = 'Opal000',
+    required = True,
     help     = "Sets the camera type on Feb.ClinkTop.ch[0] Interfaces",
 ) 
 
@@ -102,7 +101,7 @@ cl = ClinkDev.ClinkDev(
 appTop = pyrogue.gui.application(sys.argv)
 guiTop = pyrogue.gui.GuiTop(group='ClinkDev')
 guiTop.addTree(cl)
-guiTop.resize(800, 1200)
+guiTop.resize(800, 1000)
 
 # Run gui
 appTop.exec_()

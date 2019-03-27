@@ -12,9 +12,11 @@ import pyrogue as pr
 
 import rogue.protocols
 
-import XilinxKcu1500Pgp as kcu1500
-import ClinkFeb         as feb
-import Application      as app
+import XilinxKcu1500Pgp       as kcu1500
+import ClinkFeb               as feb
+import Application            as app
+import surf.protocols.clink   as cl
+import surf.protocols.batcher as batcher
 
 import rogue.interfaces.stream
 
@@ -128,7 +130,31 @@ class ClinkDev(kcu1500.Core):
             self.Hardware.enable.set(False)
             self.Hardware.hidden = True
             # Bypass the time AXIS channel
-            eventDev = self.find(typ=axi.AxiStreamBatcherEventBuilder)
+            eventDev = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
             for dev in eventDev:
                 dev.Bypass.set(0x1)          
-        
+        else:
+            # Read all the variables
+            self.ReadAll()
+            
+            # Startup procedures for OPA1000
+            uartDev = self.find(typ=cl.UartOpal000)
+            for dev in uartDev:
+                pass
+                
+            # Startup procedures for Piranha4
+            uartDev = self.find(typ=cl.UartPiranha4)
+            for dev in uartDev:
+                dev.SendEscape()
+                dev.SPF.setDisp('0')  
+                dev.GCP()
+
+            # Startup procedures for Up900cl12b
+            uartDev = self.find(typ=cl.UartUp900cl12b)
+            for dev in uartDev:
+                clCh = self.find(typ=cl.ClinkChannel)
+                for clChDev in clCh:
+                    clChDev.SerThrottle.set(30000)
+                dev.AM()
+                dev.SM.set('f')
+                dev.RP()

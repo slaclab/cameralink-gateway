@@ -168,7 +168,8 @@ $ source setup_env_template.sh
 
 2) Lauch the GUI:
 ```
-$ python scripts/gui.py
+$ python scripts/gui.py --camTypeA TYPE_A
+where <TYPE_A> is the camera type on ch[0] of the FEB (example: --camTypeA Opal000)
 ```
 
 <!--- ######################################################## -->

@@ -4,6 +4,7 @@ ClinkDev:
     ###################
     ClinkTop:
     ###################
+      PllConfig[:]: '25MHz'
       ###################
       Ch[0]:
         LinkMode: Base 
@@ -13,48 +14,19 @@ ClinkDev:
         DataEn: True
         Blowoff: False
         BaudRate: 9600 # units of bps
-        SerThrottle: 10000 # (10ms x 1us throttle rate) = 10000
+        SerThrottle: 30000 # (30ms x 1us throttle rate) = 10000
         SwControlValue: 0x0
         SwControlEn: 0x0     
         ###################
         UartUp900cl12b: # UP-900CL-12B
-          RU: ''
-          SM: ''
-          SP: ''
-          GI: ''
-          GD: ''
-          GN: ''
-          BI: ''
-          BD: ''
-          BN: ''
-    ###################          
-      Pll[:]: # 25 MHz CLink Clock Configuration
-        POWER: 0xffff         
-        HIGH_TIME_FB: 0x15
-        LOW_TIME_FB: 0x15
-        HIGH_TIME[0]: 0x15
-        LOW_TIME[0]: 0x15
-        HIGH_TIME[1]: 0x3
-        LOW_TIME[1]: 0x3
-        LockReg[0]: 0xfa
-        LockReg[1]: 0x7c01
-        LockReg[2]: 0xffe9
-        FiltReg[0]: 0x808
-        FiltReg[1]: 0x8000
+          SM: 'f'   
     ###################
     TrigCtrl[0]:
       EnableTrig: True
-      InvCC: False
+      InvCC: True # Active LOW Pulse
       TrigMap: ChA
-      TrigPulseWidth: 0xfff
-      TrigMask: 0x1
-    ###################
-    TrigCtrl[1]:
-      EnableTrig: True
-      InvCC: False
-      TrigMap: ChB
-      TrigPulseWidth: 0xfff
-      TrigMask: 0x1
+      TrigPulseWidth: 100.0 # units of us
+      TrigMask: 0x2 # CC2 trigger
     ###################
     BoardTemp:
       RemoteTcritSetpoint: 100 # Prevent FEB from thermal shutdown until FPGA Tj = 100 degC (max. operating temp)
