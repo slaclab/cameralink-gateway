@@ -5,7 +5,7 @@ ClinkDev:
     ClinkTop:
     ###################
       ###################
-      Ch[:]:
+      Ch[0]:
         LinkMode: Base 
         DataMode: 12Bit
         FrameMode: Frame
@@ -34,6 +34,20 @@ ClinkDev:
           MI: '0'      # Set MI to default value of 0
           TP: '0'      # Set TP to default value of 0
           BL: '20'     # Set BL to default value of 20
+    ###################          
+      Pll[:]: # 85 MHz CLink Clock Configuration
+        POWER: 0xffff           
+        HIGH_TIME_FB: 0x7
+        LOW_TIME_FB: 0x7
+        HIGH_TIME[0]: 0x7
+        LOW_TIME[0]: 0x7
+        HIGH_TIME[1]: 0x1
+        LOW_TIME[1]: 0x1
+        LockReg[0]: 0x2bc
+        LockReg[1]: 0x7c01
+        LockReg[2]: 0xffe9
+        FiltReg[0]: 0x9908
+        FiltReg[1]: 0x8100         
     ###################
     TrigCtrl[0]:
       EnableTrig: True
@@ -69,7 +83,9 @@ ClinkDev:
         ###################
         Ch[:]: # [:] is a wildcard for all devices
           EnableReg: True
-          RateSel: 0x1028
+          RateSel: 0x1028 # LCLS-I @ 120 Hz
+          # RateSel: 0x102B # LCLS-I @ 10 Hz
+          # RateSel: 0x0 # No triggering
           DestSel: 0x20000
         ###################
         LocalTrig[:]: # [:] is a wildcard for all devices

@@ -1,0 +1,116 @@
+ClinkDev:
+  #########################################################################################################
+  ClinkFeb[:]:
+    ###################
+    ClinkTop:
+    ###################
+      ###################
+      Ch[0]:
+        LinkMode: Base 
+        DataMode: 12Bit
+        FrameMode: Frame
+        TapCount: 2
+        DataEn: True
+        Blowoff: False
+        BaudRate: 9600 # units of bps
+        SerThrottle: 10000 # (10ms x 1us throttle rate) = 10000
+        SwControlValue: 0x0
+        SwControlEn: 0x0     
+        ###################
+        UartUp900cl12b: # UP-900CL-12B
+          RU: ''
+          SM: ''
+          SP: ''
+          GI: ''
+          GD: ''
+          GN: ''
+          BI: ''
+          BD: ''
+          BN: ''
+    ###################          
+      Pll[:]: # 25 MHz CLink Clock Configuration
+        POWER: 0xffff         
+        HIGH_TIME_FB: 0x15
+        LOW_TIME_FB: 0x15
+        HIGH_TIME[0]: 0x15
+        LOW_TIME[0]: 0x15
+        HIGH_TIME[1]: 0x3
+        LOW_TIME[1]: 0x3
+        LockReg[0]: 0xfa
+        LockReg[1]: 0x7c01
+        LockReg[2]: 0xffe9
+        FiltReg[0]: 0x808
+        FiltReg[1]: 0x8000
+    ###################
+    TrigCtrl[0]:
+      EnableTrig: True
+      InvCC: False
+      TrigMap: ChA
+      TrigPulseWidth: 0xfff
+      TrigMask: 0x1
+    ###################
+    TrigCtrl[1]:
+      EnableTrig: True
+      InvCC: False
+      TrigMap: ChB
+      TrigPulseWidth: 0xfff
+      TrigMask: 0x1
+    ###################
+    BoardTemp:
+      RemoteTcritSetpoint: 100 # Prevent FEB from thermal shutdown until FPGA Tj = 100 degC (max. operating temp)
+  #########################################################################################################
+  Application:
+    AppLane[0:4]: # Apply the configurations to 0 through 3
+      EventBuilder:
+        Timeout: 625000 # (156.25 MHz) x 4 ms = 625000
+  #########################################################################################################
+  Hardware:
+    Timing:
+      ###################
+      TimingDbgMon:
+        Loopback: 0x0
+        # UseMiniTpg: False
+        UseMiniTpg: True # True for standalone testing
+      ###################
+      Triggering: # https://confluence.slac.stanford.edu/download/attachments/216713616/ConfigEvrV2CoreTriggersYaml.pdf
+        ###################
+        Ch[:]: # [:] is a wildcard for all devices
+          EnableReg: True
+          # RateSel: 0x1028 # LCLS-I @ 120 Hz
+          RateSel: 0x102B # LCLS-I @ 10 Hz
+          # RateSel: 0x0 # No triggering
+          DestSel: 0x20000
+        ###################
+        LocalTrig[:]: # [:] is a wildcard for all devices
+          EnableTrig: True
+          Polarity: Rising
+          Delay: 625000 # (156.25 MHz) x 4 ms = 625000
+          Width: 0x1 # 0x1 = one cycle pulse
+        LocalTrig[0]:
+          Source: 0x0 # CH0
+        LocalTrig[1]:
+          Source: 0x1 # CH1
+        LocalTrig[2]:
+          Source: 0x2 # CH2
+        LocalTrig[3]:
+          Source: 0x3 # CH3  
+        ###################
+        RemoteTrig[:]: # [:] is a wildcard for all devices
+          EnableTrig: True
+          Polarity: Rising
+          Delay: 0x0 # zero for low latency fiber trigger
+          Width: 0x1 # 0x1 = one cycle pulse
+        RemoteTrig[0]:
+          Source: 0x0 # CH0
+        RemoteTrig[1]:
+          Source: 0x1 # CH1
+        RemoteTrig[2]:
+          Source: 0x2 # CH2
+        RemoteTrig[3]:
+          Source: 0x3 # CH3            
+      ###################
+      TimingFrameRx:
+        ClkSel: 0x0 # 0x0 = LCLS-I timing
+        RxDown: 0x0 # Reset the latching register
+      ###################
+      

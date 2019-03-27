@@ -63,6 +63,22 @@ parser.add_argument(
     help     = "PGP lane index (range from 1 to 4)",
 )  
 
+parser.add_argument(
+    "--camTypeA", 
+    type     = str,
+    required = False,
+    default  = 'Opal000',
+    help     = "Sets the camera type on Feb.ClinkTop.ch[0] Interfaces",
+) 
+
+parser.add_argument(
+    "--camTypeB", 
+    type     = str,
+    required = False,
+    default  = None,
+    help     = "Sets the camera type on Feb.ClinkTop.ch[1] Interfaces",
+) 
+
 # Get the arguments
 args = parser.parse_args()
 
@@ -74,6 +90,7 @@ cl = ClinkDev.ClinkDev(
     pollEn   = args.pollEn,
     initRead = args.initRead,
     numLane  = args.numLane,
+    camType  = [args.camTypeA,args.camTypeB],
 )
 
 #################################################################
