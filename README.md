@@ -101,7 +101,7 @@ $ make
 $ sudo /sbin/insmod ./datadev.ko cfgSize=0x50000 cfgRxCount=256 cfgTxCount=16
 
 # Give appropriate group/permissions
-$ sudo chmod 666 /dev/data_dev*
+$ sudo chmod 666 /dev/datadev*
 
 # Check for the loaded device
 $ cat /proc/data_dev0
