@@ -68,8 +68,7 @@ class ClinkDev(kcu1500.Core):
         )
         
         # Set the min. firmware Versions
-        # self.minPcieVersion = 0x01000200
-        self.minPcieVersion = 0x0
+        self.minPcieVersion = 0x01000200
         self.minFebVersion  = 0x01000200
         
         # PGP Application on PCIe 
