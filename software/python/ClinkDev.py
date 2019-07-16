@@ -162,7 +162,7 @@ class ClinkDev(kcu1500.Core):
                     if (fwVersion < self.minFebVersion):
                         errMsg = f"""
                             Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} < {self.minFebVersion:#04x}
-                            Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/ReprogramFpga.py
+                            Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/updateFeb.py
                             """
                         click.secho(errMsg, bg='red')
                         raise ValueError(errMsg)
