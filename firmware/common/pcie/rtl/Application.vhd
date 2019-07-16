@@ -48,23 +48,10 @@ entity Application is
       dmaIbMasters    : out AxiStreamMasterArray(3 downto 0);
       dmaIbSlaves     : in  AxiStreamSlaveArray(3 downto 0);
       dmaObMasters    : in  AxiStreamMasterArray(3 downto 0);
-      dmaObSlaves     : out AxiStreamSlaveArray(3 downto 0);
-      -- DDR MEM Interface (ddrClk domain)
-      ddrClk          : in  sl;
-      ddrRst          : in  sl;
-      ddrWriteMaster  : out AxiWriteMasterType;
-      ddrWriteSlave   : in  AxiWriteSlaveType;
-      ddrReadMaster   : out AxiReadMasterType;
-      ddrReadSlave    : in  AxiReadSlaveType);
+      dmaObSlaves     : out AxiStreamSlaveArray(3 downto 0));
 end Application;
 
 architecture mapping of Application is
-
-   constant AXI_OFFSET_C : Slv64Array(3 downto 0) := (
-      0 => x"0000_0000_0000_0000",
-      1 => x"0000_0000_4000_0000",
-      2 => x"0000_0000_8000_0000",
-      3 => x"0000_0000_C000_0000");
 
    constant NUM_AXIL_MASTERS_C : positive := 4;
 
@@ -74,12 +61,6 @@ architecture mapping of Application is
    signal axilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0);
    signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
    signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0);
-
-   signal axiWriteMasters : AxiWriteMasterArray(7 downto 0);
-   signal axiWriteSlaves  : AxiWriteSlaveArray(7 downto 0);
-   signal axiReadMasters  : AxiReadMasterArray(7 downto 0);
-   signal axiReadSlaves   : AxiReadSlaveArray(7 downto 0);
-
 
 begin
 
@@ -103,30 +84,6 @@ begin
          mAxiWriteSlaves     => axilWriteSlaves,
          mAxiReadMasters     => axilReadMasters,
          mAxiReadSlaves      => axilReadSlaves);
-
-   ---------------
-   -- AXI Crossbar
-   ---------------
-   BUILD_SIF : if (BUILD_SIF_C = true) generate
-      U_AXI_XBAR : entity work.DdrAxiXbar
-         generic map (
-            TPD_G => TPD_G)
-         port map (
-            -- Slave Interfaces
-            sAxiClk          => axilClk,
-            sAxiRst          => axilRst,
-            sAxiWriteMasters => axiWriteMasters,
-            sAxiWriteSlaves  => axiWriteSlaves,
-            sAxiReadMasters  => axiReadMasters,
-            sAxiReadSlaves   => axiReadSlaves,
-            -- Master Interface
-            mAxiClk          => ddrClk,
-            mAxiRst          => ddrRst,
-            mAxiWriteMaster  => ddrWriteMaster,
-            mAxiWriteSlave   => ddrWriteSlave,
-            mAxiReadMaster   => ddrReadMaster,
-            mAxiReadSlave    => ddrReadSlave);
-   end generate;
 
    -------------------
    -- Application Lane
@@ -159,13 +116,7 @@ begin
             dmaIbMaster     => dmaIbMasters(i),
             dmaIbSlave      => dmaIbSlaves(i),
             dmaObMaster     => dmaObMasters(i),
-            dmaObSlave      => dmaObSlaves(i),
-            -- AXI MEM Interface (axilClk domain)
-            axiOffset       => AXI_OFFSET_C(i),
-            axiWriteMasters => axiWriteMasters(2*i+1 downto 2*i),
-            axiWriteSlaves  => axiWriteSlaves(2*i+1 downto 2*i),
-            axiReadMasters  => axiReadMasters(2*i+1 downto 2*i),
-            axiReadSlaves   => axiReadSlaves(2*i+1 downto 2*i));
+            dmaObSlave      => dmaObSlaves(i));
    end generate GEN_VEC;
 
 end mapping;

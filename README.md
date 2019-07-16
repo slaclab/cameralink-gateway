@@ -101,10 +101,10 @@ $ make
 $ sudo /sbin/insmod ./datadev.ko cfgSize=0x50000 cfgRxCount=256 cfgTxCount=16
 
 # Give appropriate group/permissions
-$ sudo chmod 666 /dev/data_dev*
+$ sudo chmod 666 /dev/datadev*
 
 # Check for the loaded device
-$ cat /proc/data_dev0
+$ cat /proc/datadev0
 
 ```
 Note: There is a bug (we think in the PCIe IP core) that bricks the DMA when using `rmmod` to unload the driver.
@@ -142,7 +142,7 @@ and <PATH_TO_MCS> is the path to the firmware .MCS file
 1) Setup the rogue environment
 ```
 $ cd cameralink-gateway/software
-$ source setup_env_template.sh
+$ source setup_env_slac.sh
 ```
 
 2) Run the PCIe firmware update script:
@@ -163,13 +163,13 @@ sudo reboot
 1) Setup the rogue environment
 ```
 $ cd cameralink-gateway/software
-$ source setup_env_template.sh
+$ source setup_env_slac.sh
 ```
 
 2) Lauch the GUI:
 ```
 $ python scripts/gui.py --camTypeA TYPE_A
-where <TYPE_A> is the camera type on ch[0] of the FEB (example: --camTypeA Opal000)
+where <TYPE_A> is the camera type on ch[0] of the FEB (example: --camTypeA Opal1000)
 ```
 
 <!--- ######################################################## -->

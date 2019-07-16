@@ -48,18 +48,12 @@ entity AppLane is
       dmaIbMaster     : out AxiStreamMasterType;
       dmaIbSlave      : in  AxiStreamSlaveType;
       dmaObMaster     : in  AxiStreamMasterType;
-      dmaObSlave      : out AxiStreamSlaveType;
-      -- AXI MEM Interface (axilClk domain)
-      axiOffset       : in  slv(63 downto 0);
-      axiWriteMasters : out AxiWriteMasterArray(1 downto 0);
-      axiWriteSlaves  : in  AxiWriteSlaveArray(1 downto 0);
-      axiReadMasters  : out AxiReadMasterArray(1 downto 0);
-      axiReadSlaves   : in  AxiReadSlaveArray(1 downto 0));
+      dmaObSlave      : out AxiStreamSlaveType);
 end AppLane;
 
 architecture mapping of AppLane is
 
-   constant NUM_AXIL_MASTERS_C : positive := 2;
+   constant NUM_AXIL_MASTERS_C : positive := 1;
 
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 20, 16);
 
@@ -112,61 +106,26 @@ begin
          mAxisMaster => pgpIbMaster,
          mAxisSlave  => pgpIbSlave);
 
-   --------------------
-   -- AXI-Lite Crossbar
-   --------------------
-   U_AXIL_XBAR : entity work.AxiLiteCrossbar
-      generic map (
-         TPD_G              => TPD_G,
-         NUM_SLAVE_SLOTS_G  => 1,
-         NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
-         MASTERS_CONFIG_G   => AXIL_CONFIG_C)
-      port map (
-         axiClk              => axilClk,
-         axiClkRst           => axilRst,
-         sAxiWriteMasters(0) => axilWriteMaster,
-         sAxiWriteSlaves(0)  => axilWriteSlave,
-         sAxiReadMasters(0)  => axilReadMaster,
-         sAxiReadSlaves(0)   => axilReadSlave,
-         mAxiWriteMasters    => axilWriteMasters,
-         mAxiWriteSlaves     => axilWriteSlaves,
-         mAxiReadMasters     => axilReadMasters,
-         mAxiReadSlaves      => axilReadSlaves);
-
-   ----------------------------------
-   -- Standard Image Formatter Module
-   ----------------------------------
-   BUILD_SIF : if (BUILD_SIF_C = true) generate
-      U_SIF : entity work.StandardImageFormatter
-         generic map (
-            TPD_G            => TPD_G,
-            AXI_ADDR_WIDTH_C => 30,     -- 2^30 = 1GB buffer
-            AXIS_CONFIG_G    => DMA_AXIS_CONFIG_C,
-            AXIL_BASE_ADDR_G => AXI_BASE_ADDR_G)
-         port map (
-            -- AXI-Lite Interface (axilClk domain)
-            axilClk         => axilClk,
-            axilRst         => axilRst,
-            axilReadMaster  => axilReadMasters(1),
-            axilReadSlave   => axilReadSlaves(1),
-            axilWriteMaster => axilWriteMasters(1),
-            axilWriteSlave  => axilWriteSlaves(1),
-            -- AXI Stream Interface (axilClk domain)
-            sAxisMaster     => pgpObMasters(1),
-            sAxisSlave      => pgpObSlaves(1),
-            mAxisMaster     => sifClMaster,
-            mAxisSlave      => sifClSlave,
-            -- AXI MEM Interface (axilClk domain)
-            axiOffset       => axiOffset,
-            axiWriteMasters => axiWriteMasters,
-            axiWriteSlaves  => axiWriteSlaves,
-            axiReadMasters  => axiReadMasters,
-            axiReadSlaves   => axiReadSlaves);
-   end generate;
-   BYP_SIF : if (BUILD_SIF_C = false) generate
-      sifClMaster    <= pgpObMasters(1);
-      pgpObSlaves(1) <= sifClSlave;
-   end generate;
+   -- --------------------
+   -- -- AXI-Lite Crossbar
+   -- --------------------
+   -- U_AXIL_XBAR : entity work.AxiLiteCrossbar
+      -- generic map (
+         -- TPD_G              => TPD_G,
+         -- NUM_SLAVE_SLOTS_G  => 1,
+         -- NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
+         -- MASTERS_CONFIG_G   => AXIL_CONFIG_C)
+      -- port map (
+         -- axiClk              => axilClk,
+         -- axiClkRst           => axilRst,
+         -- sAxiWriteMasters(0) => axilWriteMaster,
+         -- sAxiWriteSlaves(0)  => axilWriteSlave,
+         -- sAxiReadMasters(0)  => axilReadMaster,
+         -- sAxiReadSlaves(0)   => axilReadSlave,
+         -- mAxiWriteMasters    => axilWriteMasters,
+         -- mAxiWriteSlaves     => axilWriteSlaves,
+         -- mAxiReadMasters     => axilReadMasters,
+         -- mAxiReadSlaves      => axilReadSlaves);
 
    ----------------------------------
    -- Event Builder
@@ -180,16 +139,23 @@ begin
          -- Clock and Reset
          axisClk         => axilClk,
          axisRst         => axilRst,
+         
          -- AXI-Lite Interface (axisClk domain)
-         axilReadMaster  => axilReadMasters(0),
-         axilReadSlave   => axilReadSlaves(0),
-         axilWriteMaster => axilWriteMasters(0),
-         axilWriteSlave  => axilWriteSlaves(0),
+         axilReadMaster  => axilReadMaster,
+         axilReadSlave   => axilReadSlave,
+         axilWriteMaster => axilWriteMaster,
+         axilWriteSlave  => axilWriteSlave,
+         
+         -- axilReadMaster  => axilReadMasters(0),
+         -- axilReadSlave   => axilReadSlaves(0),
+         -- axilWriteMaster => axilWriteMasters(0),
+         -- axilWriteSlave  => axilWriteSlaves(0),         
+         
          -- AXIS Interfaces
          sAxisMasters(0) => trigMaster,
-         sAxisMasters(1) => sifClMaster,
+         sAxisMasters(1) => pgpObMasters(1),
          sAxisSlaves(0)  => trigSlave,
-         sAxisSlaves(1)  => sifClSlave,
+         sAxisSlaves(1)  => pgpObSlaves(1),
          mAxisMaster     => eventMaster,
          mAxisSlave      => eventSlave);
 
