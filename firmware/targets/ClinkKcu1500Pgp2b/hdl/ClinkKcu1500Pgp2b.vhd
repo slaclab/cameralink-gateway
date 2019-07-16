@@ -21,7 +21,6 @@ use work.AxiPkg.all;
 use work.AxiLitePkg.all;
 use work.AxiStreamPkg.all;
 use work.AppPkg.all;
-use work.MigPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -50,11 +49,6 @@ entity ClinkKcu1500Pgp2b is
       qsfp1RxN     : in    slv(3 downto 0);
       qsfp1TxP     : out   slv(3 downto 0);
       qsfp1TxN     : out   slv(3 downto 0);
-      -- DDR Ports
-      ddrClkP      : in    slv(3 downto 3);
-      ddrClkN      : in    slv(3 downto 3);
-      ddrOut       : out   DdrOutArray(3 downto 3);
-      ddrInOut     : inout DdrInOutArray(3 downto 3);
       --------------
       --  Core Ports
       --------------
@@ -126,13 +120,6 @@ architecture top_level of ClinkKcu1500Pgp2b is
 
    signal trigMasters : AxiStreamMasterArray(3 downto 0);
    signal trigSlaves  : AxiStreamSlaveArray(3 downto 0);
-
-   signal ddrClk         : sl;
-   signal ddrRst         : sl;
-   signal ddrWriteMaster : AxiWriteMasterType;
-   signal ddrWriteSlave  : AxiWriteSlaveType;
-   signal ddrReadMaster  : AxiReadMasterType;
-   signal ddrReadSlave   : AxiReadSlaveType;
 
 begin
 
@@ -227,29 +214,6 @@ begin
          pciTxP         => pciTxP,
          pciTxN         => pciTxN);
 
-   -------------------------------------         
-   -- Memory Interface Generator IP core
-   -------------------------------------         
-   BUILD_SIF : if (BUILD_SIF_C = true) generate
-      U_Mig3 : entity work.Mig3  -- Note: Using MIG[3] because located in FPGA's SLR1 region
-         generic map (
-            TPD_G => TPD_G)
-         port map (
-            extRst         => dmaRst,
-            -- AXI MEM Interface
-            axiClk         => ddrClk,
-            axiRst         => ddrRst,
-            axiWriteMaster => ddrWriteMaster,
-            axiWriteSlave  => ddrWriteSlave,
-            axiReadMaster  => ddrReadMaster,
-            axiReadSlave   => ddrReadSlave,
-            -- DDR Ports
-            ddrClkP        => ddrClkP(3),
-            ddrClkN        => ddrClkN(3),
-            ddrOut         => ddrOut(3),
-            ddrInOut       => ddrInOut(3));
-   end generate;
-
    ---------------------
    -- AXI-Lite Crossbar
    ---------------------         
@@ -297,14 +261,7 @@ begin
          dmaObMasters    => dmaObMasters,
          dmaObSlaves     => dmaObSlaves,
          dmaIbMasters    => dmaIbMasters,
-         dmaIbSlaves     => dmaIbSlaves,
-         -- DDR MEM Interface (ddrClk domain)
-         ddrClk          => ddrClk,
-         ddrRst          => ddrRst,
-         ddrWriteMaster  => ddrWriteMaster,
-         ddrWriteSlave   => ddrWriteSlave,
-         ddrReadMaster   => ddrReadMaster,
-         ddrReadSlave    => ddrReadSlave);
+         dmaIbSlaves     => dmaIbSlaves);
 
    U_Hardware : entity work.Hardware
       generic map (
