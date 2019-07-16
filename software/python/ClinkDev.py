@@ -20,6 +20,8 @@ import surf.protocols.batcher as batcher
 
 import rogue.interfaces.stream
 
+import click
+
 class MyCustomMaster(rogue.interfaces.stream.Master):
 
     # Init method must call the parent class init
@@ -64,6 +66,11 @@ class ClinkDev(kcu1500.Core):
             numLane     = numLane, 
             **kwargs
         )
+        
+        # Set the min. firmware Versions
+        # self.minPcieVersion = 0x01000200
+        self.minPcieVersion = 0x0
+        self.minFebVersion  = 0x01000200
         
         # PGP Application on PCIe 
         self.add(app.Application(
@@ -137,8 +144,32 @@ class ClinkDev(kcu1500.Core):
             # Read all the variables
             self.ReadAll()
             
+            # Check for min. PCIe FW version
+            fwVersion = self.Hardware.AxiPcieCore.AxiVersion.FpgaVersion.get()
+            if (fwVersion < self.minPcieVersion):
+                errMsg = f"""
+                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} < {self.minPcieVersion:#04x}
+                    Please update PCIe firmware using software/scripts/updatePcieFpga.py
+                    """
+                click.secho(errMsg, bg='red')
+                raise ValueError(errMsg)            
+                
+            # Check for min. FEB FW version
+            for lane in range(numLane):
+                # Check for PGP link up
+                if (self.Hardware.PgpMon[lane].RxRemLinkReady.get() != 0):
+                    # Check for min. FW version
+                    fwVersion = self.ClinkFeb[lane].AxiVersion.FpgaVersion.get()
+                    if (fwVersion < self.minFebVersion):
+                        errMsg = f"""
+                            Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} < {self.minFebVersion:#04x}
+                            Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/ReprogramFpga.py
+                            """
+                        click.secho(errMsg, bg='red')
+                        raise ValueError(errMsg)
+            
             # Startup procedures for OPA1000
-            uartDev = self.find(typ=cl.UartOpal000)
+            uartDev = self.find(typ=cl.UartOpal1000)
             for dev in uartDev:
                 pass
                 
