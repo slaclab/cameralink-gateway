@@ -18,9 +18,12 @@ import Application            as app
 import surf.protocols.clink   as cl
 import surf.protocols.batcher as batcher
 
+import rogue
 import rogue.interfaces.stream
 
 import click
+
+rogue.Version.minVersion('3.6.0') 
 
 class MyCustomMaster(rogue.interfaces.stream.Master):
 
