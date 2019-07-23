@@ -56,15 +56,16 @@ ClinkDev:
       ###################
       TimingDbgMon:
         Loopback: 0x0
-        # UseMiniTpg: False
+        # UseMiniTpg: False # False for fiber network
         UseMiniTpg: True # True for standalone testing
       ###################
       Triggering: # https://confluence.slac.stanford.edu/download/attachments/216713616/ConfigEvrV2CoreTriggersYaml.pdf
         ###################
         Ch[:]: # [:] is a wildcard for all devices
-          EnableReg: True
+          EnableReg: False # Disable triggers (use StartRun() command to start the triggering)
           RateSel: 0x1028 # LCLS-I @ 120 Hz
           # RateSel: 0x102B # LCLS-I @ 10 Hz
+          # RateSel: 0x102C # LCLS-I @ 5 Hz          
           # RateSel: 0x0 # No triggering
           DestSel: 0x20000
         ###################

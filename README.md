@@ -172,4 +172,8 @@ $ python scripts/gui.py --camTypeA TYPE_A
 where <TYPE_A> is the camera type on ch[0] of the FEB (example: --camTypeA Opal1000)
 ```
 
+# Example of starting up OPAL1000
+$ python scripts/gui.py --camTypeA Opal1000 --defaultFile config/defaults_Opal1000.yml
+Then execute the StartRun() command to start the triggering
+
 <!--- ######################################################## -->

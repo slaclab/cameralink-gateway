@@ -79,18 +79,28 @@ parser.add_argument(
     help     = "Sets the camera type on Feb.ClinkTop.ch[1] Interfaces",
 ) 
 
+
+parser.add_argument(
+    "--defaultFile", 
+    type     = str,
+    required = False,
+    default  = None,
+    help     = "Sets the default YAML configuration file to be loaded at the root.start()",
+) 
+
 # Get the arguments
 args = parser.parse_args()
 
 #################################################################
 
 cl = ClinkDev.ClinkDev(
-    dev      = args.dev,
-    version3 = args.version3,
-    pollEn   = args.pollEn,
-    initRead = args.initRead,
-    numLane  = args.numLane,
-    camType  = [args.camTypeA,args.camTypeB],
+    dev         = args.dev,
+    version3    = args.version3,
+    pollEn      = args.pollEn,
+    initRead    = args.initRead,
+    numLane     = args.numLane,
+    camType     = [args.camTypeA,args.camTypeB],
+    defaultFile = args.defaultFile,
 )
 
 #################################################################

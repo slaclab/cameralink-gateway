@@ -25,7 +25,7 @@ class AppLane(pr.Device):
             offset       = 0x00000, 
             numberSlaves = 2, # SLAVE[TDEST=0] = Timing, SLAVE[TDEST=1] = Camera Image
             tickUnit     = '156.25MHz',            
-            expand       = False,
+            expand       = True,
         ))
 
 class Application(pr.Device):
@@ -41,5 +41,5 @@ class Application(pr.Device):
             self.add(AppLane(            
                 name   = ('AppLane[%i]' % i), 
                 offset = 0x00C00000 + (i*0x00100000), 
-                # expand      = False,
+                expand      = True,
             )) 

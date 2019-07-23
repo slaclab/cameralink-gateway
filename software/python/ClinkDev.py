@@ -17,6 +17,7 @@ import ClinkFeb               as feb
 import Application            as app
 import surf.protocols.clink   as cl
 import surf.protocols.batcher as batcher
+import LclsTimingCore         as timingCore
 
 import rogue
 import rogue.interfaces.stream
@@ -59,6 +60,7 @@ class ClinkDev(kcu1500.Core):
             initRead    = True,            # Read all registers at start of the system
             numLane     = 4,               # Number of PGP lanes
             camType     = ['Opal000',None],
+            defaultFile = None,
             **kwargs
         ):
         super().__init__(
@@ -70,6 +72,8 @@ class ClinkDev(kcu1500.Core):
             **kwargs
         )
         
+        self.defaultFile = defaultFile
+        
         # Set the min. firmware Versions
         self.minPcieVersion = 0x01000200
         self.minFebVersion  = 0x01000200
@@ -78,7 +82,7 @@ class ClinkDev(kcu1500.Core):
         self.add(app.Application(
             memBase  = self._memMap,
             numLane  = numLane,
-            expand   = False,
+            expand   = True,
         ))
 
         # Check if not doing simulation
@@ -126,12 +130,56 @@ class ClinkDev(kcu1500.Core):
                     function     = lambda cmd, lane=lane: self._frameGen[lane].myFrameGen(),
                 ))
                 
+                
+        self.add(pr.LocalVariable(
+            name        = 'RunState', 
+            description = 'Run state status, which is controlled by the StopRun() and StartRun() commands',
+            mode        = 'RO', 
+            value       = False,
+        ))        
+        
+        @self.command(description  = 'Stops the triggers and blows off data in the pipeline')        
+        def StopRun():
+            print ('ClinkDev.StopRun() executed')
+            
+            # Get devices
+            trigChDev = self.find(typ=timingCore.EvrV2ChannelReg)
+            
+            # Turn off the triggering
+            for devPtr in trigChDev:
+                devPtr.EnableReg.set(False)
+
+            # Update the run state status variable
+            self.RunState.set(False)
+                
+        @self.command(description  = 'starts the triggers and allow steams to flow to DMA engine')        
+        def StartRun():
+            print ('ClinkDev.StartRun() executed')
+            
+            # Get devices
+            trigChDev = self.find(typ=timingCore.EvrV2ChannelReg)
+                
+            # Reset all counters
+            self.CountReset()
+                          
+            # Turn on the triggering
+            for devPtr in trigChDev:
+                devPtr.EnableReg.set(True)  
+                
+            # Update the run state status variable
+            self.RunState.set(True)                 
+                
         # Start the system
         self.start(
             pollEn   = self._pollEn,
             initRead = self._initRead,
             timeout  = self._timeout,
         )
+        
+        # Hide all the "enable" variables
+        for enableList in self.find(typ=pr.EnableVariable):
+            # Hide by default
+            enableList.hidden = True          
         
         # Check if simulation
         if (dev=='sim'):
@@ -158,8 +206,20 @@ class ClinkDev(kcu1500.Core):
                 
             # Check for min. FEB FW version
             for lane in range(numLane):
+                # Unhide the because dependent on PGP link status
+                self.ClinkFeb[lane].enable.hidden  = False
                 # Check for PGP link up
                 if (self.Hardware.PgpMon[lane].RxRemLinkReady.get() != 0):
+                    
+                    # Expand for the GUI
+                    self.ClinkFeb[lane]._expand = True
+                    self.ClinkFeb[lane].ClinkTop._expand = True
+                    self.ClinkFeb[lane].TrigCtrl[0]._expand = True
+                    self.ClinkFeb[lane].TrigCtrl[1]._expand = True
+                    if camType[1] is None:
+                        self.ClinkFeb[lane].ClinkTop.Ch[1]._expand = False
+                        self.ClinkFeb[lane].TrigCtrl[1]._expand = False
+                    
                     # Check for min. FW version
                     fwVersion = self.ClinkFeb[lane].AxiVersion.FpgaVersion.get()
                     if (fwVersion < self.minFebVersion):
@@ -169,7 +229,9 @@ class ClinkDev(kcu1500.Core):
                             """
                         click.secho(errMsg, bg='red')
                         raise ValueError(errMsg)
-            
+                else:
+                    self.Application.AppLane[lane]._expand = False
+                    
             # Startup procedures for OPA1000
             uartDev = self.find(typ=cl.UartOpal1000)
             for dev in uartDev:
@@ -191,3 +253,15 @@ class ClinkDev(kcu1500.Core):
                 dev.AM()
                 dev.SM.set('f')
                 dev.RP()
+
+        # Load the configurations
+        if self.defaultFile is not None:
+            print(f'Loading {self.defaultFile} Configuration File...')
+            self.LoadConfig(self.defaultFile)    
+
+    # Function calls after loading YAML configuration
+    def initialize(self):
+        super().initialize()    
+        self.StopRun()
+        self.CountReset()
+        
