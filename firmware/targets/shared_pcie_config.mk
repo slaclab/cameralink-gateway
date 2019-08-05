@@ -1,5 +1,5 @@
-# Define Firmware Version: v1.0.2.0
-export PRJ_VERSION = 0x01000200
+# Define Firmware Version: v1.0.4.0
+export PRJ_VERSION = 0x01000400
 
 # Prom type: mt25qu512-spi-x1_x2_x4_x8
 target: prom
