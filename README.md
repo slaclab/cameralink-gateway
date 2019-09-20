@@ -107,9 +107,6 @@ $ sudo chmod 666 /dev/datadev*
 $ cat /proc/datadev0
 
 ```
-Note: There is a bug (we think in the PCIe IP core) that bricks the DMA when using `rmmod` to unload the driver.
-If you want to reconfigure the PCIe card with different buffering allocation, then do a `reboot` before doing the `insmod`
-
 
 <!--- ######################################################## -->
 
