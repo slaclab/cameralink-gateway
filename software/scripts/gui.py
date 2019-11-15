@@ -88,6 +88,13 @@ parser.add_argument(
     help     = "Sets the default YAML configuration file to be loaded at the root.start()",
 ) 
 
+parser.add_argument(
+    "--serverPort", 
+    type     = int,
+    required = False,
+    default  = None,
+    help     = "Zeromq server port",
+)
 # Get the arguments
 args = parser.parse_args()
 
@@ -101,6 +108,7 @@ cl = ClinkDev.ClinkDev(
     numLane     = args.numLane,
     camType     = [args.camTypeA,args.camTypeB],
     defaultFile = args.defaultFile,
+    serverPort  = args.serverPort,
 )
 
 #################################################################
