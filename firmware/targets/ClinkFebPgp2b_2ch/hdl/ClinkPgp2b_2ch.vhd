@@ -18,7 +18,11 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-use work.StdRtlPkg.all;
+
+library surf;
+use surf.StdRtlPkg.all;
+
+library clink_gateway_fw_lib; 
 
 entity ClinkFebPgp2b_2ch is
    generic (
@@ -75,7 +79,7 @@ architecture top_level of ClinkFebPgp2b_2ch is
 
 begin
 
-   U_Core : entity work.CLinkGateway
+   U_Core : entity clink_gateway_fw_lib.CLinkGateway
       generic map (
          TPD_G        => TPD_G,
          CHAN_COUNT_G => 2,             -- Two CLink channels

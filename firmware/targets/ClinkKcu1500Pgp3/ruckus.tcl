@@ -11,8 +11,8 @@ loadRuckusTcl $::env(PROJ_DIR)/../../submodules/lcls2-pgp-fw-lib/hardware/Xilinx
 loadRuckusTcl $::env(PROJ_DIR)/../../common/pcie
 
 # Load local source Code
-loadSource           -dir "$::DIR_PATH/hdl"
+loadSource -lib cameralink_gateway           -dir "$::DIR_PATH/hdl"
 
 # Load the simulation testbed
-loadSource -sim_only -dir "$::DIR_PATH/tb"
+loadSource -lib cameralink_gateway -sim_only -dir "$::DIR_PATH/tb"
 set_property top {ClinkKcu1500Pgp3Tb} [get_filesets sim_1]

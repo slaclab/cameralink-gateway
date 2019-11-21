@@ -18,8 +18,14 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
 
-use work.StdRtlPkg.all;
-use work.BuildInfoPkg.all;
+
+library surf;
+use surf.StdRtlPkg.all;
+
+library ruckus;
+use ruckus.BuildInfoPkg.all;
+
+library cameralink_gateway; 
 
 entity ClinkKcu1500Pgp3Tb is end ClinkKcu1500Pgp3Tb;
 
@@ -32,7 +38,7 @@ architecture testbed of ClinkKcu1500Pgp3Tb is
 
 begin
 
-   U_ClkPgp : entity work.ClkRst
+   U_ClkPgp : entity surf.ClkRst
       generic map (
          CLK_PERIOD_G      => 6.4 ns,   -- 156.25 MHz
          RST_START_DELAY_G => 0 ns,
@@ -41,7 +47,7 @@ begin
          clkP => userClkP,
          clkN => userClkN);
 
-   U_Fpga : entity work.ClinkKcu1500Pgp3
+   U_Fpga : entity cameralink_gateway.ClinkKcu1500Pgp3
       generic map (
          TPD_G          => TPD_G,
          ROGUE_SIM_EN_G => true,
