@@ -92,7 +92,7 @@ begin
          SLAVE_READY_EN_G    => true,
          VALID_THOLD_G       => 1,
          -- FIFO configurations
-         BRAM_EN_G           => true,
+         MEMORY_TYPE_G       => "block",
          GEN_SYNC_FIFO_G     => false,
          FIFO_ADDR_WIDTH_G   => 9,
          -- AXI Stream Port Configurations
@@ -114,22 +114,22 @@ begin
    -- -- AXI-Lite Crossbar
    -- --------------------
    -- U_AXIL_XBAR : entity surf.AxiLiteCrossbar
-      -- generic map (
-         -- TPD_G              => TPD_G,
-         -- NUM_SLAVE_SLOTS_G  => 1,
-         -- NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
-         -- MASTERS_CONFIG_G   => AXIL_CONFIG_C)
-      -- port map (
-         -- axiClk              => axilClk,
-         -- axiClkRst           => axilRst,
-         -- sAxiWriteMasters(0) => axilWriteMaster,
-         -- sAxiWriteSlaves(0)  => axilWriteSlave,
-         -- sAxiReadMasters(0)  => axilReadMaster,
-         -- sAxiReadSlaves(0)   => axilReadSlave,
-         -- mAxiWriteMasters    => axilWriteMasters,
-         -- mAxiWriteSlaves     => axilWriteSlaves,
-         -- mAxiReadMasters     => axilReadMasters,
-         -- mAxiReadSlaves      => axilReadSlaves);
+   -- generic map (
+   -- TPD_G              => TPD_G,
+   -- NUM_SLAVE_SLOTS_G  => 1,
+   -- NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
+   -- MASTERS_CONFIG_G   => AXIL_CONFIG_C)
+   -- port map (
+   -- axiClk              => axilClk,
+   -- axiClkRst           => axilRst,
+   -- sAxiWriteMasters(0) => axilWriteMaster,
+   -- sAxiWriteSlaves(0)  => axilWriteSlave,
+   -- sAxiReadMasters(0)  => axilReadMaster,
+   -- sAxiReadSlaves(0)   => axilReadSlave,
+   -- mAxiWriteMasters    => axilWriteMasters,
+   -- mAxiWriteSlaves     => axilWriteSlaves,
+   -- mAxiReadMasters     => axilReadMasters,
+   -- mAxiReadSlaves      => axilReadSlaves);
 
    ----------------------------------
    -- Event Builder
@@ -141,20 +141,20 @@ begin
          AXIS_CONFIG_G => DMA_AXIS_CONFIG_C)
       port map (
          -- Clock and Reset
-         axisClk         => axilClk,
-         axisRst         => axilRst,
-         
+         axisClk => axilClk,
+         axisRst => axilRst,
+
          -- AXI-Lite Interface (axisClk domain)
          axilReadMaster  => axilReadMaster,
          axilReadSlave   => axilReadSlave,
          axilWriteMaster => axilWriteMaster,
          axilWriteSlave  => axilWriteSlave,
-         
+
          -- axilReadMaster  => axilReadMasters(0),
          -- axilReadSlave   => axilReadSlaves(0),
          -- axilWriteMaster => axilWriteMasters(0),
          -- axilWriteSlave  => axilWriteSlaves(0),         
-         
+
          -- AXIS Interfaces
          sAxisMasters(0) => trigMaster,
          sAxisMasters(1) => pgpObMasters(1),
@@ -173,10 +173,10 @@ begin
          INT_PIPE_STAGES_G   => 1,
          PIPE_STAGES_G       => 1,
          SLAVE_READY_EN_G    => true,
-         VALID_THOLD_G       => 128,  -- Hold until enough to burst into the interleaving MUX
+         VALID_THOLD_G       => 128,    -- Hold until enough to burst into the interleaving MUX
          VALID_BURST_MODE_G  => true,
          -- FIFO configurations
-         BRAM_EN_G           => true,
+         MEMORY_TYPE_G       => "block",
          GEN_SYNC_FIFO_G     => true,
          FIFO_ADDR_WIDTH_G   => 9,
          -- AXI Stream Port Configurations
@@ -235,7 +235,7 @@ begin
          SLAVE_READY_EN_G    => true,
          VALID_THOLD_G       => 1,
          -- FIFO configurations
-         BRAM_EN_G           => true,
+         MEMORY_TYPE_G       => "block",
          GEN_SYNC_FIFO_G     => false,
          FIFO_ADDR_WIDTH_G   => 9,
          -- AXI Stream Port Configurations
