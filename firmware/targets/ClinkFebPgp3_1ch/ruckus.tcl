@@ -6,4 +6,4 @@ loadRuckusTcl $::env(TOP_DIR)/submodules/surf
 loadRuckusTcl $::env(TOP_DIR)/submodules/clink-gateway-fw-lib
 
 # Load local source Code and constraints
-loadSource      -dir "$::DIR_PATH/hdl"
+loadSource -lib cameralink_gateway      -dir "$::DIR_PATH/hdl"
