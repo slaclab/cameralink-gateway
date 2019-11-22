@@ -16,14 +16,22 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-use work.StdRtlPkg.all;
-use work.AxiPkg.all;
-use work.AxiLitePkg.all;
-use work.AxiStreamPkg.all;
-use work.AppPkg.all;
+
+library surf;
+use surf.StdRtlPkg.all;
+use surf.AxiPkg.all;
+use surf.AxiLitePkg.all;
+use surf.AxiStreamPkg.all;
+
+library cameralink_gateway;
+use cameralink_gateway.AppPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
+
+library lcls2_pgp_fw_lib; 
+
+library axi_pcie_core; 
 
 entity ClinkKcu1500Pgp3 is
    generic (
@@ -126,7 +134,7 @@ begin
    --------------------------------------- 
    -- AXI-Lite and reference 25 MHz clocks
    --------------------------------------- 
-   U_axilClk : entity work.ClockManagerUltraScale
+   U_axilClk : entity surf.ClockManagerUltraScale
       generic map(
          TPD_G             => TPD_G,
          SIMULATION_G      => ROGUE_SIM_EN_G,
@@ -155,7 +163,7 @@ begin
    ----------------------- 
    -- AXI-PCIE-CORE Module
    ----------------------- 
-   U_Core : entity work.XilinxKcu1500Core
+   U_Core : entity axi_pcie_core.XilinxKcu1500Core
       generic map (
          TPD_G                => TPD_G,
          ROGUE_SIM_EN_G       => ROGUE_SIM_EN_G,
@@ -217,7 +225,7 @@ begin
    ---------------------
    -- AXI-Lite Crossbar
    ---------------------         
-   U_XBAR : entity work.AxiLiteCrossbar
+   U_XBAR : entity surf.AxiLiteCrossbar
       generic map (
          TPD_G              => TPD_G,
          NUM_SLAVE_SLOTS_G  => 1,
@@ -235,7 +243,7 @@ begin
          mAxiReadMasters     => axilReadMasters,
          mAxiReadSlaves      => axilReadSlaves);
 
-   U_App : entity work.Application
+   U_App : entity cameralink_gateway.Application
       generic map (
          TPD_G           => TPD_G,
          AXI_BASE_ADDR_G => AXIL_CONFIG_C(APP_INDEX_C).baseAddr)
@@ -263,7 +271,7 @@ begin
          dmaIbMasters    => dmaIbMasters,
          dmaIbSlaves     => dmaIbSlaves);
 
-   U_Hardware : entity work.Hardware
+   U_Hardware : entity lcls2_pgp_fw_lib.Hardware
       generic map (
          TPD_G             => TPD_G,
          ROGUE_SIM_EN_G    => ROGUE_SIM_EN_G,

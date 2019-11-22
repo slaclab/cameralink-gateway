@@ -5,7 +5,7 @@ source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 loadRuckusTcl $::env(TOP_DIR)/submodules/surf
 
 # Load target's source code and constraints
-#loadSource -sim_only -dir "$::DIR_PATH/tb/"
+#loadSource -lib cameralink_gateway -sim_only -dir "$::DIR_PATH/tb/"
 
 # Set the top level synth_1 and sim_1
 set_property top {ClinkFramerTb} [get_filesets sim_1]

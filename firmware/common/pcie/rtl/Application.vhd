@@ -16,11 +16,15 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-use work.StdRtlPkg.all;
-use work.AxiPkg.all;
-use work.AxiLitePkg.all;
-use work.AxiStreamPkg.all;
-use work.AppPkg.all;
+
+library surf;
+use surf.StdRtlPkg.all;
+use surf.AxiPkg.all;
+use surf.AxiLitePkg.all;
+use surf.AxiStreamPkg.all;
+
+library cameralink_gateway;
+use cameralink_gateway.AppPkg.all;
 
 entity Application is
    generic (
@@ -67,7 +71,7 @@ begin
    --------------------
    -- AXI-Lite Crossbar
    --------------------
-   U_AXIL_XBAR : entity work.AxiLiteCrossbar
+   U_AXIL_XBAR : entity surf.AxiLiteCrossbar
       generic map (
          TPD_G              => TPD_G,
          NUM_SLAVE_SLOTS_G  => 1,
@@ -90,7 +94,7 @@ begin
    -------------------
    GEN_VEC :
    for i in 3 downto 0 generate
-      U_Lane : entity work.AppLane
+      U_Lane : entity cameralink_gateway.AppLane
          generic map (
             TPD_G           => TPD_G,
             AXI_BASE_ADDR_G => AXIL_CONFIG_C(i).baseAddr)
