@@ -47,7 +47,7 @@ ClinkDev:
       RemoteTcritSetpoint: 100 # Prevent FEB from thermal shutdown until FPGA Tj = 100 degC (max. operating temp)
   #########################################################################################################
   Application:
-    AppLane[0:4]: # Apply the configurations to 0 through 3
+    AppLane[:]: # Apply the configurations to 0 through 3
       EventBuilder:
         Timeout: 625000 # (156.25 MHz) x 4 ms = 625000
   #########################################################################################################
