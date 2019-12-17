@@ -103,13 +103,10 @@ camLinkDev = ClinkDev.ClinkDev(
     defaultFile = args.defaultFile,
 )
 
-# Dump the yaml file
-camLinkDev.saveAddressMap( "CamlinkDev.yaml" )
-
 #################################################################
 
 # # Dump the address map
-# pr.generateAddressMap(camLinkDev,'addressMapDummp.txt')
+camLinkDev.saveAddressMap( "addressMapDump.txt" )
 
 # Create GUI
 appTop = pyrogue.gui.application(sys.argv)
