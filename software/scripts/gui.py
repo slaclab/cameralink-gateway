@@ -100,7 +100,7 @@ args = parser.parse_args()
 
 #################################################################
 
-cl = ClinkDev.ClinkDev(
+camLinkDev = ClinkDev.ClinkDev(
     dev         = args.dev,
     version3    = args.version3,
     pollEn      = args.pollEn,
@@ -114,15 +114,15 @@ cl = ClinkDev.ClinkDev(
 #################################################################
 
 # # Dump the address map
-# pr.generateAddressMap(cl,'addressMapDummp.txt')
+camLinkDev.saveAddressMap( "addressMapDump.txt" )
 
 # Create GUI
 appTop = pyrogue.gui.application(sys.argv)
 guiTop = pyrogue.gui.GuiTop()
-guiTop.addTree(cl)
+guiTop.addTree(camLinkDev)
 guiTop.resize(800, 1000)
 
 # Run gui
 appTop.exec_()
-cl.stop()
+camLinkDev.stop()
 
