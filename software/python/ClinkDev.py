@@ -59,7 +59,7 @@ class ClinkDev(kcu1500.Core):
             pollEn      = True,            # Enable automatic polling registers
             initRead    = True,            # Read all registers at start of the system
             numLane     = 4,               # Number of PGP lanes
-            camType     = ['Opal000',None],
+            camType     = ['Opal1000',None],
             defaultFile = None,
             serverPort  = None,
             **kwargs
@@ -234,7 +234,7 @@ class ClinkDev(kcu1500.Core):
                 else:
                     self.Application.AppLane[lane]._expand = False
                     
-            # Startup procedures for OPA1000
+            # Startup procedures for OPAL1000
             uartDev = self.find(typ=cl.UartOpal1000)
             for dev in uartDev:
                 pass
@@ -266,4 +266,4 @@ class ClinkDev(kcu1500.Core):
         super().initialize()    
         self.StopRun()
         self.CountReset()
-
+        
