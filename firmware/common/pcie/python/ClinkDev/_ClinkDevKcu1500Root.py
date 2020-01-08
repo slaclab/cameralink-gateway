@@ -58,6 +58,7 @@ class ClinkDevKcu1500Root(lcls2_pgp_fw_lib.hardware.XilinxKcu1500.Root):
                  camTypeA    = None,                 
                  camTypeB    = None,                 
                  defaultFile = None,                 
+                 serverPort  = None,
                  **kwargs):
         
         # Set local variables
@@ -81,6 +82,7 @@ class ClinkDevKcu1500Root(lcls2_pgp_fw_lib.hardware.XilinxKcu1500.Root):
             pollEn      = pollEn, 
             initRead    = initRead, 
             numLanes    = numLanes, 
+            serverPort  = serverPort,
             **kwargs)
             
         # Create memory interface
