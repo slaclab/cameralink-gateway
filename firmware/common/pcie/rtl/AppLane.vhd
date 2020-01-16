@@ -16,15 +16,13 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-
 library surf;
 use surf.StdRtlPkg.all;
 use surf.AxiPkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
 
-library cameralink_gateway;
-use cameralink_gateway.AppPkg.all;
+use work.AppPkg.all;
 
 entity AppLane is
    generic (
@@ -44,8 +42,8 @@ entity AppLane is
       pgpObMasters    : in  AxiStreamQuadMasterType;
       pgpObSlaves     : out AxiStreamQuadSlaveType;
       -- Trigger Event streams (axilClk domain)
-      trigMaster      : in  AxiStreamMasterType;
-      trigSlave       : out AxiStreamSlaveType;
+      eventAxisMaster : in  AxiStreamMasterType;
+      eventAxisSlave  : out AxiStreamSlaveType;
       -- DMA Interface (dmaClk domain)
       dmaClk          : in  sl;
       dmaRst          : in  sl;
@@ -56,15 +54,6 @@ entity AppLane is
 end AppLane;
 
 architecture mapping of AppLane is
-
-   constant NUM_AXIL_MASTERS_C : positive := 1;
-
-   constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 20, 16);
-
-   signal axilWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
-   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0) := (others => AXI_LITE_WRITE_SLAVE_EMPTY_SLVERR_C);
-   signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
-   signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0)  := (others => AXI_LITE_READ_SLAVE_EMPTY_SLVERR_C);
 
    signal sifClMaster : AxiStreamMasterType;
    signal sifClSlave  : AxiStreamSlaveType;
@@ -110,61 +99,37 @@ begin
          mAxisMaster => pgpIbMaster,
          mAxisSlave  => pgpIbSlave);
 
-   -- --------------------
-   -- -- AXI-Lite Crossbar
-   -- --------------------
-   -- U_AXIL_XBAR : entity surf.AxiLiteCrossbar
-   -- generic map (
-   -- TPD_G              => TPD_G,
-   -- NUM_SLAVE_SLOTS_G  => 1,
-   -- NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
-   -- MASTERS_CONFIG_G   => AXIL_CONFIG_C)
-   -- port map (
-   -- axiClk              => axilClk,
-   -- axiClkRst           => axilRst,
-   -- sAxiWriteMasters(0) => axilWriteMaster,
-   -- sAxiWriteSlaves(0)  => axilWriteSlave,
-   -- sAxiReadMasters(0)  => axilReadMaster,
-   -- sAxiReadSlaves(0)   => axilReadSlave,
-   -- mAxiWriteMasters    => axilWriteMasters,
-   -- mAxiWriteSlaves     => axilWriteSlaves,
-   -- mAxiReadMasters     => axilReadMasters,
-   -- mAxiReadSlaves      => axilReadSlaves);
-
    ----------------------------------
    -- Event Builder
    ----------------------------------         
    U_EventBuilder : entity surf.AxiStreamBatcherEventBuilder
       generic map (
-         TPD_G         => TPD_G,
-         NUM_SLAVES_G  => 2,
-         AXIS_CONFIG_G => DMA_AXIS_CONFIG_C)
+         TPD_G          => TPD_G,
+         NUM_SLAVES_G   => 2,
+         MODE_G         => "ROUTED",
+         TDEST_ROUTES_G => (
+            0           => "--------",  -- Trig on 0x0, Event on 0x1
+            1           => x"02"),      -- Map PGP[VC1] to TDEST 0x2         
+         AXIS_CONFIG_G  => DMA_AXIS_CONFIG_C)
       port map (
          -- Clock and Reset
-         axisClk => axilClk,
-         axisRst => axilRst,
-
+         axisClk         => axilClk,
+         axisRst         => axilRst,
          -- AXI-Lite Interface (axisClk domain)
          axilReadMaster  => axilReadMaster,
          axilReadSlave   => axilReadSlave,
          axilWriteMaster => axilWriteMaster,
          axilWriteSlave  => axilWriteSlave,
-
-         -- axilReadMaster  => axilReadMasters(0),
-         -- axilReadSlave   => axilReadSlaves(0),
-         -- axilWriteMaster => axilWriteMasters(0),
-         -- axilWriteSlave  => axilWriteSlaves(0),         
-
          -- AXIS Interfaces
-         sAxisMasters(0) => trigMaster,
+         sAxisMasters(0) => eventAxisMaster,
          sAxisMasters(1) => pgpObMasters(1),
-         sAxisSlaves(0)  => trigSlave,
+         sAxisSlaves(0)  => eventAxisSlave,
          sAxisSlaves(1)  => pgpObSlaves(1),
          mAxisMaster     => eventMaster,
          mAxisSlave      => eventSlave);
 
    -------------------------------------
-   -- Burst Fifo before interleaving MUX
+   -- Burst FIFO before interleaving MUX
    -------------------------------------
    U_FIFO : entity surf.AxiStreamFifoV2
       generic map (
@@ -173,7 +138,7 @@ begin
          INT_PIPE_STAGES_G   => 1,
          PIPE_STAGES_G       => 1,
          SLAVE_READY_EN_G    => true,
-         VALID_THOLD_G       => 128,    -- Hold until enough to burst into the interleaving MUX
+         VALID_THOLD_G       => 128,  -- Hold until enough to burst into the interleaving MUX
          VALID_BURST_MODE_G  => true,
          -- FIFO configurations
          MEMORY_TYPE_G       => "block",
