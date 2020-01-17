@@ -126,7 +126,7 @@ $ source setup_env_template.sh
 
 2) Run the FEB firmware update script:
 ```
-$ python scripts/updateFeb.py --lane <PGP_LANE> --mcs <PATH_TO_MCS>
+$ python scripts/updateFebFpga.py --lane <PGP_LANE> --mcs <PATH_TO_MCS>
 ```
 where <PGP_LANE> is the PGP lane index (range from 0 to 3)
 and <PATH_TO_MCS> is the path to the firmware .MCS file
@@ -171,7 +171,7 @@ where <TYPE_A> is the camera type on ch[0] of the FEB (example: --camTypeA Opal1
 
 # Example of starting up OPAL1000
 ```
-$ python scripts/gui.py --camTypeA Opal1000 --defaultFile config/defaults_Opal1000.yml
+$ python scripts/gui.py --camTypeA Opal1000 --defaultFile config/Opal1000.yml
 Then execute the StartRun() command to start the triggering
 ```
 
