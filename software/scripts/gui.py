@@ -8,12 +8,20 @@
 # copied, modified, propagated, or distributed except according to the terms 
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
-import setupLibPaths
-import pyrogue as pr
-import pyrogue.gui
-import ClinkDev
+
 import sys
 import argparse
+
+import setupLibPaths
+import pyrogue.gui
+import pyrogue.pydm
+import ClinkDev
+
+import rogue
+
+#################################################################
+
+#rogue.Logging.setFilter('pyrogue.batcher', rogue.Logging.Debug)
 
 #################################################################
 
@@ -33,14 +41,6 @@ parser.add_argument(
 )  
 
 parser.add_argument(
-    "--version3", 
-    type     = argBool,
-    required = False,
-    default  = False,
-    help     = "true = PGPv3, false = PGP2b",
-) 
-
-parser.add_argument(
     "--pollEn", 
     type     = argBool,
     required = False,
@@ -57,7 +57,7 @@ parser.add_argument(
 )  
 
 parser.add_argument(
-    "--numLane", 
+    "--numLanes", 
     type     = int,
     required = False,
     default  = 4,
@@ -92,7 +92,7 @@ parser.add_argument(
     "--serverPort", 
     type     = int,
     required = False,
-    default  = None,
+    default  = 9099,
     help     = "Zeromq server port",
 )
 # Get the arguments
@@ -100,29 +100,8 @@ args = parser.parse_args()
 
 #################################################################
 
-camLinkDev = ClinkDev.ClinkDev(
-    dev         = args.dev,
-    version3    = args.version3,
-    pollEn      = args.pollEn,
-    initRead    = args.initRead,
-    numLane     = args.numLane,
-    camType     = [args.camTypeA,args.camTypeB],
-    defaultFile = args.defaultFile,
-    serverPort  = args.serverPort,
-)
+with ClinkDev.ClinkDevKcu1500Root(**vars(args)) as root:
 
+    pyrogue.pydm.runPyDM(root=root)
+    
 #################################################################
-
-# # Dump the address map
-camLinkDev.saveAddressMap( "addressMapDump.dump" )
-
-# Create GUI
-appTop = pyrogue.gui.application(sys.argv)
-guiTop = pyrogue.gui.GuiTop()
-guiTop.addTree(camLinkDev)
-guiTop.resize(800, 1000)
-
-# Run gui
-appTop.exec_()
-camLinkDev.stop()
-

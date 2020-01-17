@@ -16,15 +16,13 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-
 library surf;
 use surf.StdRtlPkg.all;
 use surf.AxiPkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
 
-library cameralink_gateway;
-use cameralink_gateway.AppPkg.all;
+use work.AppPkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
@@ -37,7 +35,7 @@ entity ClinkKcu1500Pgp2b is
    generic (
       TPD_G          : time    := 1 ns;
       ROGUE_SIM_EN_G : boolean := false;
-      PGP_TYPE_G     : boolean := false;  -- False: PGPv2b@3.125Gb/s
+      PGP_TYPE_G     : string  := "PGP2b";  -- False: PGPv2b@3.125Gb/s, True: PGPv3@10.3125Gb/s
       BUILD_INFO_G   : BuildInfoType);
    port (
       ---------------------

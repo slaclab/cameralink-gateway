@@ -18,14 +18,11 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
 
-
 library surf;
 use surf.StdRtlPkg.all;
 
 library ruckus;
 use ruckus.BuildInfoPkg.all;
-
-library cameralink_gateway; 
 
 entity ClinkKcu1500Pgp2bTb is end ClinkKcu1500Pgp2bTb;
 
@@ -47,7 +44,7 @@ begin
          clkP => userClkP,
          clkN => userClkN);
 
-   U_Fpga : entity cameralink_gateway.ClinkKcu1500Pgp2b
+   U_Fpga : entity work.ClinkKcu1500Pgp2b
       generic map (
          TPD_G          => TPD_G,
          ROGUE_SIM_EN_G => true,
