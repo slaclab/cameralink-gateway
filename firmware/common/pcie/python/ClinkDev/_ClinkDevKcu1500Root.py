@@ -279,8 +279,8 @@ class ClinkDevKcu1500Root(lcls2_pgp_fw_lib.hardware.XilinxKcu1500.Root):
 
         # Load the configurations
         if self.defaultFile is not None:
-            # defaultFile = ["config/defaults.yml",self.defaultFile]
-            defaultFile = [self.defaultFile]
+            defaultFile = ["config/defaults.yml",self.defaultFile]
+            # defaultFile = [self.defaultFile]
             print(f'Loading {defaultFile} Configuration File...')
             self.LoadConfig(defaultFile)    
             
