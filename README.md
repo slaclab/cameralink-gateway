@@ -116,6 +116,12 @@ $ cat /proc/datadev0
 
 <!--- ######################################################## -->
 
+# XPM Triggering Documentation
+
+https://docs.google.com/document/d/1B_sIkk9Fxsw2EjOBpGVFpfCCWoIiOJoVGTrkTshZfew/edit?usp=sharing
+
+<!--- ######################################################## -->
+
 # How to reprogram the FEB firmware via Rogue software
 
 1) Setup the rogue environment
