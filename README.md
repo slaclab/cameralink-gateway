@@ -55,7 +55,7 @@ PGP[lane].VC[3] = Unused
 
 ```
 DMA[lane].DEST[0] = SRPv3
-DMA[lane].DEST[1] = Event Builder Batcher
+DMA[lane].DEST[1] = Event Builder Batcher (super-frame)
 DMA[lane].DEST[1].DEST[0] = XPM Trigger Message (sub-frame)
 DMA[lane].DEST[1].DEST[1] = XPM Transition Message (sub-frame)
 DMA[lane].DEST[1].DEST[2] = Camera Image (sub-frame)
