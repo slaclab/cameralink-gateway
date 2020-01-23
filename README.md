@@ -38,6 +38,31 @@ git-lfs/2.1.1
 ```
 $ git clone --recursive git@github.com:slaclab/cameralink-gateway
 ```
+<!--- ######################################################## -->
+
+# PGP channel mapping
+
+```
+PGP[lane].VC[0] = SRPv3 (register access)
+PGP[lane].VC[1] = Camera Image (streaming data)
+PGP[lane].VC[2] = Camera UART (streaming data)
+PGP[lane].VC[3] = Unused
+```
+
+<!--- ######################################################## -->
+
+# DMA channel mapping
+
+```
+DMA[lane].DEST[0] = SRPv3
+DMA[lane].DEST[1] = Event Builder Batcher
+DMA[lane].DEST[1].DEST[0] = XPM Trigger Message (sub-frame)
+DMA[lane].DEST[1].DEST[1] = XPM Transition Message (sub-frame)
+DMA[lane].DEST[1].DEST[2] = Camera Image (sub-frame)
+DMA[lane].DEST[2] = Camera UART
+DMA[lane].DEST[3] = Unused
+```
+
 
 <!--- ######################################################## -->
 
