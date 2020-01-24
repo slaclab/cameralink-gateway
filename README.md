@@ -196,13 +196,12 @@ $ source setup_env_slac.sh
 
 2) Lauch the GUI:
 ```
-$ python scripts/gui.py --camTypeA TYPE_A
-where <TYPE_A> is the camera type on ch[0] of the FEB (example: --camTypeA Opal1000)
+$ python scripts/gui.py --camType LIST_CAMERA_TYPES --defaultFile FEB_CAMERA_CONFIG
 ```
 
 # Example of starting up OPAL1000
 ```
-$ python scripts/gui.py --camTypeA Opal1000 --defaultFile config/Opal1000.yml
+$ python scripts/gui.py --camType Opal1000 --defaultFile config/Opal1000.yml
 Then execute the StartRun() command to start the triggering
 ```
 
