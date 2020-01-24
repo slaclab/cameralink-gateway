@@ -9,16 +9,15 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 import pyrogue  as pr
-import ClinkDev
+import ClinkDev as clDev
 
-class ClinkDevKcu1500Root(ClinkDev.ClinkDevRoot):
+class ClinkDevSlacPgpCardG4Root(clDev.ClinkDevRoot):
 
     def __init__(self,**kwargs):
         
         # Pass custom value to parent via super function
         super().__init__(
             name         = 'ClinkRoot',
-            clDevTarget  = ClinkDev.ClinkDevKcu1500,
-            numLanes     = 4,
+            clDevTarget  = clDev.ClinkDevSlacPgpCardG4,
+            numLanes     = 8,            
             **kwargs)
-   

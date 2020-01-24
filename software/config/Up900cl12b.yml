@@ -1,4 +1,4 @@
-ClinkDevKcu1500Root:
+ClinkRoot:
   #########################################################################################################
   ClinkFeb[:]:
     ###################
@@ -27,7 +27,4 @@ ClinkDevKcu1500Root:
       TrigMap: ChA
       TrigPulseWidth: 100.0 # units of us
       TrigMask: 0x2 # CC2 trigger
-    ###################
-    BoardTemp:
-      RemoteTcritSetpoint: 100 # Prevent FEB from thermal shutdown until FPGA Tj = 100 degC (max. operating temp)
   #########################################################################################################

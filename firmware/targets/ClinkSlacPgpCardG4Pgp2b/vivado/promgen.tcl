@@ -8,5 +8,6 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-set_property USER_SLR_ASSIGNMENT SLR0 [get_cells {U_Hardware}]
-# set_property USER_SLR_ASSIGNMENT SLR1 [get_cells {U_Application}]
+set format     "mcs"
+set inteface   "SPIx8"
+set size       "512"

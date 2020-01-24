@@ -12,11 +12,11 @@ import pyrogue as pr
 
 import axipcie                                 as pcie
 import ClinkDev                                as clDev
-import lcls2_pgp_fw_lib.hardware.XilinxKcu1500 as xilinxKcu1500
+import lcls2_pgp_fw_lib.hardware.SlacPgpCardG4 as SlacPgpCardG4
 
-class ClinkDevKcu1500(pr.Device):
+class ClinkDevSlacPgpCardG4(pr.Device):
     def __init__(self, 
-                 numLanes = 4, 
+                 numLanes = 8, 
                  pgp3     = False, 
                  **kwargs):
         super().__init__(**kwargs)
@@ -36,7 +36,7 @@ class ClinkDevKcu1500(pr.Device):
         ))
             
         # Hardware Layer
-        self.add(xilinxKcu1500.Hsio( 
+        self.add(SlacPgpCardG4.Hsio( 
             offset    = 0x0080_0000,
             numLanes  = numLanes,
             pgp3      = pgp3,

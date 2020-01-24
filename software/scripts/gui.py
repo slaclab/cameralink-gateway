@@ -19,12 +19,6 @@ import ClinkDev
 
 import rogue
 
-#################################################################
-
-#rogue.Logging.setFilter('pyrogue.batcher', rogue.Logging.Debug)
-
-#################################################################
-
 # Set the argument parser
 parser = argparse.ArgumentParser()
 
@@ -38,6 +32,21 @@ parser.add_argument(
     required = False,
     default  = '/dev/datadev_0',
     help     = "path to device",
+)  
+
+parser.add_argument(
+    "--hwType", 
+    type     = str,
+    required = False,
+    default  = 'kcu1500',
+    help     = "kcu1500 or SlacPgpCardG4",
+)  
+
+parser.add_argument(
+    "--camType", 
+    nargs    ='+',
+    required = True,
+    help     = "List of camera type",
 )  
 
 parser.add_argument(
@@ -55,30 +64,6 @@ parser.add_argument(
     default  = True,
     help     = "Enable read all variables at start",
 )  
-
-parser.add_argument(
-    "--numLanes", 
-    type     = int,
-    required = False,
-    default  = 4,
-    help     = "PGP lane index (range from 1 to 4)",
-)  
-
-parser.add_argument(
-    "--camTypeA", 
-    type     = str,
-    required = True,
-    help     = "Sets the camera type on Feb.ClinkTop.ch[0] Interfaces",
-) 
-
-parser.add_argument(
-    "--camTypeB", 
-    type     = str,
-    required = False,
-    default  = None,
-    help     = "Sets the camera type on Feb.ClinkTop.ch[1] Interfaces",
-) 
-
 
 parser.add_argument(
     "--defaultFile", 
@@ -100,7 +85,15 @@ args = parser.parse_args()
 
 #################################################################
 
-with ClinkDev.ClinkDevKcu1500Root(**vars(args)) as root:
+# Select the hardware type
+if args.hwType == 'kcu1500':
+    hwType = ClinkDev.ClinkDevKcu1500Root
+else:
+    hwType = ClinkDev.ClinkDevSlacPgpCardG4Root
+
+#################################################################
+
+with hwType(**vars(args)) as root:
 
     pyrogue.pydm.runPyDM(root=root)
     

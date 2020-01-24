@@ -22,12 +22,11 @@ use surf.AxiPkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
 
-use work.AppPkg.all;
-
 entity AppLane is
    generic (
-      TPD_G           : time             := 1 ns;
-      AXI_BASE_ADDR_G : slv(31 downto 0) := x"00C0_0000");
+      TPD_G             : time := 1 ns;
+      AXI_BASE_ADDR_G   : slv(31 downto 0);
+      DMA_AXIS_CONFIG_G : AxiStreamConfigType);
    port (
       -- AXI-Lite Interface
       axilClk         : in  sl;
@@ -85,8 +84,8 @@ begin
          GEN_SYNC_FIFO_G     => false,
          FIFO_ADDR_WIDTH_G   => 9,
          -- AXI Stream Port Configurations
-         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_C,
-         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_C)
+         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_G,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_G)
       port map (
          -- Slave Port
          sAxisClk    => dmaClk,
@@ -108,9 +107,9 @@ begin
          NUM_SLAVES_G   => 2,
          MODE_G         => "ROUTED",
          TDEST_ROUTES_G => (
-            0           => "--------",  -- Trig on 0x0, Event on 0x1
+            0           => "0000000-",  -- Trig on 0x0, Event on 0x1
             1           => x"02"),      -- Map PGP[VC1] to TDEST 0x2         
-         AXIS_CONFIG_G  => DMA_AXIS_CONFIG_C)
+         AXIS_CONFIG_G  => DMA_AXIS_CONFIG_G)
       port map (
          -- Clock and Reset
          axisClk         => axilClk,
@@ -122,9 +121,9 @@ begin
          axilWriteSlave  => axilWriteSlave,
          -- AXIS Interfaces
          sAxisMasters(0) => eventAxisMaster,
-         sAxisMasters(1) => pgpObMasters(1),
+         sAxisMasters(1) => pgpObMasters(1),  -- PGP[VC1]
          sAxisSlaves(0)  => eventAxisSlave,
-         sAxisSlaves(1)  => pgpObSlaves(1),
+         sAxisSlaves(1)  => pgpObSlaves(1),   -- PGP[VC1]
          mAxisMaster     => eventMaster,
          mAxisSlave      => eventSlave);
 
@@ -145,8 +144,8 @@ begin
          GEN_SYNC_FIFO_G     => true,
          FIFO_ADDR_WIDTH_G   => 9,
          -- AXI Stream Port Configurations
-         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_C,
-         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_C)
+         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_G,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_G)
       port map (
          -- Slave Port
          sAxisClk    => axilClk,
@@ -204,8 +203,8 @@ begin
          GEN_SYNC_FIFO_G     => false,
          FIFO_ADDR_WIDTH_G   => 9,
          -- AXI Stream Port Configurations
-         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_C,
-         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_C)
+         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_G,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_G)
       port map (
          -- Slave Port
          sAxisClk    => axilClk,

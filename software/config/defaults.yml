@@ -1,5 +1,5 @@
-ClinkDevKcu1500Root:
-  ClinkDevKcu1500:
+ClinkRoot:
+  ClinkPcie:
     #########################################################################################################
     Application:
       AppLane[:]: # Apply the configurations to 0 through 3
@@ -9,9 +9,9 @@ ClinkDevKcu1500Root:
           Timeout: 0x0
           Blowoff: False
     #########################################################################################################
-    Kcu1500Hsio:
+    Hsio:
       ######################################      
-      Kcu1500TimingRx:
+      TimingRx:
         ######################################      
         TimingFrameRx:
           ClkSel: 0x0 # 0x0 = LCLS-I timing

@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- File       : ClinkKcu1500Pgp2b.vhd
+-- File       : ClinkSlacPgpCardG4Pgp2b.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
 -- Description: Camera link gateway PCIe card with PGPv2b
@@ -30,7 +30,7 @@ library axi_pcie_core;
 library unisim;
 use unisim.vcomponents.all;
 
-entity ClinkKcu1500Pgp2b is
+entity ClinkSlacPgpCardG4Pgp2b is
    generic (
       TPD_G          : time    := 1 ns;
       ROGUE_SIM_EN_G : boolean := false;
@@ -40,58 +40,50 @@ entity ClinkKcu1500Pgp2b is
       ---------------------
       --  Application Ports
       ---------------------
-      -- QSFP[0] Ports
-      qsfp0RefClkP : in  slv(1 downto 0);
-      qsfp0RefClkN : in  slv(1 downto 0);
-      qsfp0RxP     : in  slv(3 downto 0);
-      qsfp0RxN     : in  slv(3 downto 0);
-      qsfp0TxP     : out slv(3 downto 0);
-      qsfp0TxN     : out slv(3 downto 0);
-      -- QSFP[1] Ports
-      qsfp1RefClkP : in  slv(1 downto 0);
-      qsfp1RefClkN : in  slv(1 downto 0);
-      qsfp1RxP     : in  slv(3 downto 0);
-      qsfp1RxN     : in  slv(3 downto 0);
-      qsfp1TxP     : out slv(3 downto 0);
-      qsfp1TxN     : out slv(3 downto 0);
+      -- SFP Ports
+      sfpRefClkP  : in  slv(1 downto 0);
+      sfpRefClkN  : in  slv(1 downto 0);
+      sfpRxP      : in  sl;
+      sfpRxN      : in  sl;
+      sfpTxP      : out sl;
+      sfpTxN      : out sl;
+      -- QSFP[1:0] Ports
+      qsfpRefClkP : in  sl;
+      qsfpRefClkN : in  sl;
+      qsfp0RxP    : in  slv(3 downto 0);
+      qsfp0RxN    : in  slv(3 downto 0);
+      qsfp0TxP    : out slv(3 downto 0);
+      qsfp0TxN    : out slv(3 downto 0);
+      qsfp1RxP    : in  slv(3 downto 0);
+      qsfp1RxN    : in  slv(3 downto 0);
+      qsfp1TxP    : out slv(3 downto 0);
+      qsfp1TxN    : out slv(3 downto 0);
       --------------
       --  Core Ports
       --------------
       -- System Ports
-      emcClk       : in  sl;
-      userClkP     : in  sl;
-      userClkN     : in  sl;
-      -- QSFP[0] Ports
-      qsfp0RstL    : out sl;
-      qsfp0LpMode  : out sl;
-      qsfp0ModSelL : out sl;
-      qsfp0ModPrsL : in  sl;
-      -- QSFP[1] Ports
-      qsfp1RstL    : out sl;
-      qsfp1LpMode  : out sl;
-      qsfp1ModSelL : out sl;
-      qsfp1ModPrsL : in  sl;
+      emcClk      : in  sl;
       -- Boot Memory Ports 
-      flashCsL     : out sl;
-      flashMosi    : out sl;
-      flashMiso    : in  sl;
-      flashHoldL   : out sl;
-      flashWp      : out sl;
+      flashCsL    : out sl;
+      flashMosi   : out sl;
+      flashMiso   : in  sl;
+      flashHoldL  : out sl;
+      flashWp     : out sl;
       -- PCIe Ports
-      pciRstL      : in  sl;
-      pciRefClkP   : in  sl;
-      pciRefClkN   : in  sl;
-      pciRxP       : in  slv(7 downto 0);
-      pciRxN       : in  slv(7 downto 0);
-      pciTxP       : out slv(7 downto 0);
-      pciTxN       : out slv(7 downto 0));
-end ClinkKcu1500Pgp2b;
+      pciRstL     : in  sl;
+      pciRefClkP  : in  sl;
+      pciRefClkN  : in  sl;
+      pciRxP      : in  slv(7 downto 0);
+      pciRxN      : in  slv(7 downto 0);
+      pciTxP      : out slv(7 downto 0);
+      pciTxN      : out slv(7 downto 0));
+end ClinkSlacPgpCardG4Pgp2b;
 
-architecture top_level of ClinkKcu1500Pgp2b is
+architecture top_level of ClinkSlacPgpCardG4Pgp2b is
 
    constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(8, TKEEP_COMP_C, TUSER_FIRST_LAST_C, 8, 2);  -- 64-bit interface
    constant AXIL_CLK_FREQ_C   : real                := 156.25E+6;  -- units of Hz
-   constant DMA_SIZE_C        : positive            := 4;
+   constant DMA_SIZE_C        : positive            := 8;
 
    constant NUM_AXIL_MASTERS_C : positive := 2;
 
@@ -133,39 +125,32 @@ architecture top_level of ClinkKcu1500Pgp2b is
 
 begin
 
-   --------------------------------------- 
-   -- AXI-Lite and reference 25 MHz clocks
-   --------------------------------------- 
    U_axilClk : entity surf.ClockManagerUltraScale
       generic map(
          TPD_G             => TPD_G,
-         SIMULATION_G      => ROGUE_SIM_EN_G,
          TYPE_G            => "PLL",
          INPUT_BUFG_G      => true,
          FB_BUFG_G         => true,
          RST_IN_POLARITY_G => '1',
-         NUM_CLOCKS_G      => 2,
+         NUM_CLOCKS_G      => 1,
          -- MMCM attributes
-         CLKIN_PERIOD_G    => 6.4,      -- 156.25 MHz
-         CLKFBOUT_MULT_G   => 8,        -- 1.25GHz = 8 x 156.25 MHz
-         CLKOUT0_DIVIDE_G  => 8,        -- 156.25MHz = 1.25GHz/8
-         CLKOUT1_DIVIDE_G  => 50)       -- 25MHz = 1.25GHz/50
-
+         BANDWIDTH_G       => "OPTIMIZED",
+         CLKIN_PERIOD_G    => 4.0,      -- 250 MHz
+         CLKFBOUT_MULT_G   => 5,        -- 1.25GHz = 5 x 250 MHz
+         CLKOUT0_DIVIDE_G  => 8)        -- 156.25MHz = 1.25GHz/8
       port map(
          -- Clock Input
-         clkIn     => userClk156,
+         clkIn     => dmaClk,
          rstIn     => dmaRst,
          -- Clock Outputs
          clkOut(0) => axilClk,
-         clkOut(1) => userClk25,
          -- Reset Outputs
-         rstOut(0) => axilRst,
-         rstOut(1) => userRst25);
+         rstOut(0) => axilRst);
 
    ----------------------- 
    -- AXI-PCIE-CORE Module
    ----------------------- 
-   U_Core : entity axi_pcie_core.XilinxKcu1500Core
+   U_Core : entity axi_pcie_core.SlacPgpCardG4Core
       generic map (
          TPD_G                => TPD_G,
          ROGUE_SIM_EN_G       => ROGUE_SIM_EN_G,
@@ -177,7 +162,6 @@ begin
          ------------------------      
          --  Top Level Interfaces
          ------------------------        
-         userClk156     => userClk156,
          -- DMA Interfaces
          dmaClk         => dmaClk,
          dmaRst         => dmaRst,
@@ -197,18 +181,6 @@ begin
          --------------   
          -- System Ports
          emcClk         => emcClk,
-         userClkP       => userClkP,
-         userClkN       => userClkN,
-         -- QSFP[0] Ports
-         qsfp0RstL      => qsfp0RstL,
-         qsfp0LpMode    => qsfp0LpMode,
-         qsfp0ModSelL   => qsfp0ModSelL,
-         qsfp0ModPrsL   => qsfp0ModPrsL,
-         -- QSFP[1] Ports
-         qsfp1RstL      => qsfp1RstL,
-         qsfp1LpMode    => qsfp1LpMode,
-         qsfp1ModSelL   => qsfp1ModSelL,
-         qsfp1ModPrsL   => qsfp1ModPrsL,
          -- Boot Memory Ports 
          flashCsL       => flashCsL,
          flashMosi      => flashMosi,
@@ -247,7 +219,7 @@ begin
 
    U_App : entity work.Application
       generic map (
-         TPD_G           => TPD_G,
+         TPD_G             => TPD_G,
          AXI_BASE_ADDR_G   => AXIL_CONFIG_C(APP_INDEX_C).baseAddr,
          DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
          DMA_SIZE_G        => DMA_SIZE_C)
@@ -278,11 +250,12 @@ begin
    ------------------
    -- Hardware Module
    ------------------
-   U_HSIO : entity lcls2_pgp_fw_lib.Kcu1500Hsio
+   U_HSIO : entity lcls2_pgp_fw_lib.SlacPgpCardG4Hsio
       generic map (
          TPD_G             => TPD_G,
          ROGUE_SIM_EN_G    => ROGUE_SIM_EN_G,
          PGP_TYPE_G        => PGP_TYPE_G,
+         NUM_PGP_LANES_G   => DMA_SIZE_C,
          DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
          AXIL_CLK_FREQ_G   => AXIL_CLK_FREQ_C,
          AXI_BASE_ADDR_G   => AXIL_CONFIG_C(HW_INDEX_C).baseAddr)
@@ -290,9 +263,6 @@ begin
          ------------------------      
          --  Top Level Interfaces
          ------------------------    
-         -- Reference Clock and Reset
-         userClk25           => userClk25,
-         userRst25           => userRst25,
          -- AXI-Lite Interface (axilClk domain)
          axilClk             => axilClk,
          axilRst             => axilRst,
@@ -317,17 +287,21 @@ begin
          eventAxisCtrl       => eventAxisCtrl,
          ------------------
          --  Hardware Ports
-         ------------------       
-         -- QSFP[0] Ports,
-         qsfp0RefClkP        => qsfp0RefClkP,
-         qsfp0RefClkN        => qsfp0RefClkN,
+         ------------------    
+         -- SFP Ports
+         sfpRefClkP          => sfpRefClkP,
+         sfpRefClkN          => sfpRefClkN,
+         sfpRxP              => sfpRxP,
+         sfpRxN              => sfpRxN,
+         sfpTxP              => sfpTxP,
+         sfpTxN              => sfpTxN,
+         -- QSFP[1:0] Ports
+         qsfpRefClkP         => qsfpRefClkP,
+         qsfpRefClkN         => qsfpRefClkN,
          qsfp0RxP            => qsfp0RxP,
          qsfp0RxN            => qsfp0RxN,
          qsfp0TxP            => qsfp0TxP,
          qsfp0TxN            => qsfp0TxN,
-         -- QSFP[1] Ports
-         qsfp1RefClkP        => qsfp1RefClkP,
-         qsfp1RefClkN        => qsfp1RefClkN,
          qsfp1RxP            => qsfp1RxP,
          qsfp1RxN            => qsfp1RxN,
          qsfp1TxP            => qsfp1TxP,
