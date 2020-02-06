@@ -10,6 +10,7 @@
 #-----------------------------------------------------------------------------
 import pyrogue as pr
 import rogue
+import click
 
 import ClinkDev as clDev
 import axipcie
@@ -19,7 +20,7 @@ import lcls2_pgp_fw_lib.hardware.shared as shared
 import ClinkFeb               as feb
 import surf.protocols.batcher as batcher
 import surf.protocols.clink   as cl
-import LclsTimingCore         as timingCore
+import l2si_core              as l2si
 
 rogue.Version.minVersion('4.8.0') 
 
@@ -39,8 +40,8 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
         
         # Set the min. firmware Versions
-        self.minPcieVersion = 0x02000000
-        self.minFebVersion  = 0x02000000
+        self.minPcieVersion = 0x03000000
+        self.minFebVersion  = 0x03000000
         
         # Set number of lanes to min. requirement
         if numLanes > len(camType):
@@ -159,12 +160,18 @@ class ClinkDevRoot(shared.Root):
             print ('ClinkDev.StopRun() executed')
             
             # Get devices
-            trigChDev = self.find(typ=timingCore.EvrV2ChannelReg)
+            eventBuilder = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
+            trigger      = self.find(typ=l2si.TriggerEventBuffer)
             
             # Turn off the triggering
-            for devPtr in trigChDev:
-                devPtr.EnableReg.set(False)
+            for devPtr in trigger:
+                devPtr.MasterEnable.set(False)
+                devPtr.EventBufferEnable.set(False)
 
+            # Flush the downstream data/trigger pipelines
+            for devPtr in eventBuilder:
+                devPtr.Blowoff.set(True)             
+                
             # Update the run state status variable
             self.RunState.set(False)
                 
@@ -173,14 +180,20 @@ class ClinkDevRoot(shared.Root):
             print ('ClinkDev.StartRun() executed')
             
             # Get devices
-            trigChDev = self.find(typ=timingCore.EvrV2ChannelReg)
-                
+            eventBuilder = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
+            trigger      = self.find(typ=l2si.TriggerEventBuffer)
+            
             # Reset all counters
             self.CountReset()
-                          
+            
+            # Arm for data/trigger stream
+            for devPtr in eventBuilder:
+                devPtr.Blowoff.set(False)    
+            
             # Turn on the triggering
-            for devPtr in trigChDev:
-                devPtr.EnableReg.set(True)  
+            for devPtr in trigger:
+                devPtr.MasterEnable.set(True)
+                devPtr.EventBufferEnable.set(True)
                 
             # Update the run state status variable
             self.RunState.set(True)                 
@@ -195,10 +208,8 @@ class ClinkDevRoot(shared.Root):
         
         # Check if simulation
         if (self.dev=='sim'):
-            # Bypass the time AXIS channel
-            eventDev = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
-            for dev in eventDev:
-                dev.Bypass.set(0x1)          
+            pass
+         
         else:
             # Read all the variables
             self.ReadAll()

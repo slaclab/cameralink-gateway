@@ -1,13 +1,12 @@
-ClinkRoot:
+ClinkDevRoot:
   ClinkPcie:
     #########################################################################################################
     Application:
-      AppLane[:]: # Apply the configurations to 0 through 3
+      AppLane[:]:
         EventBuilder:
-          Timeout: 625000 # (156.25 MHz) x 4 ms = 625000
           Bypass: 0x0
           Timeout: 0x0
-          Blowoff: False
+          Blowoff: True # Flush the downstream data/trigger pipelines
     #########################################################################################################
     Hsio:
       ######################################      
@@ -73,15 +72,14 @@ ClinkRoot:
             RxReset: 0x0
             HwEnable: False
             Config_L0Select_Reset: 0x0
-            Config_L0Select_Enabled: 0x0
+            Config_L0Select_Enabled: 0x1
             AxilRdEn: True
-            Config_L0Select_RateSel: 0x0
+            Config_L0Select_RateSel: 0x4 # 102 Hz (ask Matt Weaver for more information)
             Config_L0Select_DestSel: 0x8000
             Pipeline_Depth_Clks: 20000
             Pipeline_Depth_Fids: 100
             PartitionMessage_Insert: 0x0
             PartitionMessage_Hdr: 0x0
-            PartitionMessage_Payload: 0x0
         ######################################      
         TriggerEventManager:
           ###################

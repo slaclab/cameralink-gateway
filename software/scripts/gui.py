@@ -87,13 +87,13 @@ args = parser.parse_args()
 
 # Select the hardware type
 if args.hwType == 'kcu1500':
-    hwType = ClinkDev.ClinkDevKcu1500Root
+    args.clDevTarget = ClinkDev.ClinkDevKcu1500
 else:
-    hwType = ClinkDev.ClinkDevSlacPgpCardG4Root
+    args.clDevTarget = ClinkDev.ClinkDevSlacPgpCardG4
 
 #################################################################
 
-with hwType(**vars(args)) as root:
+with ClinkDev.ClinkDevRoot(**vars(args)) as root:
 
     pyrogue.pydm.runPyDM(root=root)
     

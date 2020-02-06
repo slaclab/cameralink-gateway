@@ -32,11 +32,12 @@ class ClinkDevKcu1500(pr.Device):
         self.add(clDev.Application(
             offset   = 0x00C0_0000,
             numLanes = numLanes,
-            expand   = True,
+            expand   = False,
         ))
             
         # Hardware Layer
-        self.add(xilinxKcu1500.Hsio( 
+        self.add(xilinxKcu1500.Kcu1500Hsio( 
+            name     = 'Hsio',
             offset    = 0x0080_0000,
             numLanes  = numLanes,
             pgp3      = pgp3,

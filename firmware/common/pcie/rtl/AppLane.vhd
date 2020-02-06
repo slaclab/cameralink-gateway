@@ -108,7 +108,8 @@ begin
          MODE_G         => "ROUTED",
          TDEST_ROUTES_G => (
             0           => "0000000-",  -- Trig on 0x0, Event on 0x1
-            1           => x"02"),      -- Map PGP[VC1] to TDEST 0x2         
+            1           => "00000010"), -- Map PGP[VC1] to TDEST 0x2      
+         TRANS_TDEST_G  => X"01",
          AXIS_CONFIG_G  => DMA_AXIS_CONFIG_G)
       port map (
          -- Clock and Reset

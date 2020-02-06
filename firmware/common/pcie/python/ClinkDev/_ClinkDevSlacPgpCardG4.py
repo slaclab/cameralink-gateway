@@ -32,11 +32,12 @@ class ClinkDevSlacPgpCardG4(pr.Device):
         self.add(clDev.Application(
             offset   = 0x00C0_0000,
             numLanes = numLanes,
-            expand   = True,
+            expand   = False,
         ))
             
         # Hardware Layer
-        self.add(SlacPgpCardG4.Hsio( 
+        self.add(SlacPgpCardG4.SlacPgpCardG4Hsio( 
+            name     = 'Hsio',
             offset    = 0x0080_0000,
             numLanes  = numLanes,
             pgp3      = pgp3,
