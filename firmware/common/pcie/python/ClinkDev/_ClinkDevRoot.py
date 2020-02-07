@@ -192,8 +192,8 @@ class ClinkDevRoot(shared.Root):
             
             # Turn on the triggering
             for devPtr in trigger:
-                devPtr.MasterEnable.set(True)
                 devPtr.EventBufferEnable.set(True)
+                devPtr.MasterEnable.set(True)
                 
             # Update the run state status variable
             self.RunState.set(True)                 
