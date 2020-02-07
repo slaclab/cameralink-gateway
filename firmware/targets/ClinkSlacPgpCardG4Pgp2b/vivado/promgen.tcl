@@ -7,7 +7,7 @@
 ## may be copied, modified, propagated, or distributed except according to 
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
-# Program using: s25fl128sxxxxxx0-spi-x1_x2_x4
+
 set format     "mcs"
-set inteface   "spix1"
-set size       "128"
+set inteface   "SPIx8"
+set size       "512"

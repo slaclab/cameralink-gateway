@@ -1,0 +1,1 @@
+../../firmware/submodules/clink-gateway-fw-lib/python/ClinkFeb/updateFeb.py

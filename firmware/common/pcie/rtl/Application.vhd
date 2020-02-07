@@ -16,55 +16,51 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-
 library surf;
 use surf.StdRtlPkg.all;
 use surf.AxiPkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
 
-library cameralink_gateway;
-use cameralink_gateway.AppPkg.all;
-
 entity Application is
    generic (
-      TPD_G           : time             := 1 ns;
-      AXI_BASE_ADDR_G : slv(31 downto 0) := x"00C0_0000");
+      TPD_G             : time             := 1 ns;
+      AXI_BASE_ADDR_G   : slv(31 downto 0) := x"00C0_0000";
+      DMA_AXIS_CONFIG_G : AxiStreamConfigType;
+      DMA_SIZE_G        : positive);      
    port (
       -- AXI-Lite Interface
-      axilClk         : in  sl;
-      axilRst         : in  sl;
-      axilReadMaster  : in  AxiLiteReadMasterType;
-      axilReadSlave   : out AxiLiteReadSlaveType;
-      axilWriteMaster : in  AxiLiteWriteMasterType;
-      axilWriteSlave  : out AxiLiteWriteSlaveType;
+      axilClk          : in  sl;
+      axilRst          : in  sl;
+      axilReadMaster   : in  AxiLiteReadMasterType;
+      axilReadSlave    : out AxiLiteReadSlaveType;
+      axilWriteMaster  : in  AxiLiteWriteMasterType;
+      axilWriteSlave   : out AxiLiteWriteSlaveType;
       -- PGP Streams (axilClk domain)
-      pgpIbMasters    : out AxiStreamMasterArray(3 downto 0);
-      pgpIbSlaves     : in  AxiStreamSlaveArray(3 downto 0);
-      pgpObMasters    : in  AxiStreamQuadMasterArray(3 downto 0);
-      pgpObSlaves     : out AxiStreamQuadSlaveArray(3 downto 0);
+      pgpIbMasters     : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      pgpIbSlaves      : in  AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
+      pgpObMasters     : in  AxiStreamQuadMasterArray(DMA_SIZE_G-1 downto 0);
+      pgpObSlaves      : out AxiStreamQuadSlaveArray(DMA_SIZE_G-1 downto 0);
       -- Trigger Event streams (axilClk domain)
-      trigMasters     : in  AxiStreamMasterArray(3 downto 0);
-      trigSlaves      : out AxiStreamSlaveArray(3 downto 0);
+      eventAxisMasters : in  AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      eventAxisSlaves  : out AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
       -- DMA Interface (dmaClk domain)
-      dmaClk          : in  sl;
-      dmaRst          : in  sl;
-      dmaIbMasters    : out AxiStreamMasterArray(3 downto 0);
-      dmaIbSlaves     : in  AxiStreamSlaveArray(3 downto 0);
-      dmaObMasters    : in  AxiStreamMasterArray(3 downto 0);
-      dmaObSlaves     : out AxiStreamSlaveArray(3 downto 0));
+      dmaClk           : in  sl;
+      dmaRst           : in  sl;
+      dmaIbMasters     : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      dmaIbSlaves      : in  AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
+      dmaObMasters     : in  AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      dmaObSlaves      : out AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0));
 end Application;
 
 architecture mapping of Application is
 
-   constant NUM_AXIL_MASTERS_C : positive := 4;
+   constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(DMA_SIZE_G-1 downto 0) := genAxiLiteConfig(DMA_SIZE_G, AXI_BASE_ADDR_G, 22, 19);
 
-   constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, AXI_BASE_ADDR_G, 22, 20);
-
-   signal axilWriteMasters : AxiLiteWriteMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
-   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0);
-   signal axilReadMasters  : AxiLiteReadMasterArray(NUM_AXIL_MASTERS_C-1 downto 0);
-   signal axilReadSlaves   : AxiLiteReadSlaveArray(NUM_AXIL_MASTERS_C-1 downto 0);
+   signal axilWriteMasters : AxiLiteWriteMasterArray(DMA_SIZE_G-1 downto 0);
+   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(DMA_SIZE_G-1 downto 0);
+   signal axilReadMasters  : AxiLiteReadMasterArray(DMA_SIZE_G-1 downto 0);
+   signal axilReadSlaves   : AxiLiteReadSlaveArray(DMA_SIZE_G-1 downto 0);
 
 begin
 
@@ -75,7 +71,7 @@ begin
       generic map (
          TPD_G              => TPD_G,
          NUM_SLAVE_SLOTS_G  => 1,
-         NUM_MASTER_SLOTS_G => NUM_AXIL_MASTERS_C,
+         NUM_MASTER_SLOTS_G => DMA_SIZE_G,
          MASTERS_CONFIG_G   => AXIL_CONFIG_C)
       port map (
          axiClk              => axilClk,
@@ -93,13 +89,14 @@ begin
    -- Application Lane
    -------------------
    GEN_VEC :
-   for i in 3 downto 0 generate
-      U_Lane : entity cameralink_gateway.AppLane
+   for i in DMA_SIZE_G-1 downto 0 generate
+      U_Lane : entity work.AppLane
          generic map (
             TPD_G           => TPD_G,
-            AXI_BASE_ADDR_G => AXIL_CONFIG_C(i).baseAddr)
+            AXI_BASE_ADDR_G => AXIL_CONFIG_C(i).baseAddr,
+            DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_G)
          port map (
-            -- AXI-Lite Interface
+            -- AXI-Lite Interface (axilClk domain)
             axilClk         => axilClk,
             axilRst         => axilRst,
             axilReadMaster  => axilReadMasters(i),
@@ -112,8 +109,8 @@ begin
             pgpObMasters    => pgpObMasters(i),
             pgpObSlaves     => pgpObSlaves(i),
             -- Trigger Event streams (axilClk domain)
-            trigMaster      => trigMasters(i),
-            trigSlave       => trigSlaves(i),
+            eventAxisMaster => eventAxisMasters(i),
+            eventAxisSlave  => eventAxisSlaves(i),
             -- DMA Interface (dmaClk domain)
             dmaClk          => dmaClk,
             dmaRst          => dmaRst,

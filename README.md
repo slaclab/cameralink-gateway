@@ -38,6 +38,31 @@ git-lfs/2.1.1
 ```
 $ git clone --recursive git@github.com:slaclab/cameralink-gateway
 ```
+<!--- ######################################################## -->
+
+# PGP channel mapping
+
+```
+PGP[lane].VC[0] = SRPv3 (register access)
+PGP[lane].VC[1] = Camera Image (streaming data)
+PGP[lane].VC[2] = Camera UART (streaming data)
+PGP[lane].VC[3] = Unused
+```
+
+<!--- ######################################################## -->
+
+# DMA channel mapping
+
+```
+DMA[lane].DEST[0] = SRPv3
+DMA[lane].DEST[1] = Event Builder Batcher (super-frame)
+DMA[lane].DEST[1].DEST[0] = XPM Trigger Message (sub-frame)
+DMA[lane].DEST[1].DEST[1] = XPM Transition Message (sub-frame)
+DMA[lane].DEST[1].DEST[2] = Camera Image (sub-frame)
+DMA[lane].DEST[2] = Camera UART
+DMA[lane].DEST[255:3] = Unused
+```
+
 
 <!--- ######################################################## -->
 
@@ -116,6 +141,12 @@ $ cat /proc/datadev0
 
 <!--- ######################################################## -->
 
+# XPM Triggering Documentation
+
+https://docs.google.com/document/d/1B_sIkk9Fxsw2EjOBpGVFpfCCWoIiOJoVGTrkTshZfew/edit?usp=sharing
+
+<!--- ######################################################## -->
+
 # How to reprogram the FEB firmware via Rogue software
 
 1) Setup the rogue environment
@@ -126,7 +157,7 @@ $ source setup_env_template.sh
 
 2) Run the FEB firmware update script:
 ```
-$ python scripts/updateFeb.py --lane <PGP_LANE> --mcs <PATH_TO_MCS>
+$ python scripts/updateFebFpga.py --lane <PGP_LANE> --mcs <PATH_TO_MCS>
 ```
 where <PGP_LANE> is the PGP lane index (range from 0 to 3)
 and <PATH_TO_MCS> is the path to the firmware .MCS file
@@ -165,13 +196,12 @@ $ source setup_env_slac.sh
 
 2) Lauch the GUI:
 ```
-$ python scripts/gui.py --camTypeA TYPE_A
-where <TYPE_A> is the camera type on ch[0] of the FEB (example: --camTypeA Opal1000)
+$ python scripts/gui.py --camType LIST_CAMERA_TYPES --defaultFile FEB_CAMERA_CONFIG
 ```
 
 # Example of starting up OPAL1000
 ```
-$ python scripts/gui.py --camTypeA Opal1000 --defaultFile config/defaults_Opal1000.yml
+$ python scripts/gui.py --camType Opal1000 --defaultFile config/Opal1000.yml
 Then execute the StartRun() command to start the triggering
 ```
 

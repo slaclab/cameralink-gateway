@@ -20,10 +20,15 @@ class AppLane(pr.Device):
             **kwargs):
         super().__init__(name=name, description=description, **kwargs) 
 
+        #######################################
+        # SLAVE[TDEST=0] = XPM Trigger
+        # SLAVE[TDEST=1] = XPM Event Transition 
+        # SLAVE[TDEST=2] = Camera Image
+        #######################################
         self.add(batcher.AxiStreamBatcherEventBuilder( 
             name         = 'EventBuilder', 
             offset       = 0x00000, 
-            numberSlaves = 2, # SLAVE[TDEST=0] = Timing, SLAVE[TDEST=1] = Camera Image
+            numberSlaves = 2, 
             tickUnit     = '156.25MHz',            
             expand       = True,
         ))
@@ -32,14 +37,14 @@ class Application(pr.Device):
     def __init__(   self,       
             name        = "Application",
             description = "PCIe Lane Container",
-            numLane     = 1, # number of PGP Lanes
+            numLanes    = 4, # number of PGP Lanes
             **kwargs):
         super().__init__(name=name, description=description, **kwargs) 
 
-        for i in range(numLane):
+        for i in range(numLanes):
         
             self.add(AppLane(            
                 name   = ('AppLane[%i]' % i), 
-                offset = 0x00C00000 + (i*0x00100000), 
-                expand      = True,
+                offset = (i*0x0008_0000), 
+                expand = True,
             )) 

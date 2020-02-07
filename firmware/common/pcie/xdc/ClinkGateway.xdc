@@ -9,7 +9,4 @@
 ##############################################################################
 
 set_property USER_SLR_ASSIGNMENT SLR0 [get_cells {U_Hardware}]
-set_property USER_SLR_ASSIGNMENT SLR1 [get_cells {U_Application}]
-
-create_generated_clock -name clk156 [get_pins {U_axilClk/PllGen.U_Pll/CLKOUT0}] 
-create_generated_clock -name clk25  [get_pins {U_axilClk/PllGen.U_Pll/CLKOUT1}] 
+# set_property USER_SLR_ASSIGNMENT SLR1 [get_cells {U_Application}]

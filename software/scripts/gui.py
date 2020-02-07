@@ -8,14 +8,16 @@
 # copied, modified, propagated, or distributed except according to the terms 
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
-import setupLibPaths
-import pyrogue as pr
-import pyrogue.gui
-import ClinkDev
+
 import sys
 import argparse
 
-#################################################################
+import setupLibPaths
+import pyrogue.gui
+import pyrogue.pydm
+import ClinkDev
+
+import rogue
 
 # Set the argument parser
 parser = argparse.ArgumentParser()
@@ -33,12 +35,19 @@ parser.add_argument(
 )  
 
 parser.add_argument(
-    "--version3", 
-    type     = argBool,
+    "--hwType", 
+    type     = str,
     required = False,
-    default  = False,
-    help     = "true = PGPv3, false = PGP2b",
-) 
+    default  = 'kcu1500',
+    help     = "kcu1500 or SlacPgpCardG4",
+)  
+
+parser.add_argument(
+    "--camType", 
+    nargs    ='+',
+    required = True,
+    help     = "List of camera type",
+)  
 
 parser.add_argument(
     "--pollEn", 
@@ -57,30 +66,6 @@ parser.add_argument(
 )  
 
 parser.add_argument(
-    "--numLane", 
-    type     = int,
-    required = False,
-    default  = 4,
-    help     = "PGP lane index (range from 1 to 4)",
-)  
-
-parser.add_argument(
-    "--camTypeA", 
-    type     = str,
-    required = True,
-    help     = "Sets the camera type on Feb.ClinkTop.ch[0] Interfaces",
-) 
-
-parser.add_argument(
-    "--camTypeB", 
-    type     = str,
-    required = False,
-    default  = None,
-    help     = "Sets the camera type on Feb.ClinkTop.ch[1] Interfaces",
-) 
-
-
-parser.add_argument(
     "--defaultFile", 
     type     = str,
     required = False,
@@ -92,7 +77,7 @@ parser.add_argument(
     "--serverPort", 
     type     = int,
     required = False,
-    default  = None,
+    default  = 9099,
     help     = "Zeromq server port",
 )
 # Get the arguments
@@ -100,29 +85,16 @@ args = parser.parse_args()
 
 #################################################################
 
-camLinkDev = ClinkDev.ClinkDev(
-    dev         = args.dev,
-    version3    = args.version3,
-    pollEn      = args.pollEn,
-    initRead    = args.initRead,
-    numLane     = args.numLane,
-    camType     = [args.camTypeA,args.camTypeB],
-    defaultFile = args.defaultFile,
-    serverPort  = args.serverPort,
-)
+# Select the hardware type
+if args.hwType == 'kcu1500':
+    args.clDevTarget = ClinkDev.ClinkDevKcu1500
+else:
+    args.clDevTarget = ClinkDev.ClinkDevSlacPgpCardG4
 
 #################################################################
 
-# # Dump the address map
-camLinkDev.saveAddressMap( "addressMapDump.dump" )
+with ClinkDev.ClinkDevRoot(**vars(args)) as root:
 
-# Create GUI
-appTop = pyrogue.gui.application(sys.argv)
-guiTop = pyrogue.gui.GuiTop()
-guiTop.addTree(camLinkDev)
-guiTop.resize(800, 1000)
-
-# Run gui
-appTop.exec_()
-camLinkDev.stop()
-
+    pyrogue.pydm.runPyDM(root=root)
+    
+#################################################################
