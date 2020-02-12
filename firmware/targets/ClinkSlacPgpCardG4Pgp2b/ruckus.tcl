@@ -12,7 +12,7 @@ loadSource -lib l2si_core -dir "$::env(PROJ_DIR)/../../submodules/l2si-core/xpm/
 loadSource -lib l2si_core -dir "$::env(PROJ_DIR)/../../submodules/l2si-core/base/rtl"
 
 # Load common source code
-loadRuckusTcl $::env(PROJ_DIR)/../../common/pcie
+loadRuckusTcl $::env(PROJ_DIR)/../../common
 
 # Load local source Code
 loadSource -dir "$::DIR_PATH/hdl"
