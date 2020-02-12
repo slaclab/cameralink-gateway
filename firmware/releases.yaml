@@ -37,14 +37,28 @@ Releases:
   all:
     Targets:
       - ClinkFebPgp2b_1ch
-      - ClinkFebPgp2b_2ch
+      # - ClinkFebPgp2b_2ch
       - ClinkKcu1500Pgp2b
-      - ClinkSlacPgpCardG4Pgp2b
+      # - ClinkSlacPgpCardG4Pgp2b
     Types:
       - Rogue
-  ClinkKcu1500Pgp2b:
+  ClinkFebPgp2b_1ch:
     Targets:
       - ClinkFebPgp2b_1ch
-      - ClinkKcu1500Pgp2b
     Types:
       - Rogue
+  ClinkFebPgp2b_2ch:
+    Targets:
+      - ClinkFebPgp2b_2ch
+    Types:
+      - Rogue      
+  ClinkKcu1500Pgp2b:
+    Targets:
+      - ClinkKcu1500Pgp2b
+    Types:
+      - Rogue   
+  ClinkSlacPgpCardG4Pgp2b:
+    Targets:
+      - ClinkSlacPgpCardG4Pgp2b
+    Types:
+      - Rogue         
