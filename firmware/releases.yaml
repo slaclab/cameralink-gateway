@@ -1,36 +1,38 @@
 
 GitBase: ..
 
-TopRoguePackage: SmurfPcie
+TopRoguePackage: ClinkDev
 
 RoguePackages:
-  - submodules/surf/python
   - submodules/axi-pcie-core/python
+  - submodules/clink-gateway-fw-lib/python
+  - submodules/l2si-core/python
+  - submodules/lcls2-pgp-fw-lib/python
+  - submodules/lcls-timing-core/python
+  - submodules/surf/python
   - python     
 
 RogueConfig:
   - ../software/config
-  - ../software/config/dev-board     
 
 Targets:
-  SmurfKcu1500RssiOffload10GbE:
-    ImageDir: targets/SmurfKcu1500RssiOffload10GbE/images
+  ClinkFebPgp2b_1ch:
+    ImageDir: targets/ClinkFebPgp2b_1ch/images
     Extensions:
       - mcs
-  Kcu105TenGigE:
-    ImageDir: targets/Kcu105TenGigE/images
+  ClinkKcu1500Pgp2b:
+    ImageDir: targets/ClinkKcu1500Pgp2b/images
     Extensions:
-      - bit
+      - mcs
+  ClinkSlacPgpCardG4Pgp2b:
+    ImageDir: targets/ClinkSlacPgpCardG4Pgp2b/images
+    Extensions:
       - mcs
 
 Releases:
-  SmurfKcu1500RssiOffload10GbE:
+  ClinkKcu1500Pgp2b:
     Targets:
-      - SmurfKcu1500RssiOffload10GbE
-    Types:
-      - Rogue
-  Kcu105TenGigE:
-    Targets:
-      - Kcu105TenGigE
+      - ClinkFebPgp2b_1ch
+      - ClinkKcu1500Pgp2b
     Types:
       - Rogue
