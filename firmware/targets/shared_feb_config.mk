@@ -6,3 +6,6 @@ target: prom
 
 # Define target part
 export PRJ_PART = XC7K70Tfbg484-2
+
+# Define release
+export RELEASE = all

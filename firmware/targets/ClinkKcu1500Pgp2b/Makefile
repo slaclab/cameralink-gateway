@@ -1,8 +1,5 @@
 export INCLUDE_PGP3_10G = 0
 
-# Define release
-export RELEASE = ClinkKcu1500Pgp2b
-
 # Define target part
 export PRJ_PART = xcku115-flvb2104-2-e
 
