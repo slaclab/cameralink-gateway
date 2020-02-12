@@ -5,4 +5,4 @@ export PRJ_VERSION = 0x03000000
 target: prom
 
 # Define release
-export RELEASE = all
+export RELEASE = cameralink-gateway

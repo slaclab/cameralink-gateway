@@ -34,7 +34,7 @@ Targets:
       - mcs
 
 Releases:
-  all:
+  cameralink-gateway:
     Targets:
       - ClinkFebPgp2b_1ch
       # - ClinkFebPgp2b_2ch
