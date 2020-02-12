@@ -9,15 +9,14 @@
 # contained in the LICENSE.txt file.
 #-----------------------------------------------------------------------------
 
+import os
 import sys
 import argparse
-
-import setupLibPaths
+import rogue
 import pyrogue.gui
 import pyrogue.pydm
-import cameralink_gateway
 
-import rogue
+#################################################################
 
 # Set the argument parser
 parser = argparse.ArgumentParser()
@@ -80,20 +79,47 @@ parser.add_argument(
     default  = 9099,
     help     = "Zeromq server port",
 )
+
+parser.add_argument(
+    "--releaseZip", 
+    type     = str,
+    required = False,
+    default  = None,
+    help     = "Sets the default YAML configuration file to be loaded at the root.start()",
+) 
+
 # Get the arguments
 args = parser.parse_args()
 
 #################################################################
 
-# Select the hardware type
-if args.hwType == 'kcu1500':
-    args.clDevTarget = cameralink_gateway.ClinkDevKcu1500
+# Check for release zip file path
+if args.releaseZip is not None:
+    pyrogue.addLibraryPath(args.releaseZip + '/python')
 else:
-    args.clDevTarget = cameralink_gateway.ClinkDevSlacPgpCardG4
+    import setupLibPaths
+
+# Load the cameralink-gateway package
+import cameralink_gateway
 
 #################################################################
 
-with cameralink_gateway.ClinkDevRoot(**vars(args)) as root:
+# Select the hardware type
+if args.hwType == 'kcu1500':
+    clDevTarget = cameralink_gateway.ClinkDevKcu1500
+else:
+    clDevTarget = cameralink_gateway.ClinkDevSlacPgpCardG4
+
+#################################################################
+
+with cameralink_gateway.ClinkDevRoot(
+        dev         = args.dev,
+        pollEn      = args.pollEn,
+        initRead    = args.initRead,
+        camType     = args.camType,
+        defaultFile = args.defaultFile,
+        clDevTarget = clDevTarget,
+    ) as root:
 
     pyrogue.pydm.runPyDM(root=root)
     

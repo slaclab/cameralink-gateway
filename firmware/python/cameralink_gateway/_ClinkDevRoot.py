@@ -33,9 +33,8 @@ class ClinkDevRoot(shared.Root):
                  pollEn      = True,            # Enable automatic polling registers
                  initRead    = True,            # Read all registers at start of the system
                  numLanes    = 4,               # Number of PGP lanes
-                 camType     = None,                 
-                 defaultFile = None,                 
-                 hwType      = None,              
+                 camType     = None,
+                 defaultFile = None,
                  clDevTarget = clDev.ClinkDevKcu1500,                 
                  **kwargs):
         
