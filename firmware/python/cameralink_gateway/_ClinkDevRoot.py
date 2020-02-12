@@ -12,7 +12,7 @@ import pyrogue as pr
 import rogue
 import click
 
-import ClinkDev as clDev
+import cameralink_gateway as clDev
 import axipcie
 
 import lcls2_pgp_fw_lib.hardware.shared as shared

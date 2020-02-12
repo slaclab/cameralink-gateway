@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #-----------------------------------------------------------------------------
 # This file is part of the 'Camera link gateway'. It is subject to 
 # the license terms in the LICENSE.txt file found in the top-level directory 
@@ -20,4 +19,3 @@ pr.addLibraryPath(top_level+'firmware/submodules/l2si-core/python')
 pr.addLibraryPath(top_level+'firmware/submodules/clink-gateway-fw-lib/python')
 pr.addLibraryPath(top_level+'firmware/submodules/surf/python')
 pr.addLibraryPath(top_level+'firmware/python')
-# pr.addLibraryPath(top_level+'software/python')

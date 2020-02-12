@@ -15,7 +15,7 @@ import argparse
 import setupLibPaths
 import pyrogue.gui
 import pyrogue.pydm
-import ClinkDev
+import cameralink_gateway
 
 import rogue
 
@@ -87,13 +87,13 @@ args = parser.parse_args()
 
 # Select the hardware type
 if args.hwType == 'kcu1500':
-    args.clDevTarget = ClinkDev.ClinkDevKcu1500
+    args.clDevTarget = cameralink_gateway.ClinkDevKcu1500
 else:
-    args.clDevTarget = ClinkDev.ClinkDevSlacPgpCardG4
+    args.clDevTarget = cameralink_gateway.ClinkDevSlacPgpCardG4
 
 #################################################################
 
-with ClinkDev.ClinkDevRoot(**vars(args)) as root:
+with cameralink_gateway.ClinkDevRoot(**vars(args)) as root:
 
     pyrogue.pydm.runPyDM(root=root)
     

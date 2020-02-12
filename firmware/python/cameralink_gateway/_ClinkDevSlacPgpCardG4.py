@@ -11,7 +11,7 @@
 import pyrogue as pr
 
 import axipcie                                 as pcie
-import ClinkDev                                as clDev
+import cameralink_gateway                      as clDev
 import lcls2_pgp_fw_lib.hardware.SlacPgpCardG4 as SlacPgpCardG4
 
 class ClinkDevSlacPgpCardG4(pr.Device):
