@@ -1,5 +1,5 @@
-# Define Firmware Version: v3.0.0.0
-export PRJ_VERSION = 0x03000000
+# Define Firmware Version: v3.0.0.1
+export PRJ_VERSION = 0x03000001
 
 # Prom type: s25fl128sxxxxxx0-spi-x1_x2_x4
 target: prom
