@@ -25,6 +25,7 @@ Targets:
     ImageDir: targets/ClinkFebPgp2b_1ch/images
     Extensions:
       - mcs
+      - mcs.gz
   ClinkFebPgp2b_2ch:
     ImageDir: targets/ClinkFebPgp2b_2ch/images
     Extensions:
