@@ -93,11 +93,23 @@ args = parser.parse_args()
 
 #################################################################
 
-# Check for release zip file path
-if args.releaseZip is not None:
-    pyrogue.addLibraryPath(args.releaseZip + '/python')
-else:
-    import setupLibPaths
+# First see if submodule packages are already in the python path
+try:
+    import axi_pcie_core
+    import lcls2_pgp_fw_lib
+    import lcls_timing_core
+    import l2si_core
+    import clink_gateway_fw_lib
+    import surf
+
+# Otherwise assume it is relative in a standard development directory structure
+except:
+
+    # Check for release zip file path
+    if args.releaseZip is not None:
+        pyrogue.addLibraryPath(args.releaseZip + '/python')
+    else:
+        import setupLibPaths
 
 # Load the cameralink-gateway package
 import cameralink_gateway
