@@ -196,12 +196,12 @@ $ source setup_env_slac.sh
 
 2) Lauch the GUI:
 ```
-$ python scripts/gui.py --camType LIST_CAMERA_TYPES --defaultFile FEB_CAMERA_CONFIG
+$ python scripts/devGui --camType LIST_CAMERA_TYPES --defaultFile FEB_CAMERA_CONFIG
 ```
 
 # Example of starting up OPAL1000
 ```
-$ python scripts/gui.py --camType Opal1000 --defaultFile config/Opal1000.yml
+$ python scripts/devGui --camType Opal1000 --defaultFile config/Opal1000.yml
 Then execute the StartRun() command to start the triggering
 ```
 

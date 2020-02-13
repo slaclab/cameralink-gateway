@@ -18,7 +18,7 @@ RogueConfig:
 RogueScripts:
   - submodules/axi-pcie-core/scripts/updatePcieFpga
   - submodules/clink-gateway-fw-lib/scripts/updateFeb
-  - ../software/scripts/gui.py
+  - ../software/scripts/devGui
 
 Targets:
   ClinkFebPgp2b_1ch:
