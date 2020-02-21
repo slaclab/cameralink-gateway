@@ -5,4 +5,6 @@ export PRJ_VERSION = 0x03050000
 target: prom
 
 # Define release
+ifndef RELEASE
 export RELEASE = all
+endif
