@@ -1,5 +1,5 @@
-# Define Firmware Version: v3.0.0.1
-export PRJ_VERSION = 0x03000001
+# Define Firmware Version: v3.0.5.0
+export PRJ_VERSION = 0x03050000
 
 # Prom type: s25fl128sxxxxxx0-spi-x1_x2_x4
 target: prom
@@ -8,4 +8,4 @@ target: prom
 export PRJ_PART = XC7K70Tfbg484-2
 
 # Define release
-export RELEASE = cameralink_gateway
+export RELEASE = all

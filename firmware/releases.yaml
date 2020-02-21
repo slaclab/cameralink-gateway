@@ -39,7 +39,7 @@ Targets:
       - mcs
 
 Releases:
-  cameralink_gateway:
+  all:
     Primary: True
     Targets:
       - ClinkFebPgp2b_1ch
