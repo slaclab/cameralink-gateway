@@ -95,8 +95,8 @@ if __name__ == "__main__":
         "--guiType",
         type     = str,
         required = False,
-        default  = 'PyDm',
-        help     = "Sets the GUI type (PyDm or PyQt)",
+        default  = 'PyDM',
+        help     = "Sets the GUI type (PyDM or PyQt)",
     )
 
     # Get the arguments
@@ -144,10 +144,16 @@ if __name__ == "__main__":
             clDevTarget = clDevTarget,
         ) as root:
 
-        if (args.guiType == 'PyDm'):
+        ######################
+        # Development PyDM GUI
+        ######################
+        if (args.guiType == 'PyDM'):
 
             pyrogue.pydm.runPyDM(root=root)
 
+        #################
+        # Legacy PyQT GUI
+        #################
         elif (args.guiType == 'PyQt'):
 
             # Create GUI
@@ -160,7 +166,9 @@ if __name__ == "__main__":
             appTop.exec_()
             root.stop()
 
-        # Undefined device type
+        ####################
+        # Undefined GUI type
+        ####################
         else:
             raise ValueError("Invalid GUI type (%s)" % (args.guiType) )
 

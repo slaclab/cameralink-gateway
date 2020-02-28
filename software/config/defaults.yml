@@ -72,7 +72,7 @@ ClinkDevRoot:
             RxReset: 0x0
             HwEnable: False
             Config_L0Select_Reset: 0x0
-            Config_L0Select_Enabled: 0x1
+            Config_L0Select_Enabled: True
             AxilRdEn: True
             Config_L0Select_RateSel: 0x4 # 102 Hz (ask Matt Weaver for more information)
             Config_L0Select_DestSel: 0x8000
@@ -84,11 +84,11 @@ ClinkDevRoot:
         TriggerEventManager:
           ###################
           XpmMessageAligner:
-            XpmId: 0x0
+            TxId: 0x0
+            RxId: 0x0
           ###################
           TriggerEventBuffer[:]:
             MasterEnable: False
-            EventBufferEnable: False
             Partition: 0
             PauseThreshold: 16
             TriggerDelay: 42

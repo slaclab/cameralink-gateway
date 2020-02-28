@@ -22,7 +22,8 @@ import surf.protocols.batcher as batcher
 import surf.protocols.clink   as cl
 import l2si_core              as l2si
 
-rogue.Version.minVersion('4.8.0')
+rogue.Version.minVersion('4.10.3')
+# rogue.Version.exactVersion('4.10.3')
 
 class ClinkDevRoot(shared.Root):
 
@@ -165,7 +166,6 @@ class ClinkDevRoot(shared.Root):
             # Turn off the triggering
             for devPtr in trigger:
                 devPtr.MasterEnable.set(False)
-                devPtr.EventBufferEnable.set(False)
 
             # Flush the downstream data/trigger pipelines
             for devPtr in eventBuilder:
@@ -191,7 +191,6 @@ class ClinkDevRoot(shared.Root):
 
             # Turn on the triggering
             for devPtr in trigger:
-                devPtr.EventBufferEnable.set(True)
                 devPtr.MasterEnable.set(True)
 
             # Update the run state status variable
