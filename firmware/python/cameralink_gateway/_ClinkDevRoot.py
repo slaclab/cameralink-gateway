@@ -39,8 +39,8 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
         
         # Set the min. firmware Versions
-        self.minPcieVersion = 0x03000000
-        self.minFebVersion  = 0x03000000
+        self.PcieVersion = 0x04000000
+        self.FebVersion  = 0x04000000
         
         # Set number of lanes to min. requirement
         if numLanes > len(camType):
@@ -213,27 +213,27 @@ class ClinkDevRoot(shared.Root):
             # Read all the variables
             self.ReadAll()
             
-            # Check for min. PCIe FW version
+            # Check for PCIe FW version
             fwVersion = self.ClinkPcie.AxiPcieCore.AxiVersion.FpgaVersion.get()
-            if (fwVersion < self.minPcieVersion):
+            if (fwVersion != self.PcieVersion):
                 errMsg = f"""
-                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} < {self.minPcieVersion:#04x}
+                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.PcieVersion:#04x}
                     Please update PCIe firmware using software/scripts/updatePcieFpga.py
                     """
                 click.secho(errMsg, bg='red')
                 raise ValueError(errMsg)            
                 
-            # Check for min. FEB FW version
+            # Check for FEB FW version
             for lane in range(self.numLanes):
                 # Unhide the because dependent on PGP link status
                 self.ClinkFeb[lane].enable.hidden  = False
                 # Check for PGP link up
                 if (self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady.get() != 0):                    
-                    # Check for min. FW version
+                    # Check for FW version
                     fwVersion = self.ClinkFeb[lane].AxiVersion.FpgaVersion.get()
-                    if (fwVersion < self.minFebVersion):
+                    if (fwVersion != self.FebVersion):
                         errMsg = f"""
-                            Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} < {self.minFebVersion:#04x}
+                            Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FebVersion:#04x}
                             Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/updateFeb.py
                             """
                         click.secho(errMsg, bg='red')
