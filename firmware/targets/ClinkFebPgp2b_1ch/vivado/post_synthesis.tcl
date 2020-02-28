@@ -76,8 +76,3 @@ ConfigProbe ${ilaName} {U_Core/U_CLinkWrapper/U_ClinkTop/U_Framer0/r[ready]}
 ## Write the port map file
 ##########################
 WriteDebugProbes ${ilaName} 
-
-##########################
-## Write the port map file
-##########################
-WriteDebugProbes ${ilaName} 
