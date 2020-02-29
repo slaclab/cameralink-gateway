@@ -40,7 +40,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the min. firmware Versions
-        self.PcieVersion = 0x04000003
+        self.PcieVersion = 0x04000000
         self.FebVersion  = 0x04000000
 
         # Set number of lanes to min. requirement
