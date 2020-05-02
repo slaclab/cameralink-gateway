@@ -39,9 +39,8 @@ class ClinkDevRoot(shared.Root):
                  clDevTarget = clDev.ClinkDevKcu1500,
                  **kwargs):
 
-        # Set the min. firmware Versions
-        self.PcieVersion = 0x04000000
-        self.FebVersion  = 0x04000000
+        # Set the firmware Version lock = firmware/targets/shared_version.mk
+        self.FwVersionLock = 0x04020000
 
         # Set number of lanes to min. requirement
         if numLanes > len(camType):
@@ -214,9 +213,9 @@ class ClinkDevRoot(shared.Root):
 
             # Check for PCIe FW version
             fwVersion = self.ClinkPcie.AxiPcieCore.AxiVersion.FpgaVersion.get()
-            if (fwVersion != self.PcieVersion):
+            if (fwVersion != self.FwVersionLock):
                 errMsg = f"""
-                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.PcieVersion:#04x}
+                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FwVersionLock:#04x}
                     Please update PCIe firmware using software/scripts/updatePcieFpga.py
                     """
                 click.secho(errMsg, bg='red')
@@ -230,9 +229,9 @@ class ClinkDevRoot(shared.Root):
                 if (self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady.get() != 0):
                     # Check for FW version
                     fwVersion = self.ClinkFeb[lane].AxiVersion.FpgaVersion.get()
-                    if (fwVersion != self.FebVersion):
+                    if (fwVersion != self.FwVersionLock):
                         errMsg = f"""
-                            Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FebVersion:#04x}
+                            Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FwVersionLock:#04x}
                             Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/updateFeb.py
                             """
                         click.secho(errMsg, bg='red')
