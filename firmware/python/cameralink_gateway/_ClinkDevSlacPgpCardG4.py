@@ -41,5 +41,7 @@ class ClinkDevSlacPgpCardG4(pr.Device):
             offset    = 0x0080_0000,
             numLanes  = numLanes,
             pgp3      = pgp3,
+            enLclsI   = True,
+            enLclsII  = True,
             expand    = True,
         ))
