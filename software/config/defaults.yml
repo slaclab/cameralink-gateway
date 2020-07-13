@@ -9,15 +9,15 @@ ClinkDevRoot:
           Blowoff: True # Flush the downstream data/trigger pipelines
     #########################################################################################################
     Hsio:
-      ######################################      
+      ######################################
       TimingRx:
-        ######################################      
+        ######################################
         TimingFrameRx:
           ClkSel: LCLS-I Clock
           RxDown: 0x0 # Reset the latching register
-        ######################################      
+        ######################################
         XpmMiniWrapper:
-        ######################################      
+        ######################################
           TPGMiniCore:
             TxPolarity: 0x0
             TxLoopback: 0x0
@@ -62,7 +62,7 @@ ClinkDevRoot:
             BsaAvgToWr[0]: 0x64
             BsaMaxSeverity[0]: Invalid
             CountInterval: 0x488b
-        ######################################      
+        ######################################
           XpmMini:
             Link: 0
             TxPllReset: 0x0
@@ -78,19 +78,21 @@ ClinkDevRoot:
             Pipeline_Depth_Clks: 20000
             Pipeline_Depth_Fids: 100
             PartitionMessage_Hdr: 0x0
-        ######################################      
-        TriggerEventManager:
-          ###################
-          XpmMessageAligner:
-            TxId: 0x0
-            RxId: 0x0
-          ###################
-          TriggerEventBuffer[:]:
-            MasterEnable: False
-            Partition: 0
-            PauseThreshold: 16
-            TriggerDelay: 42
-        ######################################      
+        ######################################
+        # TriggerEventManager is LCLS-II ONly
+        ######################################
+#        TriggerEventManager:
+#          ###################
+#          XpmMessageAligner:
+#            TxId: 0x0
+#            RxId: 0x0
+#          ###################
+#          TriggerEventBuffer[:]:
+#            MasterEnable: False
+#            Partition: 0
+#            PauseThreshold: 16
+#            TriggerDelay: 42
+#        ######################################
         TimingPhyMonitor:
           Loopback: 'No'
           UseMiniTpg: True # True for standalone testing
