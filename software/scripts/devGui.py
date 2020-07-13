@@ -56,7 +56,7 @@ if __name__ == "__main__":
         "--enLclsII",
         type     = argBool,
         required = False,
-        default  = True,
+        default  = False,
         help     = "Enable LCLS-II hardware registers",
     )
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         "--startupMode",
         type     = argBool,
         required = False,
-        default  = True,
+        default  = False,
         help     = "False = LCLS-I timing mode, True = LCLS-II timing mode",
     )
 

@@ -60,7 +60,7 @@ class ClinkDevRoot(shared.Root):
         self.camType     = [camType[i] for i in range(laneSize)]
         self.defaultFile = defaultFile
         self.dev         = dev
-        self.startupMode = dev
+        self.startupMode = startupMode
 
         # Check for simulation
         if dev == 'sim':
