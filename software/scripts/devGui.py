@@ -139,14 +139,19 @@ if __name__ == "__main__":
             dev         = args.dev,
             pollEn      = args.pollEn,
             initRead    = args.initRead,
+            timeout     = 2.0,
             camType     = args.camType,
             defaultFile = args.defaultFile,
             clDevTarget = clDevTarget,
         ) as root:
 
-        # Dump the address map
-        root.saveAddressMap( "addressMapDump.dump" )
-        root.saveAddressMap( "addressMapDump.h", headerEn=True )
+#################################################################################
+# Commented out because not supported in rogue @ v4.11.1
+# and rogue v5 is not stable yet https://jira.slac.stanford.edu/browse/ESCLINK-21
+#################################################################################
+#        # Dump the address map
+#        root.saveAddressMap( "addressMapDump.dump" )
+#        root.saveAddressMap( "addressMapDump.h", headerEn=True )
 
         ######################
         # Development PyDM GUI
