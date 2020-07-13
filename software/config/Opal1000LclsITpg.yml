@@ -20,65 +20,6 @@ ClinkDevRoot:
           ClkSel: LCLS-I Clock
           ModeSel: Lcls1Protocol
           ModeSelEn: UseClkSel
-        XpmMiniWrapper:
-          enable: True
-          TPGMiniCore:
-            enable: True
-            TxPolarity: 0x0
-            TxLoopback: 0x0
-            TxInhibit: 0x0
-            BaseControl: 0xc8
-            PulseIdWr: 0x0
-            PulseIdRd: 0x5f7c3411
-            PulseIdSet: 0x0
-            TStampWr: 0x0
-            TStampRd: 0x55b2646f6cd
-            TStampSet: 0x0
-            FixedRateDiv[0]: 0x1
-            FixedRateDiv[1]: 0xd
-            FixedRateDiv[2]: 0x5b
-            FixedRateDiv[3]: 0x38e
-            FixedRateDiv[4]: 0x238c
-            FixedRateDiv[5]: 0x16378
-            FixedRateDiv[6]: 0xde2b0
-            FixedRateDiv[7]: 0x0
-            FixedRateDiv[8]: 0x0
-            FixedRateDiv[9]: 0x0
-            RateReload: 0x0
-            NBeamSeq: 0x0
-            NControlSeq: 0x0
-            NArraysBsa: 0x1
-            SeqAddrLen: 0x0
-            NAllowSeq: 0x0
-            TxReset: 0x0
-            CountIntervalReset: 0x0
-            Lcls1BsaNumSamples: 0x0
-            Lcls1BsaRate: 120Hz
-            Lcls1BsaTimeSlot: TS1
-            Lcls1BsaSeverity: INVALID
-            Lcls1BsaEdefSlot: 0x0
-            Lcls1BsaNumAvgs: 0x0
-            Lcls1BsaStart: 0x0
-            BsaCompleteWr: 0x0
-            BsaCompleteRd: 0x0
-            BsaActive[0]: 0x0
-            BsaRateSelMode[0]: FixedRate
-            BsaFixedRate[0]: 1MHz
-            BsaACRate[0]: 60Hz
-            BsaACTSMask[0]: 0x3f
-            BsaSequenceSelect[0]: 0x0
-            BsaSequenceBitSelect[0]: 0x0
-            BsaDestMode[0]: Dont_Care
-            BsaDestInclusiveMask[0]: 0xffff
-            BsaDestExclusiveMask[0]: 0xffff
-            BsaNtoAvg[0]: 0x1
-            BsaAvgToWr[0]: 0x64
-            BsaMaxSeverity[0]: Invalid
-            PllCnt: 0x0
-            ClkCnt: 0x82867a6e
-            SyncErrCnt: 0x0
-            CountInterval: 0x488b
-            BaseRateCount: 0x5d
         TriggerEventManager:
           enable: True
           EvrV2CoreTriggers:
