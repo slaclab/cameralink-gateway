@@ -22,8 +22,8 @@ import surf.protocols.batcher as batcher
 import surf.protocols.clink   as cl
 import l2si_core              as l2si
 
-rogue.Version.minVersion('4.11.1')
-# rogue.Version.exactVersion('4.10.3')
+# rogue.Version.minVersion('4.11.1')
+rogue.Version.exactVersion('4.11.1')
 
 class ClinkDevRoot(shared.Root):
 
