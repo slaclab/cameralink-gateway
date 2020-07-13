@@ -13,7 +13,6 @@ ClinkDevRoot:
       TimingRx:
         ######################################      
         TimingFrameRx:
-          ClkSel: 0x0 # 0x0 = LCLS-I timing
           ClkSel: 0x1 # 0x1 = LCLS-II timing
           RxDown: 0x0 # Reset the latching register
         ######################################      
