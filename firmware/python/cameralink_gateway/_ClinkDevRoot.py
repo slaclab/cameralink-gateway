@@ -35,6 +35,7 @@ class ClinkDevRoot(shared.Root):
     def __init__(self,
                  dataDebug   = False,
                  dev         = '/dev/datadev_0',# path to PCIe device
+                 startupMode = False,           # False = LCLS-I timing mode, True = LCLS-II timing mode
                  pgp3        = False,           # true = PGPv3, false = PGP2b
                  pollEn      = True,            # Enable automatic polling registers
                  initRead    = True,            # Read all registers at start of the system
@@ -57,6 +58,7 @@ class ClinkDevRoot(shared.Root):
         self.camType     = [camType[i] for i in range(laneSize)]
         self.defaultFile = defaultFile
         self.dev         = dev
+        self.startupMode = dev
 
         # Check for simulation
         if dev == 'sim':
@@ -268,8 +270,17 @@ class ClinkDevRoot(shared.Root):
 
         # Load the configurations
         if self.defaultFile is not None:
+
+            # Start up the timing system
+            if self.startupMode:
+                # Startup in LCLS-II mode
+                self.ClinkPcie.Hsio.TimingRx.ConfigLclsTimingV2()
+            else:
+                # Startup in LCLS-I mode
+                self.ClinkPcie.Hsio.TimingRx.ConfigLclsTimingV1()
+
+            # Load the YAML configurations
             defaultFile = ["config/defaults.yml",self.defaultFile]
-            # defaultFile = [self.defaultFile]
             print(f'Loading {defaultFile} Configuration File...')
             self.LoadConfig(defaultFile)
 

@@ -18,6 +18,8 @@ class ClinkDevSlacPgpCardG4(pr.Device):
     def __init__(self,
                  numLanes = 8,
                  pgp3     = False,
+                 enLclsI  = True,
+                 enLclsII = False,
                  **kwargs):
         super().__init__(**kwargs)
 
@@ -41,7 +43,7 @@ class ClinkDevSlacPgpCardG4(pr.Device):
             offset    = 0x0080_0000,
             numLanes  = numLanes,
             pgp3      = pgp3,
-            enLclsI   = True,
-            enLclsII  = True,
+            enLclsI   = enLclsI,
+            enLclsII  = enLclsII,
             expand    = True,
         ))
