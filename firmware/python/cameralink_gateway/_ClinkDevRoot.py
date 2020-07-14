@@ -33,18 +33,19 @@ rogue.Version.maxVersion('4.999.999')
 class ClinkDevRoot(shared.Root):
 
     def __init__(self,
-                 dataDebug   = False,
-                 dev         = '/dev/datadev_0',# path to PCIe device
-                 enLclsI     = True,
-                 enLclsII    = False,
-                 startupMode = False,           # False = LCLS-I timing mode, True = LCLS-II timing mode
-                 pgp3        = False,           # true = PGPv3, false = PGP2b
-                 pollEn      = True,            # Enable automatic polling registers
-                 initRead    = True,            # Read all registers at start of the system
-                 numLanes    = 4,               # Number of PGP lanes
-                 camType     = None,
-                 defaultFile = None,
-                 clDevTarget = clDev.ClinkDevKcu1500,
+                 dataDebug      = False,
+                 dev            = '/dev/datadev_0',# path to PCIe device
+                 enLclsI        = True,
+                 enLclsII       = False,
+                 startupMode    = False, # False = LCLS-I timing mode, True = LCLS-II timing mode
+                 standAloneMode = False, # False = using fiber timing, True = locally generated timing
+                 pgp3           = False, # true = PGPv3, false = PGP2b
+                 pollEn         = True,  # Enable automatic polling registers
+                 initRead       = True,  # Read all registers at start of the system
+                 numLanes       = 4,     # Number of PGP lanes
+                 camType        = None,
+                 defaultFile    = None,
+                 clDevTarget    = clDev.ClinkDevKcu1500,
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
@@ -57,10 +58,11 @@ class ClinkDevRoot(shared.Root):
             laneSize = numLanes
 
         # Set local variables
-        self.camType     = [camType[i] for i in range(laneSize)]
-        self.defaultFile = defaultFile
-        self.dev         = dev
-        self.startupMode = startupMode
+        self.camType        = [camType[i] for i in range(laneSize)]
+        self.defaultFile    = defaultFile
+        self.dev            = dev
+        self.startupMode    = startupMode
+        self.standAloneMode = standAloneMode
 
         # Check for simulation
         if dev == 'sim':
@@ -235,7 +237,8 @@ class ClinkDevRoot(shared.Root):
             # Check for FEB FW version
             for lane in range(self.numLanes):
                 # Unhide the because dependent on PGP link status
-                self.ClinkFeb[lane].enable.hidden  = False
+                self.ClinkFeb[lane].enable.hidden = False
+                self.ClinkPcie.Hsio.TimingRx.TriggerEventManager.enable.hidden = False
                 # Check for PGP link up
                 if (self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady.get() != 0):
                     # Check for FW version
@@ -275,16 +278,36 @@ class ClinkDevRoot(shared.Root):
         # Load the configurations
         if self.defaultFile is not None:
 
+            # Useful pointer
+            timingRx = self.ClinkPcie.Hsio.TimingRx
+
             # Start up the timing system
             if self.startupMode:
+
+                # Set the default to  LCLS-I mode
+                defaultFile = ["config/defaults_LCLS-II.yml",self.defaultFile]
+
                 # Startup in LCLS-II mode
-                self.ClinkPcie.Hsio.TimingRx.ConfigLclsTimingV2()
+                if self.standAloneMode:
+                    timingRx.ConfigureXpmMini()
+                else:
+                    timingRx.ConfigLclsTimingV2()
+
             else:
+
+                # Set the default to  LCLS-I mode
+                defaultFile = ["config/defaults_LCLS-I.yml",self.defaultFile]
+
                 # Startup in LCLS-I mode
-                self.ClinkPcie.Hsio.TimingRx.ConfigLclsTimingV1()
+                if self.standAloneMode:
+                    timingRx.ConfigureTpgMiniStream()
+                else:
+                    timingRx.ConfigLclsTimingV1()
+
+            # Read all the variables
+            self.ReadAll()
 
             # Load the YAML configurations
-            defaultFile = ["config/defaults.yml",self.defaultFile]
             print(f'Loading {defaultFile} Configuration File...')
             self.LoadConfig(defaultFile)
 

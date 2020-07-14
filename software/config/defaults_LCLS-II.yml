@@ -13,7 +13,8 @@ ClinkDevRoot:
       TimingRx:
         ######################################
         TimingFrameRx:
-          ClkSel: LCLS-I Clock
+          ClkSel: LCLS-II Clock
+          ModeSel: Lcls2Protocol
           RxDown: 0x0 # Reset the latching register
         ######################################
         XpmMiniWrapper:
@@ -79,21 +80,15 @@ ClinkDevRoot:
             Pipeline_Depth_Fids: 100
             PartitionMessage_Hdr: 0x0
         ######################################
-        # TriggerEventManager is LCLS-II ONly
-        ######################################
-#        TriggerEventManager:
-#          ###################
-#          XpmMessageAligner:
-#            TxId: 0x0
-#            RxId: 0x0
-#          ###################
-#          TriggerEventBuffer[:]:
-#            MasterEnable: False
-#            Partition: 0
-#            PauseThreshold: 16
-#            TriggerDelay: 42
-#        ######################################
-        TimingPhyMonitor:
-          Loopback: 'No'
-          UseMiniTpg: True # True for standalone testing
+        TriggerEventManager:
+          ###################
+          XpmMessageAligner:
+            TxId: 0x0
+            RxId: 0x0
+          ###################
+          TriggerEventBuffer[:]:
+            MasterEnable: False
+            Partition: 0
+            PauseThreshold: 16
+            TriggerDelay: 42
     #########################################################################################################

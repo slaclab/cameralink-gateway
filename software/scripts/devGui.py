@@ -40,7 +40,7 @@ if __name__ == "__main__":
         "--hwType",
         type     = str,
         required = False,
-        default  = 'kcu1500',
+        default  = 'kcu1500', # Default: kcu1500 PCIe card platform
         help     = "kcu1500 or SlacPgpCardG4",
     )
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
         "--enLclsI",
         type     = argBool,
         required = False,
-        default  = True,
+        default  = True, # Default: Enable LCLS-I hardware registers
         help     = "Enable LCLS-I hardware registers",
     )
 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         "--enLclsII",
         type     = argBool,
         required = False,
-        default  = False,
+        default  = False, # Default: Disable LCLS-II hardware registers
         help     = "Enable LCLS-II hardware registers",
     )
 
@@ -64,8 +64,16 @@ if __name__ == "__main__":
         "--startupMode",
         type     = argBool,
         required = False,
-        default  = False,
+        default  = False, # Default: False = LCLS-I timing mode
         help     = "False = LCLS-I timing mode, True = LCLS-II timing mode",
+    )
+
+    parser.add_argument(
+        "--standAloneMode",
+        type     = argBool,
+        required = False,
+        default  = False, # Default: False = using fiber timing
+        help     = "False = using fiber timing, True = locally generated timing",
     )
 
     parser.add_argument(
@@ -160,15 +168,16 @@ if __name__ == "__main__":
     #################################################################
 
     with cameralink_gateway.ClinkDevRoot(
-            dev         = args.dev,
-            pollEn      = args.pollEn,
-            initRead    = args.initRead,
-            camType     = args.camType,
-            defaultFile = args.defaultFile,
-            enLclsI     = (args.enLclsII or not args.startupMode),
-            enLclsII    = (args.enLclsII or args.startupMode),
-            startupMode = args.startupMode,
-            clDevTarget = clDevTarget,
+            dev            = args.dev,
+            pollEn         = args.pollEn,
+            initRead       = args.initRead,
+            camType        = args.camType,
+            defaultFile    = args.defaultFile,
+            enLclsI        = (args.enLclsII or not args.startupMode),
+            enLclsII       = (args.enLclsII or args.startupMode),
+            startupMode    = args.startupMode,
+            standAloneMode = args.standAloneMode,
+            clDevTarget    = clDevTarget,
         ) as root:
 
 #################################################################################
