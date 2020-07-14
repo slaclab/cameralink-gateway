@@ -199,9 +199,9 @@ $ source setup_env_slac.sh
 $ python scripts/devGui --camType LIST_CAMERA_TYPES --defaultFile FEB_CAMERA_CONFIG
 ```
 
-# Example of starting up OPAL1000
+# Example of starting up OPAL1000 with stand alone mode (locally generated timing)
 ```
-$ python scripts/devGui --camType Opal1000 --defaultFile config/Opal1000.yml
+$ python scripts/devGui --camType Opal1000 --defaultFile config/Opal1000.yml --standAloneMode 1
 Then execute the StartRun() command to start the triggering
 ```
 
