@@ -13,7 +13,7 @@ ClinkDevRoot:
       TimingRx:
         ######################################      
         TimingFrameRx:
-          ClkSel: LCLS-II Clock
+          ClkSel: LCLS-I Clock
           RxDown: 0x0 # Reset the latching register
         ######################################      
         XpmMiniWrapper:

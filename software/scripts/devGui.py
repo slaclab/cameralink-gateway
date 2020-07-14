@@ -45,6 +45,30 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--enLclsI",
+        type     = argBool,
+        required = False,
+        default  = True,
+        help     = "Enable LCLS-I hardware registers",
+    )
+
+    parser.add_argument(
+        "--enLclsII",
+        type     = argBool,
+        required = False,
+        default  = True,
+        help     = "Enable LCLS-II hardware registers",
+    )
+
+    parser.add_argument(
+        "--startupMode",
+        type     = argBool,
+        required = False,
+        default  = True,
+        help     = "False = LCLS-I timing mode, True = LCLS-II timing mode",
+    )
+
+    parser.add_argument(
         "--camType",
         nargs    ='+',
         required = True,
@@ -139,9 +163,11 @@ if __name__ == "__main__":
             dev         = args.dev,
             pollEn      = args.pollEn,
             initRead    = args.initRead,
-            timeout     = 2.0,
             camType     = args.camType,
             defaultFile = args.defaultFile,
+            enLclsI     = (args.enLclsII or not args.startupMode),
+            enLclsII    = (args.enLclsII or args.startupMode),
+            startupMode = args.startupMode,
             clDevTarget = clDevTarget,
         ) as root:
 

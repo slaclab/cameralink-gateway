@@ -35,6 +35,8 @@ class ClinkDevRoot(shared.Root):
     def __init__(self,
                  dataDebug   = False,
                  dev         = '/dev/datadev_0',# path to PCIe device
+                 enLclsI     = True,
+                 enLclsII    = False,
                  startupMode = False,           # False = LCLS-I timing mode, True = LCLS-II timing mode
                  pgp3        = False,           # true = PGPv3, false = PGP2b
                  pollEn      = True,            # Enable automatic polling registers
@@ -84,6 +86,8 @@ class ClinkDevRoot(shared.Root):
             memBase  = self.memMap,
             numLanes = laneSize,
             pgp3     = pgp3,
+            enLclsI  = enLclsI,
+            enLclsII = enLclsII,
             expand   = True,
         ))
 
