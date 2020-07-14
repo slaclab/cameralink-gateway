@@ -7,7 +7,7 @@ ClinkDevRoot:
       PllConfig[:]: '80MHz'
       ###################
       Ch[0]:
-        LinkMode: Base 
+        LinkMode: Base
         DataMode: 12Bit
         FrameMode: Frame
         TapCount: 2
@@ -16,7 +16,7 @@ ClinkDevRoot:
         BaudRate: 57600 # units of bps
         SerThrottle: 10000 # (10ms x 1us throttle rate) = 10000
         SwControlValue: 0x0
-        SwControlEn: 0x0 
+        SwControlEn: 0x0
         ###################
         UartOpal1000: # OPAL 1000 UART interface
           OR: '12'     # Output resolution, i.e. bits per pixel.  Set to 12. (value from Bruce Hill)
@@ -30,11 +30,11 @@ ClinkDevRoot:
           DPE: '1'     # Set DPE to default value of 1
           FSM: '0'     # Set FSM to default value of 0
           FST[0]: '0'  # Set FST to default value of [0,1]
-          FST[1]: '1'  # Set FST to default value of [0,1]     
+          FST[1]: '1'  # Set FST to default value of [0,1]
           GA: '100'    # Set GA to default value of 100
           MI: '0'      # Set MI to default value of 0
           TP: '0'      # Set TP to default value of 0
-          BL: '20'     # Set BL to default value of 20   
+          BL: '20'     # Set BL to default value of 20
     ###################
     TrigCtrl[0]:
       EnableTrig: True

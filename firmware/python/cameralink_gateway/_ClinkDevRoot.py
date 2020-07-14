@@ -22,8 +22,13 @@ import surf.protocols.batcher as batcher
 import surf.protocols.clink   as cl
 import l2si_core              as l2si
 
-# rogue.Version.minVersion('4.11.1')
-rogue.Version.exactVersion('4.11.1')
+
+##################################################
+# https://jira.slac.stanford.edu/browse/ESCLINK-21
+##################################################
+rogue.Version.minVersion('4.11.1')
+rogue.Version.maxVersion('4.999.999')
+# rogue.Version.exactVersion('4.11.1')
 
 class ClinkDevRoot(shared.Root):
 

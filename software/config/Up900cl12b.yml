@@ -7,7 +7,7 @@ ClinkDevRoot:
       PllConfig[:]: '25MHz'
       ###################
       Ch[0]:
-        LinkMode: Base 
+        LinkMode: Base
         DataMode: 12Bit
         FrameMode: Frame
         TapCount: 2
@@ -16,10 +16,10 @@ ClinkDevRoot:
         BaudRate: 9600 # units of bps
         SerThrottle: 30000 # (30ms x 1us throttle rate) = 10000
         SwControlValue: 0x0
-        SwControlEn: 0x0     
+        SwControlEn: 0x0
         ###################
         UartUp900cl12b: # UP-900CL-12B
-          SM: 'f'   
+          SM: 'f'
     ###################
     TrigCtrl[0]:
       EnableTrig: True
