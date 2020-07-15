@@ -22,13 +22,8 @@ import surf.protocols.batcher as batcher
 import surf.protocols.clink   as cl
 import l2si_core              as l2si
 
-
-###################################################
-# https://jira.slac.stanford.edu/browse/ESROGUE-459
-###################################################
-rogue.Version.minVersion('4.11.1')
-rogue.Version.maxVersion('4.999.999')
-# rogue.Version.exactVersion('4.11.1')
+rogue.Version.minVersion('5.1.0')
+# rogue.Version.exactVersion('5.1.0')
 
 class ClinkDevRoot(shared.Root):
 
@@ -78,6 +73,9 @@ class ClinkDevRoot(shared.Root):
             initRead    = initRead,
             numLanes    = laneSize,
             **kwargs)
+
+        # Unhide the RemoteVariableDump command
+        self.RemoteVariableDump.hidden = False
 
         # Create memory interface
         self.memMap = axipcie.createAxiPcieMemMap(dev, 'localhost', 8000)
