@@ -279,10 +279,10 @@ class ClinkDevRoot(shared.Root):
             # Useful pointer
             timingRx = self.ClinkPcie.Hsio.TimingRx
 
-            # Start up the timing system
+            # Start up the timing system = LCLS-II mode
             if self.startupMode:
 
-                # Set the default to  LCLS-I mode
+                # Set the default to  LCLS-II mode
                 defaultFile = ["config/defaults_LCLS-II.yml",self.defaultFile]
 
                 # Startup in LCLS-II mode
@@ -291,6 +291,7 @@ class ClinkDevRoot(shared.Root):
                 else:
                     timingRx.ConfigLclsTimingV2()
 
+            # Else LCLS-I mode
             else:
 
                 # Set the default to  LCLS-I mode
