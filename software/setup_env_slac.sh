@@ -6,5 +6,5 @@ source /afs/slac.stanford.edu/g/reseng/vol26/anaconda/miniconda3/etc/profile.d/c
 ##################################
 # Activate Rogue conda Environment
 ##################################
-#conda activate rogue_4.11.1
+#conda activate rogue_5.1.0
 conda activate rogue_pre-release
