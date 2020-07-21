@@ -222,6 +222,7 @@ class ClinkDevRoot(shared.Root):
             # Dump the state of the hardware before configuration
             self.ReadAll()
             self.ReadAll()
+            print(f'Dumping pre-configurations...')
             self.SaveConfig('dump/config-dump-pre-config.yml')
             self.SaveState('dump/state-dump-pre-config.yml')
 
@@ -321,6 +322,7 @@ class ClinkDevRoot(shared.Root):
             # Dump the state of the hardware before configuration
             self.ReadAll()
             self.ReadAll()
+            print(f'Dumping post-configurations...')
             self.SaveConfig('dump/config-dump-post-config.yml')
             self.SaveState('dump/state-dump-post-config.yml')
 
