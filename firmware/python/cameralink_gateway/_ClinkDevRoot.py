@@ -44,7 +44,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x04060000
+        self.FwVersionLock = 0x04070000
 
         # Set number of lanes to min. requirement
         if numLanes > len(camType):
@@ -225,7 +225,6 @@ class ClinkDevRoot(shared.Root):
 
             # Dump the state of the hardware before configuration
             self.ReadAll()
-            self.ReadAll()
             self.SaveConfig('dump/config-dump-pre-config.yml')
             self.SaveState('dump/state-dump-pre-config.yml')
 
@@ -318,7 +317,6 @@ class ClinkDevRoot(shared.Root):
             self.LoadConfig(defaultFile)
 
             # Dump the state of the hardware before configuration
-            self.ReadAll()
             self.ReadAll()
             self.SaveConfig('dump/config-dump-post-config.yml')
             self.SaveState('dump/state-dump-post-config.yml')
