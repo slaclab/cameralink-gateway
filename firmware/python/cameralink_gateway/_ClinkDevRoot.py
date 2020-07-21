@@ -219,14 +219,15 @@ class ClinkDevRoot(shared.Root):
             pass
 
         else:
-            # Dump the address map
-            self.saveAddressMap( "dump/addressMapDump.dump" )
-            self.saveAddressMap( "dump/addressMapDump.h", headerEn=True )
-
             # Dump the state of the hardware before configuration
+            self.ReadAll()
             self.ReadAll()
             self.SaveConfig('dump/config-dump-pre-config.yml')
             self.SaveState('dump/state-dump-pre-config.yml')
+
+            # Dump the address map
+            self.saveAddressMap( "dump/addressMapDump.dump" )
+            self.saveAddressMap( "dump/addressMapDump.h", headerEn=True )
 
             # Check for PCIe FW version
             fwVersion = self.ClinkPcie.AxiPcieCore.AxiVersion.FpgaVersion.get()
@@ -311,12 +312,14 @@ class ClinkDevRoot(shared.Root):
 
             # Read all the variables
             self.ReadAll()
+            self.ReadAll()
 
             # Load the YAML configurations
             print(f'Loading {defaultFile} Configuration File...')
             self.LoadConfig(defaultFile)
 
             # Dump the state of the hardware before configuration
+            self.ReadAll()
             self.ReadAll()
             self.SaveConfig('dump/config-dump-post-config.yml')
             self.SaveState('dump/state-dump-post-config.yml')
