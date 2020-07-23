@@ -248,7 +248,6 @@ class ClinkDevRoot(shared.Root):
             for lane in range(self.numLanes):
                 # Unhide the because dependent on PGP link status
                 self.ClinkFeb[lane].enable.hidden = False
-                self.ClinkPcie.Hsio.TimingRx.TriggerEventManager.enable.hidden = False
                 # Check for PGP link up
                 if (self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady.get() != 0):
                     # Check for FW version
