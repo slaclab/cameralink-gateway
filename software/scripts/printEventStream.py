@@ -36,10 +36,10 @@ class DataDebug(rogue.interfaces.stream.Slave):
         channel = frame.getChannel()
 
         if channel == 0 or channel == 1:
-            if enPrint:
+            if self.enPrint:
                 print('-------------------------')
-            d = l2si_core.parseEventHeaderFrame(frame)
-            if enPrint:
+            d = l2si_core.parseEventHeaderFrame(frame,self.enPrint)
+            if self.enPrint:
                 print(d)
                 if channel == 1:
                     print('-------------------------')
@@ -49,11 +49,12 @@ class DataDebug(rogue.interfaces.stream.Slave):
             frameSize = frame.getPayload()
             ba = bytearray(frameSize)
             frame.read(ba, 0)
-            if enPrint:
+            if self.enPrint:
                 print(f"Raw camera data channel - {len(ba)} bytes")
                 print(frame.getNumpy(0, frameSize))
                 print('-------------------------')
-        # print()
+        if self.enPrint:
+            print()
 
 class myRoot(pr.Root):
     def __init__(self,
