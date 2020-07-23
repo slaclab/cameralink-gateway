@@ -20,34 +20,40 @@ import rogue
 import pyrogue as pr
 import l2si_core
 
+# rogue.Logging.setLevel(rogue.Logging.Warning)
+
 #################################################################
 
 class DataDebug(rogue.interfaces.stream.Slave):
-    def __init__(self, name):
+    def __init__(self, name, enPrint):
         rogue.interfaces.stream.Slave.__init__(self)
 
         self.channelData = [[] for _ in range(8)]
         self.name = name
+        self.enPrint = enPrint
 
     def _acceptFrame(self, frame):
         channel = frame.getChannel()
 
         if channel == 0 or channel == 1:
-            print('-------------------------')
-            d = l2si_core.parseEventHeaderFrame(frame)
-            print(d)
-            if channel == 1:
+            if enPrint:
                 print('-------------------------')
-                print()
+            d = l2si_core.parseEventHeaderFrame(frame)
+            if enPrint:
+                print(d)
+                if channel == 1:
+                    print('-------------------------')
+                    print()
 
         if channel == 2:
             frameSize = frame.getPayload()
             ba = bytearray(frameSize)
             frame.read(ba, 0)
-            print(f"Raw camera data channel - {len(ba)} bytes")
-            print(frame.getNumpy(0, frameSize))
-            print('-------------------------')
-        print()
+            if enPrint:
+                print(f"Raw camera data channel - {len(ba)} bytes")
+                print(frame.getNumpy(0, frameSize))
+                print('-------------------------')
+        # print()
 
 class myRoot(pr.Root):
     def __init__(self,
@@ -57,7 +63,7 @@ class myRoot(pr.Root):
 
         # Create arrays to be filled
         self.dmaStreams = [None for lane in range(4)]
-        self._dbg       = [DataDebug("DataDebug") for lane in range(4)]
+        self._dbg       = [DataDebug(name='DataDebug',enPrint=False) for lane in range(4)]
         self.unbatchers = [rogue.protocols.batcher.SplitterV1() for lane in range(4)]
 
         # Connect the streams
