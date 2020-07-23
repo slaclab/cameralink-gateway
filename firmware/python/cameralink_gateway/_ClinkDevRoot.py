@@ -91,8 +91,12 @@ class ClinkDevRoot(shared.Root):
             expand   = True,
         ))
 
+        # CLink SRP, CLink serial
+        destList = [0, 2]
+
         # Create DMA streams
-        self.dmaStreams = axipcie.createAxiPcieDmaStreams(dev, {lane:{dest for dest in range(4)} for lane in range(laneSize)}, 'localhost', 8000)
+        self.dmaStreams = axipcie.createAxiPcieDmaStreams(
+            dev, {lane:{dest for dest in destList} for lane in range(laneSize)}, 'localhost', 8000)
 
         # Check if not doing simulation
         if (dev!='sim'):
