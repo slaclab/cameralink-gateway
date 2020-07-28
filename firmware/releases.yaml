@@ -43,7 +43,7 @@ Releases:
     Primary: True
     Targets:
       - ClinkFebPgp2b_1ch
-      # - ClinkFebPgp2b_2ch
+      - ClinkFebPgp2b_2ch
       - ClinkKcu1500Pgp2b
       # - ClinkSlacPgpCardG4Pgp2b
     Types:
