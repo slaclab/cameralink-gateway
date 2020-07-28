@@ -24,7 +24,14 @@ ClinkDevRoot:
     TrigCtrl[0]:
       EnableTrig: True
       InvCC: True # Active LOW Pulse
-      TrigMap: ChA
+      TrigMap: ChA # ChA = pgpTrigger(0)
+      TrigPulseWidth: 100.0 # units of us
+      TrigMask: 0x2 # CC2 trigger
+    ###################
+    TrigCtrl[1]:
+      EnableTrig: True
+      InvCC: True # Active LOW Pulse
+      TrigMap: ChB # ChB = pgpTrigger(1)
       TrigPulseWidth: 100.0 # units of us
       TrigMask: 0x2 # CC2 trigger
   #########################################################################################################
