@@ -40,6 +40,7 @@ class ClinkDevRoot(shared.Root):
                  numLanes       = 4,     # Number of PGP lanes
                  camType        = None,
                  defaultFile    = None,
+                 enableDump     = False,
                  clDevTarget    = clDev.ClinkDevKcu1500,
                  **kwargs):
 
@@ -58,6 +59,7 @@ class ClinkDevRoot(shared.Root):
         self.dev            = dev
         self.startupMode    = startupMode
         self.standAloneMode = standAloneMode
+        self.enableDump     = enableDump
 
         # Check for simulation
         if dev == 'sim':
@@ -224,16 +226,16 @@ class ClinkDevRoot(shared.Root):
             pass
 
         else:
-            # Dump the state of the hardware before configuration
             self.ReadAll()
             self.ReadAll()
-            print(f'Dumping pre-configurations...')
-            self.SaveConfig('dump/config-dump-pre-config.yml')
-            self.SaveState('dump/state-dump-pre-config.yml')
-
-            # Dump the address map
-            self.saveAddressMap( "dump/addressMapDump.dump" )
-            self.saveAddressMap( "dump/addressMapDump.h", headerEn=True )
+            if (self.enableDump):
+                # Dump the state of the hardware before configuration
+                print(f'Dumping pre-configurations...')
+                self.SaveConfig('dump/config-dump-pre-config.yml')
+                self.SaveState('dump/state-dump-pre-config.yml')
+                # Dump the address map
+                self.saveAddressMap( "dump/addressMapDump.dump" )
+                self.saveAddressMap( "dump/addressMapDump.h", headerEn=True )
 
             # Check for PCIe FW version
             fwVersion = self.ClinkPcie.AxiPcieCore.AxiVersion.FpgaVersion.get()
@@ -323,12 +325,13 @@ class ClinkDevRoot(shared.Root):
             print(f'Loading {defaultFile} Configuration File...')
             self.LoadConfig(defaultFile)
 
-            # Dump the state of the hardware before configuration
-            self.ReadAll()
-            self.ReadAll()
-            print(f'Dumping post-configurations...')
-            self.SaveConfig('dump/config-dump-post-config.yml')
-            self.SaveState('dump/state-dump-post-config.yml')
+            if (self.enableDump):
+                # Dump the state of the hardware before configuration
+                self.ReadAll()
+                self.ReadAll()
+                print(f'Dumping post-configurations...')
+                self.SaveConfig('dump/config-dump-post-config.yml')
+                self.SaveState('dump/state-dump-post-config.yml')
 
     # Function calls after loading YAML configuration
     def initialize(self):
