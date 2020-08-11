@@ -81,6 +81,7 @@ class ClinkDevRoot(shared.Root):
 
         # Create memory interface
         self.memMap = axipcie.createAxiPcieMemMap(dev, 'localhost', 8000)
+        self.memMap.setName('PCIe_Bar0')
 
         # Instantiate the top level Device and pass it the memory map
         self.add(clDevTarget(
@@ -111,6 +112,7 @@ class ClinkDevRoot(shared.Root):
 
                 # SRP
                 self._srp[lane] = rogue.protocols.srp.SrpV3()
+                self._srp[lane].setName(f'SRPv3[{lane}]')
                 pr.streamConnectBiDir(self.dmaStreams[lane][0],self._srp[lane])
 
                 # CameraLink Feb Board
