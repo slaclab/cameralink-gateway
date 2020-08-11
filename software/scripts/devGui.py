@@ -77,6 +77,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--enableDump",
+        type     = argBool,
+        required = False,
+        default  = True,
+        help     = "True to dump .h and pre/post state",
+    )
+
+    parser.add_argument(
         "--camType",
         nargs    ='+',
         required = True,
@@ -177,6 +185,7 @@ if __name__ == "__main__":
             enLclsII       = (args.enLclsII or args.startupMode),
             startupMode    = args.startupMode,
             standAloneMode = args.standAloneMode,
+            enableDump     = args.enableDump,
             clDevTarget    = clDevTarget,
         ) as root:
 
