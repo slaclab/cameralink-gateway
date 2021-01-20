@@ -22,6 +22,9 @@ use surf.AxiPkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
 
+library lcls_timing_core;
+use lcls_timing_core.TimingPkg.all;
+
 entity AppLane is
    generic (
       TPD_G             : time := 1 ns;
@@ -29,27 +32,30 @@ entity AppLane is
       DMA_AXIS_CONFIG_G : AxiStreamConfigType);
    port (
       -- AXI-Lite Interface
-      axilClk         : in  sl;
-      axilRst         : in  sl;
-      axilReadMaster  : in  AxiLiteReadMasterType;
-      axilReadSlave   : out AxiLiteReadSlaveType;
-      axilWriteMaster : in  AxiLiteWriteMasterType;
-      axilWriteSlave  : out AxiLiteWriteSlaveType;
+      axilClk             : in  sl;
+      axilRst             : in  sl;
+      axilReadMaster      : in  AxiLiteReadMasterType;
+      axilReadSlave       : out AxiLiteReadSlaveType;
+      axilWriteMaster     : in  AxiLiteWriteMasterType;
+      axilWriteSlave      : out AxiLiteWriteSlaveType;
       -- PGP Streams (axilClk domain)
-      pgpIbMaster     : out AxiStreamMasterType;
-      pgpIbSlave      : in  AxiStreamSlaveType;
-      pgpObMasters    : in  AxiStreamQuadMasterType;
-      pgpObSlaves     : out AxiStreamQuadSlaveType;
+      pgpIbMaster         : out AxiStreamMasterType;
+      pgpIbSlave          : in  AxiStreamSlaveType;
+      pgpObMasters        : in  AxiStreamQuadMasterType;
+      pgpObSlaves         : out AxiStreamQuadSlaveType;
       -- Trigger Event streams (axilClk domain)
-      eventAxisMaster : in  AxiStreamMasterType;
-      eventAxisSlave  : out AxiStreamSlaveType;
+      eventAxisMaster     : in  AxiStreamMasterType;
+      eventAxisSlave      : out AxiStreamSlaveType;
+      eventTimingMsgValid : in  sl;
+      eventTimingMsg      : in  TimingMessageType;
+      eventTimingMsgRd    : out sl;
       -- DMA Interface (dmaClk domain)
-      dmaClk          : in  sl;
-      dmaRst          : in  sl;
-      dmaIbMaster     : out AxiStreamMasterType;
-      dmaIbSlave      : in  AxiStreamSlaveType;
-      dmaObMaster     : in  AxiStreamMasterType;
-      dmaObSlave      : out AxiStreamSlaveType);
+      dmaClk              : in  sl;
+      dmaRst              : in  sl;
+      dmaIbMaster         : out AxiStreamMasterType;
+      dmaIbSlave          : in  AxiStreamSlaveType;
+      dmaObMaster         : in  AxiStreamMasterType;
+      dmaObSlave          : out AxiStreamSlaveType);
 end AppLane;
 
 architecture mapping of AppLane is
@@ -65,6 +71,36 @@ architecture mapping of AppLane is
 
    signal appObMaster : AxiStreamMasterType;
    signal appObSlave  : AxiStreamSlaveType;
+
+   constant TIM_AXIS_CONFIG_C : AxiStreamConfigType := (
+      TSTRB_EN_C    => false,
+      TDATA_BYTES_C => 48,
+      TDEST_BITS_C  => 0,
+      TID_BITS_C    => 0,
+      TKEEP_MODE_C  => TKEEP_NORMAL_C,
+      TUSER_BITS_C  => 0,
+      TUSER_MODE_C  => TUSER_NORMAL_C
+   ); 
+   
+   signal inTimingAxisMaster  : AxiStreamMasterType := axiStreamMasterInit(TIM_AXIS_CONFIG_C);
+   signal inTimingAxisSlave   : AxiStreamSlaveType;
+   signal outTimingAxisMaster : AxiStreamMasterType;
+   signal outTimingAxisSlave  : AxiStreamSlaveType;
+
+   function toSlvFormatted(msg : TimingMessageType) return slv is
+      variable v : slv(383 downto 0) := (others=>'0');
+      variable i : integer := 0;
+   begin
+      assignSlv(i, v, msg.pulseId);                             -- [63:0]
+      assignSlv(i, v, msg.fixedRates(9 downto 0));              -- [73:64]
+      assignSlv(i, v, msg.acRates(5 downto 0));                 -- [79:74]
+      assignSlv(i, v, resize(msg.acTimeSlot,8));                -- [87:80]
+      assignSlv(i, v, msg.beamRequest(7 downto 0));             -- [95:88]
+      for j in msg.control'range loop                           -- [383:96]
+         assignSlv(i, v, msg.control(j));
+      end loop;
+      return v;
+   end function;
 
 begin
 
@@ -98,17 +134,42 @@ begin
          mAxisMaster => pgpIbMaster,
          mAxisSlave  => pgpIbSlave);
 
+   -------------------
+   -- Timing Stream --
+   -------------------
+   U_Timing_To_Dma : entity surf.AxiStreamResize
+     generic map (
+         TPD_G               => TPD_G,
+         -- AXI Stream Port Configurations
+         SLAVE_AXI_CONFIG_G  => TIM_AXIS_CONFIG_C,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_G)
+      port map (
+         axisClk     => axilClk,
+         axisRst     => axilRst,
+         -- Slave Port
+         sAxisMaster => inTimingAxisMaster,
+         sAxisSlave  => inTimingAxisSlave,
+         -- Master Port
+         mAxisMaster => outTimingAxisMaster,
+         mAxisSlave  => outTimingAxisSlave);
+
+   inTimingAxisMaster.tValid <= eventTimingMsgValid;
+   inTimingAxisMaster.tData(383 downto 0) <= toSlvFormatted(eventTimingMsg);
+   inTimingAxisMaster.tLast  <= '1';
+   eventTimingMsgRd          <= inTimingAxisSlave.tReady;
+   
    ----------------------------------
    -- Event Builder
    ----------------------------------         
    U_EventBuilder : entity surf.AxiStreamBatcherEventBuilder
       generic map (
          TPD_G          => TPD_G,
-         NUM_SLAVES_G   => 2,
+         NUM_SLAVES_G   => 3,
          MODE_G         => "ROUTED",
          TDEST_ROUTES_G => (
             0           => "0000000-",  -- Trig on 0x0, Event on 0x1
-            1           => "00000010"), -- Map PGP[VC1] to TDEST 0x2      
+            1           => "00000010",  -- Map PGP[VC1] to TDEST 0x2      
+            2           => "00000011"), -- Map Timing   to TDEST 0x3      
          TRANS_TDEST_G  => X"01",
          AXIS_CONFIG_G  => DMA_AXIS_CONFIG_G)
       port map (
@@ -123,8 +184,10 @@ begin
          -- AXIS Interfaces
          sAxisMasters(0) => eventAxisMaster,
          sAxisMasters(1) => pgpObMasters(1),  -- PGP[VC1]
+         sAxisMasters(2) => outTimingAxisMaster,
          sAxisSlaves(0)  => eventAxisSlave,
          sAxisSlaves(1)  => pgpObSlaves(1),   -- PGP[VC1]
+         sAxisSlaves(2)  => outTimingAxisSlave,
          mAxisMaster     => eventMaster,
          mAxisSlave      => eventSlave);
 

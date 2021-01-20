@@ -27,6 +27,9 @@ library lcls2_pgp_fw_lib;
 
 library axi_pcie_core;
 
+library lcls_timing_core;
+use lcls_timing_core.TimingPkg.all;
+
 library unisim;
 use unisim.vcomponents.all;
 
@@ -131,6 +134,10 @@ architecture top_level of ClinkKcu1500Pgp2b is
    signal eventAxisSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
    signal eventAxisCtrl    : AxiStreamCtrlArray(DMA_SIZE_C-1 downto 0)   := (others => AXI_STREAM_CTRL_UNUSED_C);
 
+   signal eventTimingMessagesValid : slv(DMA_SIZE_C-1 downto 0);
+   signal eventTimingMessages      : TimingMessageArray(DMA_SIZE_C-1 downto 0);
+   signal eventTimingMessagesRd    : slv(DMA_SIZE_C-1 downto 0);
+   
 begin
 
    --------------------------------------- 
@@ -253,27 +260,30 @@ begin
          DMA_SIZE_G        => DMA_SIZE_C)
       port map (
          -- AXI-Lite Interface (axilClk domain)
-         axilClk          => axilClk,
-         axilRst          => axilRst,
-         axilReadMaster   => axilReadMasters(APP_INDEX_C),
-         axilReadSlave    => axilReadSlaves(APP_INDEX_C),
-         axilWriteMaster  => axilWriteMasters(APP_INDEX_C),
-         axilWriteSlave   => axilWriteSlaves(APP_INDEX_C),
+         axilClk                  => axilClk,
+         axilRst                  => axilRst,
+         axilReadMaster           => axilReadMasters(APP_INDEX_C),
+         axilReadSlave            => axilReadSlaves(APP_INDEX_C),
+         axilWriteMaster          => axilWriteMasters(APP_INDEX_C),
+         axilWriteSlave           => axilWriteSlaves(APP_INDEX_C),
          -- PGP Streams (axilClk domain)
-         pgpIbMasters     => pgpIbMasters,
-         pgpIbSlaves      => pgpIbSlaves,
-         pgpObMasters     => pgpObMasters,
-         pgpObSlaves      => pgpObSlaves,
+         pgpIbMasters             => pgpIbMasters,
+         pgpIbSlaves              => pgpIbSlaves,
+         pgpObMasters             => pgpObMasters,
+         pgpObSlaves              => pgpObSlaves,
          -- Trigger Event streams (axilClk domain)
-         eventAxisMasters => eventAxisMasters,  -- [out]
-         eventAxisSlaves  => eventAxisSlaves,   -- [in]
+         eventAxisMasters         => eventAxisMasters,  -- [out]
+         eventAxisSlaves          => eventAxisSlaves,   -- [in]
+         eventTimingMessagesValid => eventTimingMessagesValid,
+         eventTimingMessages      => eventTimingMessages,
+         eventTimingMessagesRd    => eventTimingMessagesRd,
          -- DMA Interface (dmaClk domain)
-         dmaClk           => dmaClk,
-         dmaRst           => dmaRst,
-         dmaObMasters     => dmaObMasters,
-         dmaObSlaves      => dmaObSlaves,
-         dmaIbMasters     => dmaIbMasters,
-         dmaIbSlaves      => dmaIbSlaves);
+         dmaClk                   => dmaClk,
+         dmaRst                   => dmaRst,
+         dmaObMasters             => dmaObMasters,
+         dmaObSlaves              => dmaObSlaves,
+         dmaIbMasters             => dmaIbMasters,
+         dmaIbSlaves              => dmaIbSlaves);
 
    ------------------
    -- Hardware Module
@@ -293,46 +303,48 @@ begin
          --  Top Level Interfaces
          ------------------------    
          -- Reference Clock and Reset
-         userClk25           => userClk25,
-         userRst25           => userRst25,
+         userClk25                => userClk25,
+         userRst25                => userRst25,
          -- AXI-Lite Interface (axilClk domain)
-         axilClk             => axilClk,
-         axilRst             => axilRst,
-         axilReadMaster      => axilReadMasters(HW_INDEX_C),
-         axilReadSlave       => axilReadSlaves(HW_INDEX_C),
-         axilWriteMaster     => axilWriteMasters(HW_INDEX_C),
-         axilWriteSlave      => axilWriteSlaves(HW_INDEX_C),
+         axilClk                  => axilClk,
+         axilRst                  => axilRst,
+         axilReadMaster           => axilReadMasters(HW_INDEX_C),
+         axilReadSlave            => axilReadSlaves(HW_INDEX_C),
+         axilWriteMaster          => axilWriteMasters(HW_INDEX_C),
+         axilWriteSlave           => axilWriteSlaves(HW_INDEX_C),
          -- PGP Streams (axilClk domain)
-         pgpIbMasters        => pgpIbMasters,
-         pgpIbSlaves         => pgpIbSlaves,
-         pgpObMasters        => pgpObMasters,
-         pgpObSlaves         => pgpObSlaves,
+         pgpIbMasters             => pgpIbMasters,
+         pgpIbSlaves              => pgpIbSlaves,
+         pgpObMasters             => pgpObMasters,
+         pgpObSlaves              => pgpObSlaves,
          -- Trigger / event interfaces
-         triggerClk          => axilClk,
-         triggerRst          => axilRst,
-         triggerData         => open,
-         eventClk            => axilClk,
-         eventRst            => axilRst,
-         eventTimingMessages => open,
-         eventAxisMasters    => eventAxisMasters,
-         eventAxisSlaves     => eventAxisSlaves,
-         eventAxisCtrl       => eventAxisCtrl,
+         triggerClk               => axilClk,
+         triggerRst               => axilRst,
+         triggerData              => open,
+         eventClk                 => axilClk,
+         eventRst                 => axilRst,
+         eventTimingMessagesValid => eventTimingMessagesValid,
+         eventTimingMessages      => eventTimingMessages,
+         eventTimingMessagesRd    => eventTimingMessagesRd,
+         eventAxisMasters         => eventAxisMasters,
+         eventAxisSlaves          => eventAxisSlaves,
+         eventAxisCtrl            => eventAxisCtrl,
          ------------------
          --  Hardware Ports
          ------------------       
          -- QSFP[0] Ports,
-         qsfp0RefClkP        => qsfp0RefClkP,
-         qsfp0RefClkN        => qsfp0RefClkN,
-         qsfp0RxP            => qsfp0RxP,
-         qsfp0RxN            => qsfp0RxN,
-         qsfp0TxP            => qsfp0TxP,
-         qsfp0TxN            => qsfp0TxN,
+         qsfp0RefClkP           => qsfp0RefClkP,
+         qsfp0RefClkN           => qsfp0RefClkN,
+         qsfp0RxP               => qsfp0RxP,
+         qsfp0RxN               => qsfp0RxN,
+         qsfp0TxP               => qsfp0TxP,
+         qsfp0TxN               => qsfp0TxN,
          -- QSFP[1] Ports
-         qsfp1RefClkP        => qsfp1RefClkP,
-         qsfp1RefClkN        => qsfp1RefClkN,
-         qsfp1RxP            => qsfp1RxP,
-         qsfp1RxN            => qsfp1RxN,
-         qsfp1TxP            => qsfp1TxP,
-         qsfp1TxN            => qsfp1TxN);
+         qsfp1RefClkP           => qsfp1RefClkP,
+         qsfp1RefClkN           => qsfp1RefClkN,
+         qsfp1RxP               => qsfp1RxP,
+         qsfp1RxN               => qsfp1RxN,
+         qsfp1TxP               => qsfp1TxP,
+         qsfp1TxN               => qsfp1TxN);
 
 end top_level;

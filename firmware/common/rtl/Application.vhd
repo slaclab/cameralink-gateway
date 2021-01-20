@@ -22,6 +22,9 @@ use surf.AxiPkg.all;
 use surf.AxiLitePkg.all;
 use surf.AxiStreamPkg.all;
 
+library lcls_timing_core;
+use lcls_timing_core.TimingPkg.all;
+
 entity Application is
    generic (
       TPD_G             : time             := 1 ns;
@@ -30,27 +33,30 @@ entity Application is
       DMA_SIZE_G        : positive);      
    port (
       -- AXI-Lite Interface
-      axilClk          : in  sl;
-      axilRst          : in  sl;
-      axilReadMaster   : in  AxiLiteReadMasterType;
-      axilReadSlave    : out AxiLiteReadSlaveType;
-      axilWriteMaster  : in  AxiLiteWriteMasterType;
-      axilWriteSlave   : out AxiLiteWriteSlaveType;
+      axilClk                  : in  sl;
+      axilRst                  : in  sl;
+      axilReadMaster           : in  AxiLiteReadMasterType;
+      axilReadSlave            : out AxiLiteReadSlaveType;
+      axilWriteMaster          : in  AxiLiteWriteMasterType;
+      axilWriteSlave           : out AxiLiteWriteSlaveType;
       -- PGP Streams (axilClk domain)
-      pgpIbMasters     : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
-      pgpIbSlaves      : in  AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
-      pgpObMasters     : in  AxiStreamQuadMasterArray(DMA_SIZE_G-1 downto 0);
-      pgpObSlaves      : out AxiStreamQuadSlaveArray(DMA_SIZE_G-1 downto 0);
+      pgpIbMasters             : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      pgpIbSlaves              : in  AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
+      pgpObMasters             : in  AxiStreamQuadMasterArray(DMA_SIZE_G-1 downto 0);
+      pgpObSlaves              : out AxiStreamQuadSlaveArray(DMA_SIZE_G-1 downto 0);
       -- Trigger Event streams (axilClk domain)
-      eventAxisMasters : in  AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
-      eventAxisSlaves  : out AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
+      eventAxisMasters         : in  AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      eventAxisSlaves          : out AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
+      eventTimingMessagesValid : in  slv(DMA_SIZE_G-1 downto 0) := (others=>'0');
+      eventTimingMessages      : in  TimingMessageArray(DMA_SIZE_G-1 downto 0) := (others=>TIMING_MESSAGE_INIT_C);
+      eventTimingMessagesRd    : out slv(DMA_SIZE_G-1 downto 0);
       -- DMA Interface (dmaClk domain)
-      dmaClk           : in  sl;
-      dmaRst           : in  sl;
-      dmaIbMasters     : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
-      dmaIbSlaves      : in  AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
-      dmaObMasters     : in  AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
-      dmaObSlaves      : out AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0));
+      dmaClk                   : in  sl;
+      dmaRst                   : in  sl;
+      dmaIbMasters             : out AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      dmaIbSlaves              : in  AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0);
+      dmaObMasters             : in  AxiStreamMasterArray(DMA_SIZE_G-1 downto 0);
+      dmaObSlaves              : out AxiStreamSlaveArray(DMA_SIZE_G-1 downto 0));
 end Application;
 
 architecture mapping of Application is
@@ -97,27 +103,30 @@ begin
             DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_G)
          port map (
             -- AXI-Lite Interface (axilClk domain)
-            axilClk         => axilClk,
-            axilRst         => axilRst,
-            axilReadMaster  => axilReadMasters(i),
-            axilReadSlave   => axilReadSlaves(i),
-            axilWriteMaster => axilWriteMasters(i),
-            axilWriteSlave  => axilWriteSlaves(i),
+            axilClk               => axilClk,
+            axilRst               => axilRst,
+            axilReadMaster        => axilReadMasters(i),
+            axilReadSlave         => axilReadSlaves(i),
+            axilWriteMaster       => axilWriteMasters(i),
+            axilWriteSlave        => axilWriteSlaves(i),
             -- PGP Streams (axilClk domain)
-            pgpIbMaster     => pgpIbMasters(i),
-            pgpIbSlave      => pgpIbSlaves(i),
-            pgpObMasters    => pgpObMasters(i),
-            pgpObSlaves     => pgpObSlaves(i),
+            pgpIbMaster           => pgpIbMasters(i),
+            pgpIbSlave            => pgpIbSlaves(i),
+            pgpObMasters          => pgpObMasters(i),
+            pgpObSlaves           => pgpObSlaves(i),
             -- Trigger Event streams (axilClk domain)
-            eventAxisMaster => eventAxisMasters(i),
-            eventAxisSlave  => eventAxisSlaves(i),
-            -- DMA Interface (dmaClk domain)
-            dmaClk          => dmaClk,
-            dmaRst          => dmaRst,
-            dmaIbMaster     => dmaIbMasters(i),
-            dmaIbSlave      => dmaIbSlaves(i),
-            dmaObMaster     => dmaObMasters(i),
-            dmaObSlave      => dmaObSlaves(i));
+            eventAxisMaster       => eventAxisMasters(i),
+            eventAxisSlave        => eventAxisSlaves(i),
+            eventTimingMsgValid   => eventTimingMessagesValid(i),
+            eventTimingMsg        => eventTimingMessages(i),
+            eventTimingMsgRd      => eventTimingMessagesRd(i),
+           -- DMA Interface (dmaClk domain)
+            dmaClk                => dmaClk,
+            dmaRst                => dmaRst,
+            dmaIbMaster           => dmaIbMasters(i),
+            dmaIbSlave            => dmaIbSlaves(i),
+            dmaObMaster           => dmaObMasters(i),
+            dmaObSlave            => dmaObSlaves(i));
    end generate GEN_VEC;
 
 end mapping;
