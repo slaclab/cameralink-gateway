@@ -45,7 +45,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x04100000
+        self.FwVersionLock = 0x05000000
 
         # Set number of lanes to min. requirement
         if numLanes > len(camType):
