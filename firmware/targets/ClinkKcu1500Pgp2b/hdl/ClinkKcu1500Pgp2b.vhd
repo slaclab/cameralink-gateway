@@ -27,9 +27,6 @@ library lcls2_pgp_fw_lib;
 
 library axi_pcie_core;
 
-library lcls_timing_core;
-use lcls_timing_core.TimingPkg.all;
-
 library unisim;
 use unisim.vcomponents.all;
 
