@@ -21,20 +21,28 @@ RogueScripts:
   - ../software/scripts/devGui
 
 Targets:
-  ClinkFebPgp2b_1ch:
-    ImageDir: targets/ClinkFebPgp2b_1ch/images
+  ClinkFebPgp2b:
+    ImageDir: targets/ClinkFebPgp2b/images
     Extensions:
       - mcs
-  ClinkFebPgp2b_2ch:
-    ImageDir: targets/ClinkFebPgp2b_2ch/images
+  ClinkFebPgp4:
+    ImageDir: targets/ClinkFebPgp4/images
     Extensions:
       - mcs      
   ClinkKcu1500Pgp2b:
     ImageDir: targets/ClinkKcu1500Pgp2b/images
     Extensions:
       - mcs
+  ClinkKcu1500Pgp4:
+    ImageDir: targets/ClinkKcu1500Pgp4/images
+    Extensions:
+      - mcs
   ClinkSlacPgpCardG4Pgp2b:
     ImageDir: targets/ClinkSlacPgpCardG4Pgp2b/images
+    Extensions:
+      - mcs
+  ClinkSlacPgpCardG4Pgp4:
+    ImageDir: targets/ClinkSlacPgpCardG4Pgp4/images
     Extensions:
       - mcs
 
@@ -42,10 +50,11 @@ Releases:
   all:
     Primary: True
     Targets:
-      - ClinkFebPgp2b_1ch
-      # - ClinkFebPgp2b_2ch
+      - ClinkFebPgp2b
+      - ClinkFebPgp4
       - ClinkKcu1500Pgp2b
-      # - ClinkSlacPgpCardG4Pgp2b
+      - ClinkKcu1500Pgp4
+      - ClinkSlacPgpCardG4Pgp2b
+      - ClinkSlacPgpCardG4Pgp4
     Types:
       - Rogue
-    

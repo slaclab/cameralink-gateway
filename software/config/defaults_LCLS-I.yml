@@ -90,9 +90,9 @@ ClinkDevRoot:
             EvrV2ChannelReg[:]:
               EnableReg: True
               RateType: ControlWord
-              RateSel: 40 # 120 Hz
+              # RateSel: 40 # 120 Hz
               # RateSel: 41 #  60 Hz
-              # RateSel: 42 #  30 Hz
+              RateSel: 42 #  30 Hz
               # RateSel: 43 #  10 Hz
               # RateSel: 44 #   5 Hz
               # RateSel: 45 #   1 Hz

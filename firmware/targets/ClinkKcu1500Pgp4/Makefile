@@ -1,7 +1,7 @@
-export INCLUDE_PGP4_10G = 0
+export INCLUDE_PGP4_10G = 1
 
 # Define target part
-export PRJ_PART = XCKU040-FFVA1156-2-E
+export PRJ_PART = xcku115-flvb2104-2-e
 
 # Use top level makefile
 include ../shared_version.mk

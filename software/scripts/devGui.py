@@ -37,11 +37,11 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--hwType",
-        type     = str,
+        "--pgp4",
+        type     = argBool,
         required = False,
-        default  = 'kcu1500', # Default: kcu1500 PCIe card platform
-        help     = "kcu1500 or SlacPgpCardG4",
+        default  = False, # Default: Enable PGP2b
+        help     = "False = PGP2b (default), True = PGPv4",
     )
 
     parser.add_argument(
@@ -167,14 +167,6 @@ if __name__ == "__main__":
 
     #################################################################
 
-    # Select the hardware type
-    if args.hwType == 'kcu1500':
-        clDevTarget = cameralink_gateway.ClinkDevKcu1500
-    else:
-        clDevTarget = cameralink_gateway.ClinkDevSlacPgpCardG4
-
-    #################################################################
-
     with cameralink_gateway.ClinkDevRoot(
             dev            = args.dev,
             pollEn         = args.pollEn,
@@ -186,7 +178,7 @@ if __name__ == "__main__":
             startupMode    = args.startupMode,
             standAloneMode = args.standAloneMode,
             enableDump     = args.enableDump,
-            clDevTarget    = clDevTarget,
+            pgp4           = args.pgp4,
         ) as root:
 
         ######################

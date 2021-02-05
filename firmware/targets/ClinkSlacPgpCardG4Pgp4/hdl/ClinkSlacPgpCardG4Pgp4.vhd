@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
--- File       : ClinkSlacPgpCardG4Pgp2b.vhd
+-- File       : ClinkSlacPgpCardG4Pgp4.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
--- Description: Camera link gateway PCIe card with PGPv2b
+-- Description: Camera link gateway PCIe card with PGPv4
 -------------------------------------------------------------------------------
 -- This file is part of 'Camera link gateway'.
 -- It is subject to the license terms in the LICENSE.txt file found in the 
@@ -30,11 +30,11 @@ library axi_pcie_core;
 library unisim;
 use unisim.vcomponents.all;
 
-entity ClinkSlacPgpCardG4Pgp2b is
+entity ClinkSlacPgpCardG4Pgp4 is
    generic (
       TPD_G          : time    := 1 ns;
       ROGUE_SIM_EN_G : boolean := false;
-      PGP_TYPE_G     : string  := "PGP2b";  -- PGPv2b@3.125Gb/s, PGP4@10.3125Gb/s
+      PGP_TYPE_G     : string  := "PGP4";  -- PGPv2b@3.125Gb/s, PGP4@10.3125Gb/s
       BUILD_INFO_G   : BuildInfoType);
    port (
       ---------------------
@@ -77,9 +77,9 @@ entity ClinkSlacPgpCardG4Pgp2b is
       pciRxN      : in  slv(7 downto 0);
       pciTxP      : out slv(7 downto 0);
       pciTxN      : out slv(7 downto 0));
-end ClinkSlacPgpCardG4Pgp2b;
+end ClinkSlacPgpCardG4Pgp4;
 
-architecture top_level of ClinkSlacPgpCardG4Pgp2b is
+architecture top_level of ClinkSlacPgpCardG4Pgp4 is
 
    constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(8, TKEEP_COMP_C, TUSER_FIRST_LAST_C, 8, 2);  -- 64-bit interface
    constant AXIL_CLK_FREQ_C   : real                := 156.25E+6;  -- units of Hz

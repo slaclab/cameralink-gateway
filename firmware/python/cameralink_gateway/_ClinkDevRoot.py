@@ -15,7 +15,7 @@ import click
 import cameralink_gateway as clDev
 import axipcie
 
-import lcls2_pgp_fw_lib.hardware.shared as shared
+import lcls2_pgp_fw_lib.shared as shared
 
 import ClinkFeb               as feb
 import surf.protocols.batcher as batcher
@@ -34,14 +34,13 @@ class ClinkDevRoot(shared.Root):
                  enLclsII       = False,
                  startupMode    = False, # False = LCLS-I timing mode, True = LCLS-II timing mode
                  standAloneMode = False, # False = using fiber timing, True = locally generated timing
-                 pgp3           = False, # true = PGPv3, false = PGP2b
+                 pgp4           = False, # true = PGPv4, false = PGP2b
                  pollEn         = True,  # Enable automatic polling registers
                  initRead       = True,  # Read all registers at start of the system
                  numLanes       = 4,     # Number of PGP lanes
                  camType        = None,
                  defaultFile    = None,
                  enableDump     = False,
-                 clDevTarget    = clDev.ClinkDevKcu1500,
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
@@ -70,7 +69,7 @@ class ClinkDevRoot(shared.Root):
         # Pass custom value to parent via super function
         super().__init__(
             dev         = dev,
-            pgp3        = pgp3,
+            pgp4        = pgp4,
             pollEn      = pollEn,
             initRead    = initRead,
             numLanes    = laneSize,
@@ -84,11 +83,11 @@ class ClinkDevRoot(shared.Root):
         self.memMap.setName('PCIe_Bar0')
 
         # Instantiate the top level Device and pass it the memory map
-        self.add(clDevTarget(
+        self.add(clDev.ClinkPcieFpga(
             name     = 'ClinkPcie',
             memBase  = self.memMap,
             numLanes = laneSize,
-            pgp3     = pgp3,
+            pgp4     = pgp4,
             enLclsI  = enLclsI,
             enLclsII = enLclsII,
             expand   = True,
@@ -121,14 +120,14 @@ class ClinkDevRoot(shared.Root):
                     memBase    = self._srp[lane],
                     serial     = self.dmaStreams[lane][2],
                     camType    = self.camType[lane],
-                    version3   = pgp3,
+                    version4   = pgp4,
                     enableDeps = [self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady], # Only allow access if the PGP link is established
                     expand     = True,
                 ))
 
         # Else doing Rogue VCS simulation
         else:
-            self.roguePgp = shared.RogueStreams(numLanes=laneSize, pgp3=pgp3)
+            self.roguePgp = shared.RogueStreams(numLanes=laneSize, pgp4=pgp4)
 
             # Create arrays to be filled
             self._frameGen = [None for lane in range(laneSize)]
