@@ -42,11 +42,4 @@ ClinkDevRoot:
       TrigMap: ChA # ChA = pgpTrigger(0)
       TrigPulseWidth: 32.768 # units of us
       TrigMask: 0x1 # CC1 trigger
-    ###################
-    TrigCtrl[1]:
-      EnableTrig: True
-      InvCC: False # Active High Pulse
-      TrigMap: ChB # ChB = pgpTrigger(1)
-      TrigPulseWidth: 32.768 # units of us
-      TrigMask: 0x1 # CC1 trigger
   #########################################################################################################
