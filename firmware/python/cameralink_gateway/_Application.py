@@ -24,11 +24,12 @@ class AppLane(pr.Device):
         # SLAVE[TDEST=0] = XPM Trigger
         # SLAVE[TDEST=1] = XPM Event Transition
         # SLAVE[TDEST=2] = Camera Image
+        # SLAVE[TDEST=3] = XPM Timing
         #######################################
         self.add(batcher.AxiStreamBatcherEventBuilder(
             name         = 'EventBuilder',
             offset       = 0x00000,
-            numberSlaves = 2,
+            numberSlaves = 3,
             tickUnit     = '156.25MHz',
             expand       = True,
         ))
