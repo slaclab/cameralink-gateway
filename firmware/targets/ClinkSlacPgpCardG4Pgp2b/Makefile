@@ -1,4 +1,4 @@
-export INCLUDE_PGP4_10G = 0
+export INCLUDE_PGP4_6G = 0
 
 # Define target part
 export PRJ_PART = XCKU040-FFVA1156-2-E

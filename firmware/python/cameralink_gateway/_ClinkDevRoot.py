@@ -44,7 +44,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x06000000
+        self.FwVersionLock = 0x06010000
 
         # Set number of lanes to min. requirement
         if numLanes > len(camType):
@@ -93,12 +93,16 @@ class ClinkDevRoot(shared.Root):
             expand   = True,
         ))
 
-        # CLink SRP, CLink serial
-        destList = [0, 2]
+        # CLink SRP, CLink serial, SEM serial
+        destList = [0, 2, 3]
 
         # Create DMA streams
         self.dmaStreams = axipcie.createAxiPcieDmaStreams(
             dev, {lane:{dest for dest in destList} for lane in range(laneSize)}, 'localhost', 8000)
+
+        # Create empty list
+        self.RemRxLinkReady = [None for i in range(laneSize)]
+        self.semDataWriter  = [None for i in range(laneSize)]
 
         # Check if not doing simulation
         if (dev!='sim'):
@@ -114,6 +118,9 @@ class ClinkDevRoot(shared.Root):
                 self._srp[lane].setName(f'SRPv3[{lane}]')
                 pr.streamConnectBiDir(self.dmaStreams[lane][0],self._srp[lane])
 
+                # Add pointer to the list
+                self.RemRxLinkReady[lane] = self.ClinkPcie.Hsio.PgpMon[lane].RxStatus.RemRxLinkReady if pgp4 else self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady
+
                 # CameraLink Feb Board
                 self.add(feb.ClinkFeb(
                     name       = (f'ClinkFeb[{lane}]'),
@@ -121,9 +128,13 @@ class ClinkDevRoot(shared.Root):
                     serial     = self.dmaStreams[lane][2],
                     camType    = self.camType[lane],
                     version4   = pgp4,
-                    enableDeps = [self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady], # Only allow access if the PGP link is established
+                    enableDeps = [self.RemRxLinkReady[lane]], # Only allow access if the PGP link is established
                     expand     = True,
                 ))
+
+                # Add SEM module
+                self.semDataWriter[lane] = feb.SemAsciiFileWriter(index=lane)
+                self.dmaStreams[lane][3] >> self.semDataWriter[lane]
 
         # Else doing Rogue VCS simulation
         else:
@@ -253,7 +264,7 @@ class ClinkDevRoot(shared.Root):
                 # Unhide the because dependent on PGP link status
                 self.ClinkFeb[lane].enable.hidden = False
                 # Check for PGP link up
-                if (self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady.get() != 0):
+                if (self.RemRxLinkReady[lane].get() != 0):
                     # Check for FW version
                     fwVersion = self.ClinkFeb[lane].AxiVersion.FpgaVersion.get()
                     if (fwVersion != self.FwVersionLock):

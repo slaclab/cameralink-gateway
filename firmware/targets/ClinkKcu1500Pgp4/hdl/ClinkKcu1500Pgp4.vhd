@@ -34,7 +34,7 @@ entity ClinkKcu1500Pgp4 is
    generic (
       TPD_G          : time    := 1 ns;
       ROGUE_SIM_EN_G : boolean := false;
-      PGP_TYPE_G     : string  := "PGP4";  -- PGPv2b@3.125Gb/s, PGP4@10.3125Gb/s
+      PGP_TYPE_G     : string  := "PGP4";
       BUILD_INFO_G   : BuildInfoType);
    port (
       ---------------------

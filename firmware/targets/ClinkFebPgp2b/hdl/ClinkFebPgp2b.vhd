@@ -81,7 +81,6 @@ begin
    U_Core : entity clink_gateway_fw_lib.CLinkGateway
       generic map (
          TPD_G        => TPD_G,
-         CHAN_COUNT_G => 1,             -- One CLink channel
          PGP_TYPE_G   => false,         -- False: PGPv2b@3.125Gb/s
          BUILD_INFO_G => BUILD_INFO_G,
          SIMULATION_G => SIMULATION_G)

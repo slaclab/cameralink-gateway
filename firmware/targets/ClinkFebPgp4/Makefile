@@ -1,4 +1,4 @@
-export INCLUDE_PGP4_10G = 1
+export INCLUDE_PGP4_6G = 1
 
 # Use top level makefile
 include ../shared_version.mk
