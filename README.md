@@ -61,7 +61,8 @@ DMA[lane].DEST[1].DEST[1] = XPM Transition Message (sub-frame)
 DMA[lane].DEST[1].DEST[2] = Camera Image (sub-frame)
 DMA[lane].DEST[1].DEST[3] = XPM Timing Message (sub-frame)
 DMA[lane].DEST[2] = Camera UART
-DMA[lane].DEST[255:3] = Unused
+DMA[lane].DEST[3] = SEM UART
+DMA[lane].DEST[255:4] = Unused
 ```
 
 
