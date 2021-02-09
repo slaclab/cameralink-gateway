@@ -186,7 +186,11 @@ if __name__ == "__main__":
         ######################
         if (args.guiType == 'PyDM'):
 
-            pyrogue.pydm.runPyDM(root=root)
+            pyrogue.pydm.runPyDM(
+                root  = root,
+                sizeX = 800,
+                sizeY = 1000,
+            )
 
         #################
         # Legacy PyQT GUI
