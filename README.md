@@ -38,6 +38,35 @@ git-lfs/2.1.1
 ```
 $ git clone --recursive git@github.com:slaclab/cameralink-gateway
 ```
+
+<!--- ######################################################## -->
+
+# FEB's dual stack LED Definition
+
+```
+LED[TOP].Green = PGP2b Link Up
+LED[TOP].Blue  = PGPv4 Link Up
+LED[TOP].Red   = Unused (always OFF)
+
+LED[BOTTOM].Green = CLINK Running
+LED[BOTTOM].Blue  = Unused (always OFF)
+LED[BOTTOM].Red   = CLINK not Running
+```
+
+<!--- ######################################################## -->
+
+# FEB's SFP Fiber mapping
+
+```
+SFP[0] = PGP2b
+SFP[1] = PGPv4
+SFP[2] = Unused
+SFP[3] = Unused
+```
+
+SFP[0] is fiber closed to the power connector.  Numbering goes from left to right with SFP[3] closest to JTAG connector.
+
+
 <!--- ######################################################## -->
 
 # PGP channel mapping
@@ -46,7 +75,7 @@ $ git clone --recursive git@github.com:slaclab/cameralink-gateway
 PGP[lane].VC[0] = SRPv3 (register access)
 PGP[lane].VC[1] = Camera Image (streaming data)
 PGP[lane].VC[2] = Camera UART (streaming data)
-PGP[lane].VC[3] = Unused
+PGP[lane].VC[3] = SEM UART
 ```
 
 <!--- ######################################################## -->

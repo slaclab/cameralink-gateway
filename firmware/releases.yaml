@@ -21,12 +21,8 @@ RogueScripts:
   - ../software/scripts/devGui
 
 Targets:
-  ClinkFebPgp2b:
-    ImageDir: targets/ClinkFebPgp2b/images
-    Extensions:
-      - mcs
-  ClinkFebPgp4:
-    ImageDir: targets/ClinkFebPgp4/images
+  ClinkFeb:
+    ImageDir: targets/ClinkFeb/images
     Extensions:
       - mcs      
   ClinkKcu1500Pgp2b:
@@ -50,8 +46,7 @@ Releases:
   all:
     Primary: True
     Targets:
-      - ClinkFebPgp2b
-      - ClinkFebPgp4
+      - ClinkFeb
       - ClinkKcu1500Pgp2b
       - ClinkKcu1500Pgp4
       - ClinkSlacPgpCardG4Pgp2b

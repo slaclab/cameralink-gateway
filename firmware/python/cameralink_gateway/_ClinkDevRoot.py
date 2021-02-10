@@ -127,7 +127,6 @@ class ClinkDevRoot(shared.Root):
                     memBase    = self._srp[lane],
                     serial     = self.dmaStreams[lane][2],
                     camType    = self.camType[lane],
-                    version4   = pgp4,
                     enableDeps = [self.RemRxLinkReady[lane]], # Only allow access if the PGP link is established
                     expand     = True,
                 ))

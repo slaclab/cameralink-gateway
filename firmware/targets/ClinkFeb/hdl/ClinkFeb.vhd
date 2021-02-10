@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
--- File       : ClinkFebPgp2b.vhd
+-- File       : ClinkFeb.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
--- Description: Camera link gateway FEB with PGPv2b and 1 CLink channels
+-- Description: Camera link gateway FEB
 -------------------------------------------------------------------------------
 -- This file is part of 'Camera link gateway'.
 -- It is subject to the license terms in the LICENSE.txt file found in the 
@@ -21,9 +21,9 @@ use ieee.std_logic_unsigned.all;
 library surf;
 use surf.StdRtlPkg.all;
 
-library clink_gateway_fw_lib; 
+library clink_gateway_fw_lib;
 
-entity ClinkFebPgp2b is
+entity ClinkFeb is
    generic (
       TPD_G        : time    := 1 ns;
       BUILD_INFO_G : BuildInfoType;
@@ -72,16 +72,15 @@ entity ClinkFebPgp2b is
       tempAlertL    : in    sl;
       vPIn          : in    sl;
       vNIn          : in    sl);
-end ClinkFebPgp2b;
+end ClinkFeb;
 
-architecture top_level of ClinkFebPgp2b is
+architecture top_level of ClinkFeb is
 
 begin
 
    U_Core : entity clink_gateway_fw_lib.CLinkGateway
       generic map (
          TPD_G        => TPD_G,
-         PGP_TYPE_G   => false,         -- False: PGPv2b@3.125Gb/s
          BUILD_INFO_G => BUILD_INFO_G,
          SIMULATION_G => SIMULATION_G)
       port map (
