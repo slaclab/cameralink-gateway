@@ -66,6 +66,36 @@ SFP[3] = Unused
 
 SFP[0] is fiber closed to the power connector.  Numbering goes from left to right with SFP[3] closest to JTAG connector.
 
+<!--- ######################################################## -->
+
+# SLAC PGP GEN4 PCIe Fiber mapping
+
+```
+QSFP[0][0] = PGP.Lane[0].VC[3:0]
+QSFP[0][1] = PGP.Lane[1].VC[3:0]
+QSFP[0][2] = PGP.Lane[2].VC[3:0]
+QSFP[0][3] = PGP.Lane[3].VC[3:0]
+QSFP[1][0] = LCLS-I  Timing Receiver
+QSFP[1][1] = LCLS-II Timing Receiver
+QSFP[1][2] = Unused QSFP Link
+QSFP[1][3] = Unused QSFP Link
+SFP = Unused SFP Link
+```
+
+<!--- ######################################################## -->
+
+# KCU1500 PCIe Fiber mapping
+
+```
+QSFP[0][0] = PGP.Lane[0].VC[3:0]
+QSFP[0][1] = PGP.Lane[1].VC[3:0]
+QSFP[0][2] = PGP.Lane[2].VC[3:0]
+QSFP[0][3] = PGP.Lane[3].VC[3:0]
+QSFP[1][0] = LCLS-I  Timing Receiver
+QSFP[1][1] = LCLS-II Timing Receiver
+QSFP[1][2] = Unused QSFP Link
+QSFP[1][3] = Unused QSFP Link
+```
 
 <!--- ######################################################## -->
 
