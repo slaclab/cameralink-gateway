@@ -99,7 +99,7 @@ QSFP[1][3] = Unused QSFP Link
 
 <!--- ######################################################## -->
 
-# PGP channel mapping
+# PGP Virtual Channel Mapping
 
 ```
 PGP[lane].VC[0] = SRPv3 (register access)
