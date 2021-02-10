@@ -75,7 +75,7 @@ SFP[0] is fiber closed to the power connector.  Numbering goes from left to righ
 PGP[lane].VC[0] = SRPv3 (register access)
 PGP[lane].VC[1] = Camera Image (streaming data)
 PGP[lane].VC[2] = Camera UART (streaming data)
-PGP[lane].VC[3] = SEM UART
+PGP[lane].VC[3] = SEM UART (streaming data)
 ```
 
 <!--- ######################################################## -->
