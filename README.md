@@ -136,7 +136,7 @@ $ source cameralink-gateway/firmware/setup_env_slac.sh
 
 2) Go to the target directory and make the firmware:
 ```
-$ cd cameralink-gateway/firmware/targets/ClinkFebPgp2b_1ch/
+$ cd cameralink-gateway/firmware/targets/ClinkFeb/
 $ make
 ```
 
