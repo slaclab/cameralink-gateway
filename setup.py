@@ -44,10 +44,7 @@ setup(
         'cameralink_gateway.LclsTimingCore',
         'cameralink_gateway.axipcie',
         'cameralink_gateway.lcls2_pgp_fw_lib',
-        'cameralink_gateway.lcls2_pgp_fw_lib.hardware',
-        'cameralink_gateway.lcls2_pgp_fw_lib.hardware.XilinxKcu1500',
-        'cameralink_gateway.lcls2_pgp_fw_lib.hardware.SlacPgpCardG4',
-        'cameralink_gateway.lcls2_pgp_fw_lib.hardware.shared',
+        'cameralink_gateway.lcls2_pgp_fw_lib.shared',
         'cameralink_gateway.ClinkFeb', 
     ],
     package_dir = {
