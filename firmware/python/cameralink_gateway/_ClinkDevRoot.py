@@ -40,6 +40,7 @@ class ClinkDevRoot(shared.Root):
                  numLanes       = 4,     # Number of PGP lanes
                  camType        = None,
                  defaultFile    = None,
+                 seuDumpDir     = None,
                  enableDump     = False,
                  **kwargs):
 
@@ -132,8 +133,9 @@ class ClinkDevRoot(shared.Root):
                 ))
 
                 # Add SEM module
-                self.semDataWriter[lane] = feb.SemAsciiFileWriter(index=lane)
-                self.dmaStreams[lane][3] >> self.semDataWriter[lane]
+                if seuDumpDir is not None:
+                    self.semDataWriter[lane] = feb.SemAsciiFileWriter(index=lane,dumpDir=seuDumpDir)
+                    self.dmaStreams[lane][3] >> self.semDataWriter[lane]
 
         # Else doing Rogue VCS simulation
         else:

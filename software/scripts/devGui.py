@@ -116,6 +116,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--seuDumpDir",
+        type     = str,
+        required = False,
+        default  = None,
+        help     = "path to SEU dump directory",
+    )
+
+    parser.add_argument(
         "--serverPort",
         type     = int,
         required = False,
@@ -179,6 +187,7 @@ if __name__ == "__main__":
             standAloneMode = args.standAloneMode,
             enableDump     = args.enableDump,
             pgp4           = args.pgp4,
+            seuDumpDir     = args.seuDumpDir,
         ) as root:
 
         ######################
