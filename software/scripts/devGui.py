@@ -11,11 +11,10 @@
 
 import os
 import sys
+import time
 import argparse
 import importlib
 import rogue
-import pyrogue.gui
-import pyrogue.pydm
 
 if __name__ == "__main__":
 
@@ -156,8 +155,11 @@ if __name__ == "__main__":
         type     = str,
         required = False,
         default  = 'PyDM',
-        help     = "Sets the GUI type (PyDM or PyQt)",
+        help     = "Sets the GUI type (PyDM, PyQt, or None)",
     )
+
+    # Get the arguments
+    args = parser.parse_args()
 
     #################################################################
 
@@ -201,10 +203,55 @@ if __name__ == "__main__":
             seuDumpDir     = args.seuDumpDir,
         ) as root:
 
-        pyrogue.pydm.runPyDM(
-            root  = root,
-            sizeX = 800,
-            sizeY = 1000,
-        )
+        if args.guiType == 'PyDM' or args.guiType == 'PyQt':
+            import pyrogue.gui
+            import pyrogue.pydm
+
+        ######################
+        # Development PyDM GUI
+        ######################
+        if (args.guiType == 'PyDM'):
+
+            pyrogue.pydm.runPyDM(
+                root  = root,
+                sizeX = 800,
+                sizeY = 1000,
+            )
+
+        #################
+        # Legacy PyQT GUI
+        #################
+        elif (args.guiType == 'PyQt'):
+
+            # Create GUI
+            appTop = pyrogue.gui.application(sys.argv)
+            guiTop = pyrogue.gui.GuiTop()
+            guiTop.addTree(root)
+            guiTop.resize(800, 1000)
+
+            # Run gui
+            appTop.exec_()
+            root.stop()
+
+        #################
+        # No GUI
+        #################
+        elif (args.guiType == 'None'):
+
+            # Wait to be killed via Ctrl-C
+            print('Running root server.  Hit Ctrl-C to exit')
+            try:
+                while True:
+                    time.sleep(1)
+            except:
+                pass
+            print('Stopping root server...')
+            root.stop()
+
+        ####################
+        # Undefined GUI type
+        ####################
+        else:
+            raise ValueError("Invalid GUI type (%s)" % (args.guiType) )
 
     #################################################################
