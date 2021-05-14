@@ -16,34 +16,34 @@ import lcls2_pgp_fw_lib.shared as shared
 
 class ClinkPcieFpga(pr.Device):
     def __init__(self,
-                 numLanes = 4,
-                 pgp4     = False,
-                 enLclsI  = True,
-                 enLclsII = False,
+                 laneConfig = {0: 'Opal1000'},
+                 pgp4       = False,
+                 enLclsI    = True,
+                 enLclsII   = False,
                  **kwargs):
         super().__init__(**kwargs)
 
         # Core Layer
         self.add(pcie.AxiPcieCore(
             offset      = 0x0000_0000,
-            numDmaLanes = numLanes,
+            numDmaLanes = 4,
             expand      = False,
         ))
 
         # Application layer
         self.add(clDev.Application(
-            offset   = 0x00C0_0000,
-            numLanes = numLanes,
-            expand   = True,
+            offset     = 0x00C0_0000,
+            laneConfig = laneConfig,
+            expand     = True,
         ))
 
         # Hardware Layer
         self.add(shared.Hsio(
-            name     = 'Hsio',
-            offset    = 0x0080_0000,
-            numLanes  = numLanes,
-            pgp4      = pgp4,
-            enLclsI   = enLclsI,
-            enLclsII  = enLclsII,
-            expand    = True,
+            name       = 'Hsio',
+            offset     = 0x0080_0000,
+            laneConfig = laneConfig,
+            pgp4       = pgp4,
+            enLclsI    = enLclsI,
+            enLclsII   = enLclsII,
+            expand     = True,
         ))
