@@ -37,9 +37,7 @@ class ClinkDevRoot(shared.Root):
                  pgp4           = False, # true = PGPv4, false = PGP2b
                  pollEn         = True,  # Enable automatic polling registers
                  initRead       = True,  # Read all registers at start of the system
-                 numLanes       = 4,     # Number of PGP lanes
-                 camType        = None,
-                 defaultFile    = None,
+                 laneConfig     = {0: 'Opal1000'},
                  seuDumpDir     = None,
                  enableDump     = False,
                  **kwargs):
@@ -47,19 +45,17 @@ class ClinkDevRoot(shared.Root):
         # Set the firmware Version lock = firmware/targets/shared_version.mk
         self.FwVersionLock = 0x07000000
 
-        # Set number of lanes to min. requirement
-        if numLanes > len(camType):
-            laneSize = len(camType)
-        else:
-            laneSize = numLanes
-
         # Set local variables
-        self.camType        = [camType[i] for i in range(laneSize)]
-        self.defaultFile    = defaultFile
+        self.laneConfig     = laneConfig
         self.dev            = dev
         self.startupMode    = startupMode
         self.standAloneMode = standAloneMode
         self.enableDump     = enableDump
+        self.defaultFile    = []
+
+        # Generate a list of configurations
+        for lane in self.laneConfig:
+            self.defaultFile.append(f'config/{self.laneConfig[lane]}/lane{lane}.yml')
 
         # Check for simulation
         if dev == 'sim':
@@ -73,7 +69,6 @@ class ClinkDevRoot(shared.Root):
             pgp4        = pgp4,
             pollEn      = pollEn,
             initRead    = initRead,
-            numLanes    = laneSize,
             **kwargs)
 
         # Unhide the RemoteVariableDump command
@@ -85,34 +80,38 @@ class ClinkDevRoot(shared.Root):
 
         # Instantiate the top level Device and pass it the memory map
         self.add(clDev.ClinkPcieFpga(
-            name     = 'ClinkPcie',
-            memBase  = self.memMap,
-            numLanes = laneSize,
-            pgp4     = pgp4,
-            enLclsI  = enLclsI,
-            enLclsII = enLclsII,
-            expand   = True,
+            name       = 'ClinkPcie',
+            memBase    = self.memMap,
+            laneConfig = self.laneConfig,
+            pgp4       = pgp4,
+            enLclsI    = enLclsI,
+            enLclsII   = enLclsII,
+            expand     = True,
         ))
 
-        # CLink SRP, CLink serial, SEM serial
-        destList = [0, 2, 3]
+        # Create empty list
+        self.dmaStreams     = [[None for x in range(4)] for y in range(4)]
+        self._srp           = [None for x in range(4)]
+        self._frameGen      = [None for x in range(4)]
+        self.RemRxLinkReady = [None for x in range(4)]
+        self.semDataWriter  = [None for x in range(4)]
+        self._dbg           = [None for x in range(4)]
+        self.unbatchers     = [None for x in range(4)]
 
         # Create DMA streams
-        self.dmaStreams = axipcie.createAxiPcieDmaStreams(
-            dev, {lane:{dest for dest in destList} for lane in range(laneSize)}, 'localhost', 8000)
-
-        # Create empty list
-        self.RemRxLinkReady = [None for i in range(laneSize)]
-        self.semDataWriter  = [None for i in range(laneSize)]
+        for lane in self.laneConfig:
+            # CLink VC[0]=SRP, VC[2]=CLink serial, VC[3]=SEM serial
+            for vc in [0, 2, 3]:
+                if (dev is not 'sim'):
+                    self.dmaStreams[lane][vc] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+vc,1)
+                else:
+                    self.dmaStreams[lane][vc] = rogue.interfaces.stream.TcpClient('localhost', (8000+2)+(512*lane)+2*vc)
 
         # Check if not doing simulation
-        if (dev!='sim'):
-
-            # Create arrays to be filled
-            self._srp = [None for lane in range(laneSize)]
+        if (dev is not 'sim'):
 
             # Create the stream interface
-            for lane in range(laneSize):
+            for lane in self.laneConfig:
 
                 # SRP
                 self._srp[lane] = rogue.protocols.srp.SrpV3()
@@ -127,7 +126,7 @@ class ClinkDevRoot(shared.Root):
                     name       = (f'ClinkFeb[{lane}]'),
                     memBase    = self._srp[lane],
                     serial     = self.dmaStreams[lane][2],
-                    camType    = self.camType[lane],
+                    camType    = self.laneConfig[lane],
                     enableDeps = [self.RemRxLinkReady[lane]], # Only allow access if the PGP link is established
                     expand     = True,
                 ))
@@ -139,10 +138,7 @@ class ClinkDevRoot(shared.Root):
 
         # Else doing Rogue VCS simulation
         else:
-            self.roguePgp = shared.RogueStreams(numLanes=laneSize, pgp4=pgp4)
-
-            # Create arrays to be filled
-            self._frameGen = [None for lane in range(laneSize)]
+            self.roguePgp = shared.RogueStreams(pgp4=pgp4)
 
             # Create the stream interface
             for lane in range(laneSize):
@@ -166,12 +162,11 @@ class ClinkDevRoot(shared.Root):
                     function     = lambda cmd, lane=lane: self._frameGen[lane].myFrameGen,
                 ))
 
-        # Create arrays to be filled
-        self._dbg = [None for lane in range(laneSize)]
-        self.unbatchers = [rogue.protocols.batcher.SplitterV1() for lane in range(laneSize)]
-
         # Create the stream interface
-        for lane in range(laneSize):
+        for lane in self.laneConfig:
+            # Create the unbatcher
+            self.unbatchers[lane] = rogue.protocols.batcher.SplitterV1()
+
             # Debug slave
             if dataDebug:
                 # Connect the streams
@@ -235,7 +230,7 @@ class ClinkDevRoot(shared.Root):
             enableList.hidden = True
 
         # Check if simulation
-        if (self.dev=='sim'):
+        if (self.dev is 'sim'):
             pass
 
         else:
@@ -261,7 +256,7 @@ class ClinkDevRoot(shared.Root):
                 raise ValueError(errMsg)
 
             # Check for FEB FW version
-            for lane in range(self.numLanes):
+            for lane in self.laneConfig:
                 # Unhide the because dependent on PGP link status
                 self.ClinkFeb[lane].enable.hidden = False
                 # Check for PGP link up
@@ -300,51 +295,49 @@ class ClinkDevRoot(shared.Root):
                 dev.SM.set('f')
                 dev.RP()
 
-        # Load the configurations
-        if self.defaultFile is not None:
+        # Useful pointer
+        timingRx = self.ClinkPcie.Hsio.TimingRx
 
-            # Useful pointer
-            timingRx = self.ClinkPcie.Hsio.TimingRx
+        # Start up the timing system = LCLS-II mode
+        if self.startupMode:
 
-            # Start up the timing system = LCLS-II mode
-            if self.startupMode:
+            # Set the default to  LCLS-II mode
+            defaultFile = ['config/defaults_LCLS-II.yml']
 
-                # Set the default to  LCLS-II mode
-                defaultFile = ["config/defaults_LCLS-II.yml",self.defaultFile]
-
-                # Startup in LCLS-II mode
-                if self.standAloneMode:
-                    timingRx.ConfigureXpmMini()
-                else:
-                    timingRx.ConfigLclsTimingV2()
-
-            # Else LCLS-I mode
+            # Startup in LCLS-II mode
+            if self.standAloneMode:
+                timingRx.ConfigureXpmMini()
             else:
+                timingRx.ConfigLclsTimingV2()
 
-                # Set the default to  LCLS-I mode
-                defaultFile = ["config/defaults_LCLS-I.yml",self.defaultFile]
+        # Else LCLS-I mode
+        else:
 
-                # Startup in LCLS-I mode
-                if self.standAloneMode:
-                    timingRx.ConfigureTpgMiniStream()
-                else:
-                    timingRx.ConfigLclsTimingV1()
+            # Set the default to  LCLS-I mode
+            defaultFile = ['config/defaults_LCLS-I.yml']
 
-            # Read all the variables
+            # Startup in LCLS-I mode
+            if self.standAloneMode:
+                timingRx.ConfigureTpgMiniStream()
+            else:
+                timingRx.ConfigLclsTimingV1()
+
+        # Read all the variables
+        self.ReadAll()
+        self.ReadAll()
+
+        # Load the YAML configurations
+        defaultFile.extend(self.defaultFile)
+        print(f'Loading {defaultFile} Configuration File...')
+        self.LoadConfig(defaultFile)
+
+        if (self.enableDump):
+            # Dump the state of the hardware before configuration
             self.ReadAll()
             self.ReadAll()
-
-            # Load the YAML configurations
-            print(f'Loading {defaultFile} Configuration File...')
-            self.LoadConfig(defaultFile)
-
-            if (self.enableDump):
-                # Dump the state of the hardware before configuration
-                self.ReadAll()
-                self.ReadAll()
-                print(f'Dumping post-configurations...')
-                self.SaveConfig('dump/config-dump-post-config.yml')
-                self.SaveState('dump/state-dump-post-config.yml')
+            print(f'Dumping post-configurations...')
+            self.SaveConfig('dump/config-dump-post-config.yml')
+            self.SaveState('dump/state-dump-post-config.yml')
 
     # Function calls after loading YAML configuration
     def initialize(self):

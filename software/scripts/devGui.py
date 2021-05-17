@@ -27,7 +27,27 @@ if __name__ == "__main__":
     # Convert str to bool
     argBool = lambda s: s.lower() in ['true', 't', 'yes', '1']
 
+    # Convert arg to a dictionary
+    class keyvalue(argparse.Action):
+        def __call__( self , parser, namespace,values, option_string = None):
+            setattr(namespace, self.dest, dict())
+            for value in values:
+                # split it into key and value
+                key, value = value.split('=')
+                # Convert the key from str to int
+                key = int(key)
+                # assign into dictionary
+                getattr(namespace, self.dest)[key] = value
+
     # Add arguments
+    parser.add_argument(
+        "--laneConfig",
+        nargs    = '*',
+        action   = keyvalue,
+        required = True,
+        help     = "Define the dictionary for the lane configuration. E.g. --laneConfig 0=Opal1000 1=Opal1000",
+    )
+
     parser.add_argument(
         "--dev",
         type     = str,
@@ -39,9 +59,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--pgp4",
         type     = argBool,
-        required = False,
-        default  = False, # Default: Enable PGP2b
-        help     = "False = PGP2b (default), True = PGPv4",
+        required = True,
+        help     = "False = PGP2b, True = PGPv4",
     )
 
     parser.add_argument(
@@ -80,15 +99,8 @@ if __name__ == "__main__":
         "--enableDump",
         type     = argBool,
         required = False,
-        default  = True,
+        default  = False,
         help     = "True to dump .h and pre/post state",
-    )
-
-    parser.add_argument(
-        "--camType",
-        nargs    ='+',
-        required = True,
-        help     = "List of camera type",
     )
 
     parser.add_argument(
@@ -105,14 +117,6 @@ if __name__ == "__main__":
         required = False,
         default  = True,
         help     = "Enable read all variables at start",
-    )
-
-    parser.add_argument(
-        "--defaultFile",
-        type     = str,
-        required = False,
-        default  = None,
-        help     = "Sets the default YAML configuration file to be loaded at the root.start()",
     )
 
     parser.add_argument(
@@ -137,14 +141,6 @@ if __name__ == "__main__":
         required = False,
         default  = None,
         help     = "Sets the default YAML configuration file to be loaded at the root.start()",
-    )
-
-    parser.add_argument(
-        "--guiType",
-        type     = str,
-        required = False,
-        default  = 'PyDM',
-        help     = "Sets the GUI type (PyDM or PyQt)",
     )
 
     # Get the arguments
@@ -175,12 +171,13 @@ if __name__ == "__main__":
 
     #################################################################
 
+    print ( f'laneConfig={args.laneConfig}' )
+
     with cameralink_gateway.ClinkDevRoot(
             dev            = args.dev,
             pollEn         = args.pollEn,
             initRead       = args.initRead,
-            camType        = args.camType,
-            defaultFile    = args.defaultFile,
+            laneConfig     = args.laneConfig,
             enLclsI        = (args.enLclsII or not args.startupMode),
             enLclsII       = (args.enLclsII or args.startupMode),
             startupMode    = args.startupMode,
@@ -190,36 +187,10 @@ if __name__ == "__main__":
             seuDumpDir     = args.seuDumpDir,
         ) as root:
 
-        ######################
-        # Development PyDM GUI
-        ######################
-        if (args.guiType == 'PyDM'):
-
-            pyrogue.pydm.runPyDM(
-                root  = root,
-                sizeX = 800,
-                sizeY = 1000,
-            )
-
-        #################
-        # Legacy PyQT GUI
-        #################
-        elif (args.guiType == 'PyQt'):
-
-            # Create GUI
-            appTop = pyrogue.gui.application(sys.argv)
-            guiTop = pyrogue.gui.GuiTop()
-            guiTop.addTree(root)
-            guiTop.resize(800, 1000)
-
-            # Run gui
-            appTop.exec_()
-            root.stop()
-
-        ####################
-        # Undefined GUI type
-        ####################
-        else:
-            raise ValueError("Invalid GUI type (%s)" % (args.guiType) )
+        pyrogue.pydm.runPyDM(
+            root  = root,
+            sizeX = 800,
+            sizeY = 1000,
+        )
 
     #################################################################
