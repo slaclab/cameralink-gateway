@@ -43,7 +43,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x07000000
+        self.FwVersionLock = 0x07020000
 
         # Set local variables
         self.laneConfig     = laneConfig

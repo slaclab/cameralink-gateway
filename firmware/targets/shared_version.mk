@@ -1,5 +1,5 @@
-# Define Firmware Version: v7.0.0.0
-export PRJ_VERSION = 0x07000000
+# Define Firmware Version: v7.2.0.0
+export PRJ_VERSION = 0x07020000
 
 # Define release
 ifndef RELEASE
