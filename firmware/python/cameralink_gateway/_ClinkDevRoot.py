@@ -43,7 +43,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x07020000
+        self.FwVersionLock = 0x07030000
 
         # Set local variables
         self.laneConfig     = laneConfig
@@ -253,7 +253,7 @@ class ClinkDevRoot(shared.Root):
                     Please update PCIe firmware using software/scripts/updatePcieFpga.py
                     """
                 click.secho(errMsg, bg='red')
-                raise ValueError(errMsg)
+                # raise ValueError(errMsg)
 
             # Check for FEB FW version
             for lane in self.laneConfig:
@@ -269,8 +269,16 @@ class ClinkDevRoot(shared.Root):
                             Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/updateFeb.py
                             """
                         click.secho(errMsg, bg='red')
-                        raise ValueError(errMsg)
+                        # raise ValueError(errMsg)
+
+                    # Force expand parts of the device tree
+                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane]._expand = True
+                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[0]._expand = False
+                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[1]._expand = True # Camera image stream
+                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[2]._expand = False
+                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[3]._expand = False
                 else:
+                    # Collapse the lanes with links that are down
                     self.ClinkPcie.Application.AppLane[lane]._expand = False
 
             # Startup procedures for OPAL1000
