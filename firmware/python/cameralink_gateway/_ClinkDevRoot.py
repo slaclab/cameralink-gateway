@@ -253,7 +253,7 @@ class ClinkDevRoot(shared.Root):
                     Please update PCIe firmware using software/scripts/updatePcieFpga.py
                     """
                 click.secho(errMsg, bg='red')
-                # raise ValueError(errMsg)
+                raise ValueError(errMsg)
 
             # Check for FEB FW version
             for lane in self.laneConfig:
@@ -269,7 +269,7 @@ class ClinkDevRoot(shared.Root):
                             Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/updateFeb.py
                             """
                         click.secho(errMsg, bg='red')
-                        # raise ValueError(errMsg)
+                        raise ValueError(errMsg)
 
                     # Force expand parts of the device tree
                     self.ClinkPcie.Hsio.PgpRxAxisMon[lane]._expand = True
