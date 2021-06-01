@@ -96,6 +96,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--enableYamlLoad",
+        type     = argBool,
+        required = False,
+        default  = True,
+        help     = "False to bypass the YAML load",
+    )
+
+    parser.add_argument(
         "--enableDump",
         type     = argBool,
         required = False,
@@ -183,6 +191,7 @@ if __name__ == "__main__":
             startupMode    = args.startupMode,
             standAloneMode = args.standAloneMode,
             enableDump     = args.enableDump,
+            enableYamlLoad = args.enableYamlLoad,
             pgp4           = args.pgp4,
             seuDumpDir     = args.seuDumpDir,
         ) as root:

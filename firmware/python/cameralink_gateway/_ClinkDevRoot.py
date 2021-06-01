@@ -40,6 +40,7 @@ class ClinkDevRoot(shared.Root):
                  laneConfig     = {0: 'Opal1000'},
                  seuDumpDir     = None,
                  enableDump     = False,
+                 enableYamlLoad = True,
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
@@ -51,6 +52,7 @@ class ClinkDevRoot(shared.Root):
         self.startupMode    = startupMode
         self.standAloneMode = standAloneMode
         self.enableDump     = enableDump
+        self.enableYamlLoad = enableYamlLoad
         self.defaultFile    = []
 
         # Generate a list of configurations
@@ -335,9 +337,10 @@ class ClinkDevRoot(shared.Root):
         self.ReadAll()
 
         # Load the YAML configurations
-        defaultFile.extend(self.defaultFile)
-        print(f'Loading {defaultFile} Configuration File...')
-        self.LoadConfig(defaultFile)
+        if self.enableYamlLoad:
+            defaultFile.extend(self.defaultFile)
+            print(f'Loading {defaultFile} Configuration File...')
+            self.LoadConfig(defaultFile)
 
         if (self.enableDump):
             # Dump the state of the hardware before configuration
