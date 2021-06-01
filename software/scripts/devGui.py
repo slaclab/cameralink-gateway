@@ -96,7 +96,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--enableYamlLoad",
+        "--enableConfig",
         type     = argBool,
         required = False,
         default  = True,
@@ -191,7 +191,7 @@ if __name__ == "__main__":
             startupMode    = args.startupMode,
             standAloneMode = args.standAloneMode,
             enableDump     = args.enableDump,
-            enableYamlLoad = args.enableYamlLoad,
+            enableConfig   = args.enableConfig,
             pgp4           = args.pgp4,
             seuDumpDir     = args.seuDumpDir,
         ) as root:
