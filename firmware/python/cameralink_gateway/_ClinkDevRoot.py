@@ -40,6 +40,7 @@ class ClinkDevRoot(shared.Root):
                  laneConfig     = {0: 'Opal1000'},
                  seuDumpDir     = None,
                  enableDump     = False,
+                 enableConfig   = True,
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
@@ -51,6 +52,7 @@ class ClinkDevRoot(shared.Root):
         self.startupMode    = startupMode
         self.standAloneMode = standAloneMode
         self.enableDump     = enableDump
+        self.enableConfig   = enableConfig
         self.defaultFile    = []
 
         # Generate a list of configurations
@@ -303,41 +305,44 @@ class ClinkDevRoot(shared.Root):
                 dev.SM.set('f')
                 dev.RP()
 
-        # Useful pointer
-        timingRx = self.ClinkPcie.Hsio.TimingRx
+        # Load the configurations
+        if self.enableConfig:
 
-        # Start up the timing system = LCLS-II mode
-        if self.startupMode:
+            # Useful pointer
+            timingRx = self.ClinkPcie.Hsio.TimingRx
 
-            # Set the default to  LCLS-II mode
-            defaultFile = ['config/defaults_LCLS-II.yml']
+            # Start up the timing system = LCLS-II mode
+            if self.startupMode:
 
-            # Startup in LCLS-II mode
-            if self.standAloneMode:
-                timingRx.ConfigureXpmMini()
+                # Set the default to  LCLS-II mode
+                defaultFile = ['config/defaults_LCLS-II.yml']
+
+                # Startup in LCLS-II mode
+                if self.standAloneMode:
+                    timingRx.ConfigureXpmMini()
+                else:
+                    timingRx.ConfigLclsTimingV2()
+
+            # Else LCLS-I mode
             else:
-                timingRx.ConfigLclsTimingV2()
 
-        # Else LCLS-I mode
-        else:
+                # Set the default to  LCLS-I mode
+                defaultFile = ['config/defaults_LCLS-I.yml']
 
-            # Set the default to  LCLS-I mode
-            defaultFile = ['config/defaults_LCLS-I.yml']
+                # Startup in LCLS-I mode
+                if self.standAloneMode:
+                    timingRx.ConfigureTpgMiniStream()
+                else:
+                    timingRx.ConfigLclsTimingV1()
 
-            # Startup in LCLS-I mode
-            if self.standAloneMode:
-                timingRx.ConfigureTpgMiniStream()
-            else:
-                timingRx.ConfigLclsTimingV1()
+            # Read all the variables
+            self.ReadAll()
+            self.ReadAll()
 
-        # Read all the variables
-        self.ReadAll()
-        self.ReadAll()
-
-        # Load the YAML configurations
-        defaultFile.extend(self.defaultFile)
-        print(f'Loading {defaultFile} Configuration File...')
-        self.LoadConfig(defaultFile)
+            # Load the YAML configurations
+            defaultFile.extend(self.defaultFile)
+            print(f'Loading {defaultFile} Configuration File...')
+            self.LoadConfig(defaultFile)
 
         if (self.enableDump):
             # Dump the state of the hardware before configuration
