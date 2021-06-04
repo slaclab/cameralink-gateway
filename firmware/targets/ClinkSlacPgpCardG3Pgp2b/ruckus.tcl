@@ -22,5 +22,7 @@ loadRuckusTcl $::env(PROJ_DIR)/../../common
 loadSource      -dir "$::DIR_PATH/hdl"
 loadConstraints -dir "$::DIR_PATH/hdl"
 
+loadSource -path "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4/hdl/TimingRx.vhd"
+
 # Updating impl_1 strategy
 set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]

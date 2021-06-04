@@ -210,22 +210,29 @@ begin
             CEB   => '0',
             ODIV2 => gtediv2(i),
             O     => open);
-
-      U_BUFG : BUFG
-         port map (
-            I => gtediv2(i),
-            O => refClk(i));
-
-      U_RstSync : entity surf.RstSync
-         generic map (
-            TPD_G => TPD_G)
-         port map (
-            clk      => refClk(i),
-            asyncRst => mmcmRst,
-            syncRst  => refRst(i));
-
-      mmcmLocked(i) <= not(refRst(i));
-
+            
+      U_Pll : entity surf.ClockManager7
+         generic map(
+            TPD_G             => TPD_G,
+            TYPE_G            => "PLL",
+            INPUT_BUFG_G      => true,
+            FB_BUFG_G         => false,
+            RST_IN_POLARITY_G => '1',
+            NUM_CLOCKS_G      => 1,
+            -- MMCM attributes
+            BANDWIDTH_G       => "HIGH",
+            CLKIN_PERIOD_G    => ite((i=0), 8.402, 5.382),
+            CLKFBOUT_MULT_G   => 10,        
+            CLKOUT0_DIVIDE_G  => 10)        
+         port map(
+            -- Clock Input
+            clkIn     => gtediv2(i),
+            rstIn     => mmcmRst,
+            -- Clock Outputs
+            clkOut(0) => refClk(i),
+            -- Reset Outputs
+            locked    => mmcmLocked(i));
+         
    end generate GEN_GT_VEC;
 
    U_QPLL : entity surf.Gtp7QuadPll
