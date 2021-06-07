@@ -68,6 +68,22 @@ SFP[0] is fiber closed to the power connector.  Numbering goes from left to righ
 
 <!--- ######################################################## -->
 
+# SLAC PGP GEN3 PCIe Fiber mapping
+
+```
+QSFP[0][0] = PGP.Lane[0].VC[3:0]
+QSFP[0][1] = Unused QSFP Link
+QSFP[0][2] = Unused QSFP Link
+QSFP[0][3] = Unused QSFP Link
+QSFP[1][0] = LCLS-I  Timing Receiver
+QSFP[1][1] = LCLS-II Timing Receiver
+QSFP[1][2] = Unused QSFP Link
+QSFP[1][3] = Unused QSFP Link
+SFP = Unused SFP Link
+```
+
+<!--- ######################################################## -->
+
 # SLAC PGP GEN4 PCIe Fiber mapping
 
 ```
@@ -260,9 +276,9 @@ $ source setup_env_slac.sh
 $ python scripts/devGui --pgp4 IS_PGP4_BOOL --laneConfig LANE_CONFIG_DICTIONARY
 ```
 
-# Example of starting up OPAL1000 on Lane[0] with PGP2b and stand alone mode (locally generated timing)
+# Example of starting up OPAL1000 on Lane[0] with PGP4 (instead of PGP2b) and stand alone mode (locally generated timing)
 ```
-$ python scripts/devGui --pgp4 0 --laneConfig 0=Opal1000 --standAloneMode 1
+$ python scripts/devGui --pgp4 1 --laneConfig 0=Opal1000 --standAloneMode 1
 Then execute the StartRun() command to start the triggering
 ```
 

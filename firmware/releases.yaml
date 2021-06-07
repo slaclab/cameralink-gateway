@@ -25,12 +25,8 @@ Targets:
     ImageDir: targets/ClinkFeb/images
     Extensions:
       - mcs      
-  ClinkKcu1500Pgp2b:
-    ImageDir: targets/ClinkKcu1500Pgp2b/images
-    Extensions:
-      - mcs
-  ClinkKcu1500Pgp4:
-    ImageDir: targets/ClinkKcu1500Pgp4/images
+  ClinkSlacPgpCardG3Pgp4:
+    ImageDir: targets/ClinkSlacPgpCardG3Pgp4/images
     Extensions:
       - mcs
   ClinkSlacPgpCardG4Pgp2b:
@@ -41,15 +37,24 @@ Targets:
     ImageDir: targets/ClinkSlacPgpCardG4Pgp4/images
     Extensions:
       - mcs
+  ClinkKcu1500Pgp2b:
+    ImageDir: targets/ClinkKcu1500Pgp2b/images
+    Extensions:
+      - mcs
+  ClinkKcu1500Pgp4:
+    ImageDir: targets/ClinkKcu1500Pgp4/images
+    Extensions:
+      - mcs
 
 Releases:
   all:
     Primary: True
     Targets:
       - ClinkFeb
-      - ClinkKcu1500Pgp2b
-      - ClinkKcu1500Pgp4
+      - ClinkSlacPgpCardG3Pgp4
       - ClinkSlacPgpCardG4Pgp2b
       - ClinkSlacPgpCardG4Pgp4
+      - ClinkKcu1500Pgp2b
+      - ClinkKcu1500Pgp4
     Types:
       - Rogue

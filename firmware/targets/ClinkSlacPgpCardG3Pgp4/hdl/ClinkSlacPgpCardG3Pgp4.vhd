@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- File       : ClinkSlacPgpCardG4Pgp2b.vhd
+-- File       : ClinkSlacPgpCardG3Pgp4.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
 -- Description: Camera link gateway PCIe card with PGPv2b
@@ -26,64 +26,64 @@ use surf.SsiPkg.all;
 library lcls2_pgp_fw_lib;
 
 library axi_pcie_core;
+use axi_pcie_core.AxiPciePkg.all;
 
 library unisim;
 use unisim.vcomponents.all;
 
-entity ClinkSlacPgpCardG4Pgp2b is
+entity ClinkSlacPgpCardG3Pgp4 is
    generic (
       TPD_G          : time    := 1 ns;
       ROGUE_SIM_EN_G : boolean := false;
-      PGP_TYPE_G     : string  := "PGP2b";
       BUILD_INFO_G   : BuildInfoType);
    port (
       ---------------------
       --  Application Ports
       ---------------------
-      -- SFP Ports
-      sfpRefClkP  : in  slv(1 downto 0);
-      sfpRefClkN  : in  slv(1 downto 0);
-      sfpRxP      : in  sl;
-      sfpRxN      : in  sl;
-      sfpTxP      : out sl;
-      sfpTxN      : out sl;
-      -- QSFP[1:0] Ports
-      qsfpRefClkP : in  sl;
-      qsfpRefClkN : in  sl;
-      qsfp0RxP    : in  slv(3 downto 0);
-      qsfp0RxN    : in  slv(3 downto 0);
-      qsfp0TxP    : out slv(3 downto 0);
-      qsfp0TxN    : out slv(3 downto 0);
-      qsfp1RxP    : in  slv(3 downto 0);
-      qsfp1RxN    : in  slv(3 downto 0);
-      qsfp1TxP    : out slv(3 downto 0);
-      qsfp1TxN    : out slv(3 downto 0);
+      -- PGP GT Serial Ports
+      pgpRefClkP : in    sl;
+      pgpRefClkN : in    sl;
+      pgpRxP     : in    slv(7 downto 0);
+      pgpRxN     : in    slv(7 downto 0);
+      pgpTxP     : out   slv(7 downto 0);
+      pgpTxN     : out   slv(7 downto 0);
+      -- EVR GT Serial Ports
+      evrRefClkP : in    slv(1 downto 0);
+      evrRefClkN : in    slv(1 downto 0);
+      evrMuxSel  : out   slv(1 downto 0);
+      evrRxP     : in    sl;
+      evrRxN     : in    sl;
+      evrTxP     : out   sl;
+      evrTxN     : out   sl;
+      -- User LEDs
+      ledDbg     : out   sl;
+      ledRedL    : out   slv(5 downto 0);
+      ledBlueL   : out   slv(5 downto 0);
+      ledGreenL  : out   slv(5 downto 0);
       --------------
       --  Core Ports
       --------------
-      -- System Ports
-      emcClk      : in  sl;
-      -- Boot Memory Ports
-      flashCsL    : out sl;
-      flashMosi   : out sl;
-      flashMiso   : in  sl;
-      flashHoldL  : out sl;
-      flashWp     : out sl;
+      -- FLASH Interface
+      flashAddr  : out   slv(28 downto 0);
+      flashData  : inout slv(15 downto 0);
+      flashAdv   : out   sl;
+      flashCeL   : out   sl;
+      flashOeL   : out   sl;
+      flashWeL   : out   sl;
       -- PCIe Ports
-      pciRstL     : in  sl;
-      pciRefClkP  : in  sl;
-      pciRefClkN  : in  sl;
-      pciRxP      : in  slv(7 downto 0);
-      pciRxN      : in  slv(7 downto 0);
-      pciTxP      : out slv(7 downto 0);
-      pciTxN      : out slv(7 downto 0));
-end ClinkSlacPgpCardG4Pgp2b;
+      pciRstL    : in    sl;
+      pciRefClkP : in    sl;            -- 100 MHz
+      pciRefClkN : in    sl;            -- 100 MHz
+      pciRxP     : in    slv(3 downto 0);
+      pciRxN     : in    slv(3 downto 0);
+      pciTxP     : out   slv(3 downto 0);
+      pciTxN     : out   slv(3 downto 0));
+end ClinkSlacPgpCardG3Pgp4;
 
-architecture top_level of ClinkSlacPgpCardG4Pgp2b is
+architecture top_level of ClinkSlacPgpCardG3Pgp4 is
 
-   constant DMA_AXIS_CONFIG_C : AxiStreamConfigType := ssiAxiStreamConfig(8, TKEEP_COMP_C, TUSER_FIRST_LAST_C, 8, 2);  -- 64-bit interface
-   constant AXIL_CLK_FREQ_C   : real                := 156.25E+6;  -- units of Hz
-   constant DMA_SIZE_C        : positive            := 4;
+   constant NUM_PGP_LANES_C : positive := 1;
+   constant DMA_SIZE_C      : positive := 1;
 
    constant NUM_AXIL_MASTERS_C : positive := 2;
 
@@ -91,10 +91,6 @@ architecture top_level of ClinkSlacPgpCardG4Pgp2b is
    constant APP_INDEX_C : natural := 1;
 
    constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(NUM_AXIL_MASTERS_C-1 downto 0) := genAxiLiteConfig(NUM_AXIL_MASTERS_C, x"0080_0000", 23, 22);
-
-   signal userClk156 : sl;
-   signal userClk25  : sl;
-   signal userRst25  : sl;
 
    signal axilClk          : sl;
    signal axilRst          : sl;
@@ -114,52 +110,32 @@ architecture top_level of ClinkSlacPgpCardG4Pgp2b is
    signal dmaIbMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
    signal dmaIbSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
 
-   signal pgpIbMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0)     := (others => AXI_STREAM_MASTER_INIT_C);
-   signal pgpIbSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)      := (others => AXI_STREAM_SLAVE_FORCE_C);
-   signal pgpObMasters : AxiStreamQuadMasterArray(DMA_SIZE_C-1 downto 0) := (others => (others => AXI_STREAM_MASTER_INIT_C));
-   signal pgpObSlaves  : AxiStreamQuadSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => (others => AXI_STREAM_SLAVE_FORCE_C));
+   signal pgpIbMasters : AxiStreamMasterArray(NUM_PGP_LANES_C-1 downto 0)     := (others => AXI_STREAM_MASTER_INIT_C);
+   signal pgpIbSlaves  : AxiStreamSlaveArray(NUM_PGP_LANES_C-1 downto 0)      := (others => AXI_STREAM_SLAVE_FORCE_C);
+   signal pgpObMasters : AxiStreamQuadMasterArray(NUM_PGP_LANES_C-1 downto 0) := (others => (others => AXI_STREAM_MASTER_INIT_C));
+   signal pgpObSlaves  : AxiStreamQuadSlaveArray(NUM_PGP_LANES_C-1 downto 0)  := (others => (others => AXI_STREAM_SLAVE_FORCE_C));
 
-   signal eventTrigMsgMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
-   signal eventTrigMsgSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
-   signal eventTrigMsgCtrl    : AxiStreamCtrlArray(DMA_SIZE_C-1 downto 0)   := (others => AXI_STREAM_CTRL_UNUSED_C);
+   signal eventTrigMsgMasters : AxiStreamMasterArray(NUM_PGP_LANES_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
+   signal eventTrigMsgSlaves  : AxiStreamSlaveArray(NUM_PGP_LANES_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
+   signal eventTrigMsgCtrl    : AxiStreamCtrlArray(NUM_PGP_LANES_C-1 downto 0)   := (others => AXI_STREAM_CTRL_UNUSED_C);
 
-   signal eventTimingMsgMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
-   signal eventTimingMsgSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
+   signal eventTimingMsgMasters : AxiStreamMasterArray(NUM_PGP_LANES_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
+   signal eventTimingMsgSlaves  : AxiStreamSlaveArray(NUM_PGP_LANES_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
 
 begin
 
-   U_axilClk : entity surf.ClockManagerUltraScale
-      generic map(
-         TPD_G             => TPD_G,
-         TYPE_G            => "PLL",
-         INPUT_BUFG_G      => true,
-         FB_BUFG_G         => true,
-         RST_IN_POLARITY_G => '1',
-         NUM_CLOCKS_G      => 1,
-         -- MMCM attributes
-         BANDWIDTH_G       => "OPTIMIZED",
-         CLKIN_PERIOD_G    => 4.0,      -- 250 MHz
-         CLKFBOUT_MULT_G   => 5,        -- 1.25GHz = 5 x 250 MHz
-         CLKOUT0_DIVIDE_G  => 8)        -- 156.25MHz = 1.25GHz/8
-      port map(
-         -- Clock Input
-         clkIn     => dmaClk,
-         rstIn     => dmaRst,
-         -- Clock Outputs
-         clkOut(0) => axilClk,
-         -- Reset Outputs
-         rstOut(0) => axilRst);
+   axilClk <= dmaClk;
+   axilRst <= dmaRst;
 
    -----------------------
    -- AXI-PCIE-CORE Module
    -----------------------
-   U_Core : entity axi_pcie_core.SlacPgpCardG4Core
+   U_Core : entity axi_pcie_core.AxiPciePgpCardG3Core
       generic map (
          TPD_G                => TPD_G,
          ROGUE_SIM_EN_G       => ROGUE_SIM_EN_G,
          ROGUE_SIM_CH_COUNT_G => 4,     -- 4 Virtual Channels per DMA lane
          BUILD_INFO_G         => BUILD_INFO_G,
-         DMA_AXIS_CONFIG_G    => DMA_AXIS_CONFIG_C,
          DMA_SIZE_G           => DMA_SIZE_C)
       port map (
          ------------------------
@@ -182,14 +158,13 @@ begin
          --------------
          --  Core Ports
          --------------
-         -- System Ports
-         emcClk         => emcClk,
          -- Boot Memory Ports
-         flashCsL       => flashCsL,
-         flashMosi      => flashMosi,
-         flashMiso      => flashMiso,
-         flashHoldL     => flashHoldL,
-         flashWp        => flashWp,
+         flashAddr      => flashAddr,
+         flashData      => flashData,
+         flashAdv       => flashAdv,
+         flashCeL       => flashCeL,
+         flashOeL       => flashOeL,
+         flashWeL       => flashWeL,
          -- PCIe Ports
          pciRstL        => pciRstL,
          pciRefClkP     => pciRefClkP,
@@ -198,6 +173,24 @@ begin
          pciRxN         => pciRxN,
          pciTxP         => pciTxP,
          pciTxN         => pciTxN);
+
+   ledDbg    <= '0';
+   ledRedL   <= (others => '1');
+   ledBlueL  <= (others => '1');
+   ledGreenL <= (others => '1');
+   evrMuxSel <= (others => '0');
+
+   U_TermGts : entity surf.Gtpe2ChannelDummy
+      generic map (
+         TPD_G        => TPD_G,
+         SIMULATION_G => ROGUE_SIM_EN_G,
+         WIDTH_G      => 1)
+      port map (
+         refClk   => axilClk,
+         gtRxP(0) => evrRxP,
+         gtRxN(0) => evrRxN,
+         gtTxP(0) => evrTxP,
+         gtTxN(0) => evrTxN);
 
    ---------------------
    -- AXI-Lite Crossbar
@@ -225,7 +218,7 @@ begin
          TPD_G             => TPD_G,
          AXI_BASE_ADDR_G   => AXIL_CONFIG_C(APP_INDEX_C).baseAddr,
          DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
-         DMA_SIZE_G        => DMA_SIZE_C)
+         DMA_SIZE_G        => NUM_PGP_LANES_C)
       port map (
          -- AXI-Lite Interface (axilClk domain)
          axilClk               => axilClk,
@@ -247,22 +240,21 @@ begin
          -- DMA Interface (dmaClk domain)
          dmaClk                => dmaClk,
          dmaRst                => dmaRst,
-         dmaObMasters          => dmaObMasters,
-         dmaObSlaves           => dmaObSlaves,
-         dmaIbMasters          => dmaIbMasters,
-         dmaIbSlaves           => dmaIbSlaves);
+         dmaObMasters          => dmaObMasters(NUM_PGP_LANES_C-1 downto 0),
+         dmaObSlaves           => dmaObSlaves(NUM_PGP_LANES_C-1 downto 0),
+         dmaIbMasters          => dmaIbMasters(NUM_PGP_LANES_C-1 downto 0),
+         dmaIbSlaves           => dmaIbSlaves(NUM_PGP_LANES_C-1 downto 0));
 
    ------------------
    -- Hardware Module
    ------------------
-   U_HSIO : entity lcls2_pgp_fw_lib.SlacPgpCardG4Hsio
+   U_HSIO : entity work.SlacPgpCardG3Hsio
       generic map (
          TPD_G               => TPD_G,
          ROGUE_SIM_EN_G      => ROGUE_SIM_EN_G,
-         PGP_TYPE_G          => PGP_TYPE_G,
-         NUM_PGP_LANES_G     => DMA_SIZE_C,
+         NUM_PGP_LANES_G     => NUM_PGP_LANES_C,
          DMA_AXIS_CONFIG_G   => DMA_AXIS_CONFIG_C,
-         AXIL_CLK_FREQ_G     => AXIL_CLK_FREQ_C,
+         AXIL_CLK_FREQ_G     => DMA_CLK_FREQ_C,
          AXI_BASE_ADDR_G     => AXIL_CONFIG_C(HW_INDEX_C).baseAddr,
          EN_LCLS_I_TIMING_G  => true,
          EN_LCLS_II_TIMING_G => true)
@@ -296,23 +288,15 @@ begin
          ------------------
          --  Hardware Ports
          ------------------
-         -- SFP Ports
-         sfpRefClkP            => sfpRefClkP,
-         sfpRefClkN            => sfpRefClkN,
-         sfpRxP                => sfpRxP,
-         sfpRxN                => sfpRxN,
-         sfpTxP                => sfpTxP,
-         sfpTxN                => sfpTxN,
-         -- QSFP[1:0] Ports
-         qsfpRefClkP           => qsfpRefClkP,
-         qsfpRefClkN           => qsfpRefClkN,
-         qsfp0RxP              => qsfp0RxP,
-         qsfp0RxN              => qsfp0RxN,
-         qsfp0TxP              => qsfp0TxP,
-         qsfp0TxN              => qsfp0TxN,
-         qsfp1RxP              => qsfp1RxP,
-         qsfp1RxN              => qsfp1RxN,
-         qsfp1TxP              => qsfp1TxP,
-         qsfp1TxN              => qsfp1TxN);
+         -- PGP GT Serial Ports
+         pgpRefClkP            => pgpRefClkP,
+         pgpRefClkN            => pgpRefClkN,
+         pgpRxP                => pgpRxP,
+         pgpRxN                => pgpRxN,
+         pgpTxP                => pgpTxP,
+         pgpTxN                => pgpTxN,
+         -- EVR GT Serial Ports
+         evrRefClkP            => evrRefClkP,
+         evrRefClkN            => evrRefClkN);
 
 end top_level;
