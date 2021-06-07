@@ -260,9 +260,9 @@ $ source setup_env_slac.sh
 $ python scripts/devGui --pgp4 IS_PGP4_BOOL --laneConfig LANE_CONFIG_DICTIONARY
 ```
 
-# Example of starting up OPAL1000 on Lane[0] with PGP2b and stand alone mode (locally generated timing)
+# Example of starting up OPAL1000 on Lane[0] with PGP4 (instead of PGP2b) and stand alone mode (locally generated timing)
 ```
-$ python scripts/devGui --pgp4 0 --laneConfig 0=Opal1000 --standAloneMode 1
+$ python scripts/devGui --pgp4 1 --laneConfig 0=Opal1000 --standAloneMode 1
 Then execute the StartRun() command to start the triggering
 ```
 
