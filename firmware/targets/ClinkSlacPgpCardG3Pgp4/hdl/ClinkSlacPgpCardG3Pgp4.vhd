@@ -5,11 +5,11 @@
 -- Description: Camera link gateway PCIe card with PGPv2b
 -------------------------------------------------------------------------------
 -- This file is part of 'Camera link gateway'.
--- It is subject to the license terms in the LICENSE.txt file found in the 
--- top-level directory of this distribution and at: 
---    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
--- No part of 'Camera link gateway', including this file, 
--- may be copied, modified, propagated, or distributed except according to 
+-- It is subject to the license terms in the LICENSE.txt file found in the
+-- top-level directory of this distribution and at:
+--    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+-- No part of 'Camera link gateway', including this file,
+-- may be copied, modified, propagated, or distributed except according to
 -- the terms contained in the LICENSE.txt file.
 -------------------------------------------------------------------------------
 
@@ -127,9 +127,9 @@ begin
    axilClk <= dmaClk;
    axilRst <= dmaRst;
 
-   ----------------------- 
+   -----------------------
    -- AXI-PCIE-CORE Module
-   ----------------------- 
+   -----------------------
    U_Core : entity axi_pcie_core.AxiPciePgpCardG3Core
       generic map (
          TPD_G                => TPD_G,
@@ -138,9 +138,9 @@ begin
          BUILD_INFO_G         => BUILD_INFO_G,
          DMA_SIZE_G           => DMA_SIZE_C)
       port map (
-         ------------------------      
+         ------------------------
          --  Top Level Interfaces
-         ------------------------        
+         ------------------------
          -- DMA Interfaces
          dmaClk         => dmaClk,
          dmaRst         => dmaRst,
@@ -157,7 +157,7 @@ begin
          appWriteSlave  => axilWriteSlave,
          --------------
          --  Core Ports
-         --------------   
+         --------------
          -- Boot Memory Ports
          flashAddr      => flashAddr,
          flashData      => flashData,
@@ -165,7 +165,7 @@ begin
          flashCeL       => flashCeL,
          flashOeL       => flashOeL,
          flashWeL       => flashWeL,
-         -- PCIe Ports 
+         -- PCIe Ports
          pciRstL        => pciRstL,
          pciRefClkP     => pciRefClkP,
          pciRefClkN     => pciRefClkN,
@@ -194,7 +194,7 @@ begin
 
    ---------------------
    -- AXI-Lite Crossbar
-   ---------------------         
+   ---------------------
    U_XBAR : entity surf.AxiLiteCrossbar
       generic map (
          TPD_G              => TPD_G,
@@ -259,9 +259,9 @@ begin
          EN_LCLS_I_TIMING_G  => true,
          EN_LCLS_II_TIMING_G => true)
       port map (
-         ------------------------      
+         ------------------------
          --  Top Level Interfaces
-         ------------------------    
+         ------------------------
          -- AXI-Lite Interface (axilClk domain)
          axilClk               => axilClk,
          axilRst               => axilRst,
@@ -287,7 +287,7 @@ begin
          eventTimingMsgSlaves  => eventTimingMsgSlaves,
          ------------------
          --  Hardware Ports
-         ------------------    
+         ------------------
          -- PGP GT Serial Ports
          pgpRefClkP            => pgpRefClkP,
          pgpRefClkN            => pgpRefClkN,

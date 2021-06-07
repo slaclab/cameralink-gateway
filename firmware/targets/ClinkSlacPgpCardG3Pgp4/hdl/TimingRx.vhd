@@ -210,7 +210,7 @@ begin
             CEB   => '0',
             ODIV2 => gtediv2(i),
             O     => open);
-            
+
       U_Pll : entity surf.ClockManager7
          generic map(
             TPD_G             => TPD_G,
@@ -222,8 +222,8 @@ begin
             -- MMCM attributes
             BANDWIDTH_G       => "HIGH",
             CLKIN_PERIOD_G    => ite((i=0), 8.402, 5.382),
-            CLKFBOUT_MULT_G   => 10,        
-            CLKOUT0_DIVIDE_G  => 10)        
+            CLKFBOUT_MULT_G   => 10,
+            CLKOUT0_DIVIDE_G  => 10)
          port map(
             -- Clock Input
             clkIn     => gtediv2(i),
@@ -232,7 +232,7 @@ begin
             clkOut(0) => refClk(i),
             -- Reset Outputs
             locked    => mmcmLocked(i));
-         
+
    end generate GEN_GT_VEC;
 
    U_QPLL : entity surf.Gtp7QuadPll

@@ -1,10 +1,10 @@
 ##############################################################################
 ## This file is part of LCLS2 PGP Firmware Library'.
-## It is subject to the license terms in the LICENSE.txt file found in the 
-## top-level directory of this distribution and at: 
-##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html. 
-## No part of LCLS2 PGP Firmware Library', including this file, 
-## may be copied, modified, propagated, or distributed except according to 
+## It is subject to the license terms in the LICENSE.txt file found in the
+## top-level directory of this distribution and at:
+##    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+## No part of LCLS2 PGP Firmware Library', including this file,
+## may be copied, modified, propagated, or distributed except according to
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
@@ -41,9 +41,9 @@ create_generated_clock -name pgpTxClk1x  [get_pins {U_HSIO/U_TX_PLL/CLKOUT0}]
 create_generated_clock -name pgpTxClk2x  [get_pins {U_HSIO/U_TX_PLL/CLKOUT2}]
 create_generated_clock -name pgpTxClk4x  [get_pins {U_HSIO/U_TX_PLL/CLKOUT1}]
 
-# Base Clocks 
+# Base Clocks
 
-create_generated_clock -name clk119 [get_pins {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_Pll/PllGen.U_Pll/CLKOUT0}] 
+create_generated_clock -name clk119 [get_pins {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_Pll/PllGen.U_Pll/CLKOUT0}]
 create_generated_clock -name clk186 [get_pins {U_HSIO/U_TimingRx/GEN_GT_VEC[1].U_Pll/PllGen.U_Pll/CLKOUT0}]
 
 # GT Out Clocks
@@ -171,12 +171,12 @@ set_false_path -to [get_pins {*/U_TimingRx/U_TXCLK/CE*}]
 set_clock_groups -asynchronous \
     -group [get_clocks -include_generated_clocks {pgpRefClk}] \
     -group [get_clocks -include_generated_clocks {timingGtRxOutClk0}] \
-    -group [get_clocks -include_generated_clocks {timingGtRxOutClk1}] \    
+    -group [get_clocks -include_generated_clocks {timingGtRxOutClk1}] \
     -group [get_clocks -include_generated_clocks {timingGtTxOutClk0}] \
     -group [get_clocks -include_generated_clocks {timingGtTxOutClk1}] \
     -group [get_clocks -include_generated_clocks {evrRefClk0}]  \
     -group [get_clocks -include_generated_clocks {evrRefClk1}] \
-    -group [get_clocks -include_generated_clocks {sysClk}] 
+    -group [get_clocks -include_generated_clocks {sysClk}]
 
 set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {sysClk}] -group [get_clocks {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/GEN_6G.U_Pgp3Gtp7Ip6G/U0/Pgp3Gtp7Ip6G_i/gt0_Pgp3Gtp7Ip6G_i/gtpe2_i/RXOUTCLK}]
 set_clock_groups -asynchronous -group [get_clocks -include_generated_clocks {sysClk}] -group [get_clocks {U_HSIO/GEN_LANE[1].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/GEN_6G.U_Pgp3Gtp7Ip6G/U0/Pgp3Gtp7Ip6G_i/gt0_Pgp3Gtp7Ip6G_i/gtpe2_i/RXOUTCLK}]
@@ -188,45 +188,45 @@ set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk2x}] \
    -group [get_clocks {pgpRxClk1x_0}] \
    -group [get_clocks {pgpRxClk2x_0}] \
-   -group [get_clocks -include_generated_clocks {sysClk}] 
+   -group [get_clocks -include_generated_clocks {sysClk}]
 
 set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk4x}] \
    -group [get_clocks {pgpRxClk4x_0}] \
-   -group [get_clocks -include_generated_clocks {sysClk}] 
-   
+   -group [get_clocks -include_generated_clocks {sysClk}]
+
 set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk1x}] \
    -group [get_clocks {pgpTxClk2x}] \
    -group [get_clocks {pgpRxClk1x_1}] \
    -group [get_clocks {pgpRxClk2x_1}] \
-   -group [get_clocks -include_generated_clocks {sysClk}] 
+   -group [get_clocks -include_generated_clocks {sysClk}]
 
 set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk4x}] \
    -group [get_clocks {pgpRxClk4x_1}] \
-   -group [get_clocks -include_generated_clocks {sysClk}]  
+   -group [get_clocks -include_generated_clocks {sysClk}]
 
 set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk1x}] \
    -group [get_clocks {pgpTxClk2x}] \
    -group [get_clocks {pgpRxClk1x_2}] \
    -group [get_clocks {pgpRxClk2x_2}] \
-   -group [get_clocks -include_generated_clocks {sysClk}] 
+   -group [get_clocks -include_generated_clocks {sysClk}]
 
 set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk4x}] \
    -group [get_clocks {pgpRxClk4x_2}] \
-   -group [get_clocks -include_generated_clocks {sysClk}] 
-   
+   -group [get_clocks -include_generated_clocks {sysClk}]
+
 set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk1x}] \
    -group [get_clocks {pgpTxClk2x}] \
    -group [get_clocks {pgpRxClk1x_3}] \
    -group [get_clocks {pgpRxClk2x_3}] \
-   -group [get_clocks -include_generated_clocks {sysClk}] 
+   -group [get_clocks -include_generated_clocks {sysClk}]
 
 set_clock_groups -asynchronous \
    -group [get_clocks {pgpTxClk4x}] \
    -group [get_clocks {pgpRxClk4x_3}] \
-   -group [get_clocks -include_generated_clocks {sysClk}]     
+   -group [get_clocks -include_generated_clocks {sysClk}]
