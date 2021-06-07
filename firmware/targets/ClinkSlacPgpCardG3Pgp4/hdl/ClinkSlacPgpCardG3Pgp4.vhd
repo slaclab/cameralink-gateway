@@ -82,7 +82,8 @@ end ClinkSlacPgpCardG3Pgp4;
 
 architecture top_level of ClinkSlacPgpCardG3Pgp4 is
 
-   constant DMA_SIZE_C        : positive := 1;
+   constant NUM_PGP_LANES_C : positive := 1;
+   constant DMA_SIZE_C      : positive := 1;
 
    constant NUM_AXIL_MASTERS_C : positive := 2;
 
@@ -109,17 +110,17 @@ architecture top_level of ClinkSlacPgpCardG3Pgp4 is
    signal dmaIbMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
    signal dmaIbSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
 
-   signal pgpIbMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0)     := (others => AXI_STREAM_MASTER_INIT_C);
-   signal pgpIbSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)      := (others => AXI_STREAM_SLAVE_FORCE_C);
-   signal pgpObMasters : AxiStreamQuadMasterArray(DMA_SIZE_C-1 downto 0) := (others => (others => AXI_STREAM_MASTER_INIT_C));
-   signal pgpObSlaves  : AxiStreamQuadSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => (others => AXI_STREAM_SLAVE_FORCE_C));
+   signal pgpIbMasters : AxiStreamMasterArray(NUM_PGP_LANES_C-1 downto 0)     := (others => AXI_STREAM_MASTER_INIT_C);
+   signal pgpIbSlaves  : AxiStreamSlaveArray(NUM_PGP_LANES_C-1 downto 0)      := (others => AXI_STREAM_SLAVE_FORCE_C);
+   signal pgpObMasters : AxiStreamQuadMasterArray(NUM_PGP_LANES_C-1 downto 0) := (others => (others => AXI_STREAM_MASTER_INIT_C));
+   signal pgpObSlaves  : AxiStreamQuadSlaveArray(NUM_PGP_LANES_C-1 downto 0)  := (others => (others => AXI_STREAM_SLAVE_FORCE_C));
 
-   signal eventTrigMsgMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
-   signal eventTrigMsgSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
-   signal eventTrigMsgCtrl    : AxiStreamCtrlArray(DMA_SIZE_C-1 downto 0)   := (others => AXI_STREAM_CTRL_UNUSED_C);
+   signal eventTrigMsgMasters : AxiStreamMasterArray(NUM_PGP_LANES_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
+   signal eventTrigMsgSlaves  : AxiStreamSlaveArray(NUM_PGP_LANES_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
+   signal eventTrigMsgCtrl    : AxiStreamCtrlArray(NUM_PGP_LANES_C-1 downto 0)   := (others => AXI_STREAM_CTRL_UNUSED_C);
 
-   signal eventTimingMsgMasters : AxiStreamMasterArray(DMA_SIZE_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
-   signal eventTimingMsgSlaves  : AxiStreamSlaveArray(DMA_SIZE_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
+   signal eventTimingMsgMasters : AxiStreamMasterArray(NUM_PGP_LANES_C-1 downto 0) := (others => AXI_STREAM_MASTER_INIT_C);
+   signal eventTimingMsgSlaves  : AxiStreamSlaveArray(NUM_PGP_LANES_C-1 downto 0)  := (others => AXI_STREAM_SLAVE_FORCE_C);
 
 begin
 
@@ -217,7 +218,7 @@ begin
          TPD_G             => TPD_G,
          AXI_BASE_ADDR_G   => AXIL_CONFIG_C(APP_INDEX_C).baseAddr,
          DMA_AXIS_CONFIG_G => DMA_AXIS_CONFIG_C,
-         DMA_SIZE_G        => DMA_SIZE_C)
+         DMA_SIZE_G        => NUM_PGP_LANES_C)
       port map (
          -- AXI-Lite Interface (axilClk domain)
          axilClk               => axilClk,
@@ -239,10 +240,10 @@ begin
          -- DMA Interface (dmaClk domain)
          dmaClk                => dmaClk,
          dmaRst                => dmaRst,
-         dmaObMasters          => dmaObMasters,
-         dmaObSlaves           => dmaObSlaves,
-         dmaIbMasters          => dmaIbMasters,
-         dmaIbSlaves           => dmaIbSlaves);
+         dmaObMasters          => dmaObMasters(NUM_PGP_LANES_C-1 downto 0),
+         dmaObSlaves           => dmaObSlaves(NUM_PGP_LANES_C-1 downto 0),
+         dmaIbMasters          => dmaIbMasters(NUM_PGP_LANES_C-1 downto 0),
+         dmaIbSlaves           => dmaIbSlaves(NUM_PGP_LANES_C-1 downto 0));
 
    ------------------
    -- Hardware Module
@@ -251,7 +252,7 @@ begin
       generic map (
          TPD_G               => TPD_G,
          ROGUE_SIM_EN_G      => ROGUE_SIM_EN_G,
-         NUM_PGP_LANES_G     => DMA_SIZE_C,
+         NUM_PGP_LANES_G     => NUM_PGP_LANES_C,
          DMA_AXIS_CONFIG_G   => DMA_AXIS_CONFIG_C,
          AXIL_CLK_FREQ_G     => DMA_CLK_FREQ_C,
          AXI_BASE_ADDR_G     => AXIL_CONFIG_C(HW_INDEX_C).baseAddr,

@@ -1,6 +1,9 @@
 # Load RUCKUS environment and library
 source -quiet $::env(RUCKUS_DIR)/vivado_proc.tcl
 
+# Check for version 2020.2 of Vivado (or later)
+if { [VersionCheck 2020.2] < 0 } {exit -1}
+
 # Load base sub-modules
 loadRuckusTcl $::env(PROJ_DIR)/../../submodules/surf
 loadRuckusTcl $::env(PROJ_DIR)/../../submodules/lcls-timing-core
@@ -24,3 +27,8 @@ loadConstraints -dir "$::DIR_PATH/hdl"
 
 # Updating impl_1 strategy
 set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
+
+# Use an existing .DCP from previous routed.dcp file that's known to meet timing as the starting point
+set_property AUTO_INCREMENTAL_CHECKPOINT 0 [get_runs impl_1]
+import_files -fileset utils_1 "$::DIR_PATH/dcp/ClinkSlacPgpCardG3Pgp4_incremental_compile.dcp"
+set_property incremental_checkpoint [get_files {ClinkSlacPgpCardG3Pgp4_incremental_compile.dcp}] [get_runs impl_1]
