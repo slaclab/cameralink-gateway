@@ -226,10 +226,10 @@ class ClinkDevRoot(shared.Root):
     def start(self, **kwargs):
         super().start(**kwargs)
 
-        # Hide all the "enable" variables
-        for enableList in self.find(typ=pr.EnableVariable):
-            # Hide by default
-            enableList.hidden = True
+#        # Hide all the "enable" variables
+#        for enableList in self.find(typ=pr.EnableVariable):
+#            # Hide by default
+#            enableList.hidden = True
 
         # Check if simulation
         if (self.dev is 'sim'):
