@@ -40,51 +40,54 @@ entity ClinkKcu1500Pgp4 is
       ---------------------
       --  Application Ports
       ---------------------
+      -- I2C Ports
+      qsfpScl      : inout slv(1 downto 0);
+      qsfpSda      : inout slv(1 downto 0);
       -- QSFP[0] Ports
-      qsfp0RefClkP : in  slv(1 downto 0);
-      qsfp0RefClkN : in  slv(1 downto 0);
-      qsfp0RxP     : in  slv(3 downto 0);
-      qsfp0RxN     : in  slv(3 downto 0);
-      qsfp0TxP     : out slv(3 downto 0);
-      qsfp0TxN     : out slv(3 downto 0);
+      qsfp0RefClkP : in    slv(1 downto 0);
+      qsfp0RefClkN : in    slv(1 downto 0);
+      qsfp0RxP     : in    slv(3 downto 0);
+      qsfp0RxN     : in    slv(3 downto 0);
+      qsfp0TxP     : out   slv(3 downto 0);
+      qsfp0TxN     : out   slv(3 downto 0);
       -- QSFP[1] Ports
-      qsfp1RefClkP : in  slv(1 downto 0);
-      qsfp1RefClkN : in  slv(1 downto 0);
-      qsfp1RxP     : in  slv(3 downto 0);
-      qsfp1RxN     : in  slv(3 downto 0);
-      qsfp1TxP     : out slv(3 downto 0);
-      qsfp1TxN     : out slv(3 downto 0);
+      qsfp1RefClkP : in    slv(1 downto 0);
+      qsfp1RefClkN : in    slv(1 downto 0);
+      qsfp1RxP     : in    slv(3 downto 0);
+      qsfp1RxN     : in    slv(3 downto 0);
+      qsfp1TxP     : out   slv(3 downto 0);
+      qsfp1TxN     : out   slv(3 downto 0);
       --------------
       --  Core Ports
       --------------
       -- System Ports
-      emcClk       : in  sl;
-      userClkP     : in  sl;
-      userClkN     : in  sl;
+      emcClk       : in    sl;
+      userClkP     : in    sl;
+      userClkN     : in    sl;
       -- QSFP[0] Ports
-      qsfp0RstL    : out sl;
-      qsfp0LpMode  : out sl;
-      qsfp0ModSelL : out sl;
-      qsfp0ModPrsL : in  sl;
+      qsfp0RstL    : out   sl;
+      qsfp0LpMode  : out   sl;
+      qsfp0ModSelL : out   sl;
+      qsfp0ModPrsL : in    sl;
       -- QSFP[1] Ports
-      qsfp1RstL    : out sl;
-      qsfp1LpMode  : out sl;
-      qsfp1ModSelL : out sl;
-      qsfp1ModPrsL : in  sl;
+      qsfp1RstL    : out   sl;
+      qsfp1LpMode  : out   sl;
+      qsfp1ModSelL : out   sl;
+      qsfp1ModPrsL : in    sl;
       -- Boot Memory Ports
-      flashCsL     : out sl;
-      flashMosi    : out sl;
-      flashMiso    : in  sl;
-      flashHoldL   : out sl;
-      flashWp      : out sl;
+      flashCsL     : out   sl;
+      flashMosi    : out   sl;
+      flashMiso    : in    sl;
+      flashHoldL   : out   sl;
+      flashWp      : out   sl;
       -- PCIe Ports
-      pciRstL      : in  sl;
-      pciRefClkP   : in  sl;
-      pciRefClkN   : in  sl;
-      pciRxP       : in  slv(7 downto 0);
-      pciRxN       : in  slv(7 downto 0);
-      pciTxP       : out slv(7 downto 0);
-      pciTxN       : out slv(7 downto 0));
+      pciRstL      : in    sl;
+      pciRefClkP   : in    sl;
+      pciRefClkN   : in    sl;
+      pciRxP       : in    slv(7 downto 0);
+      pciRxN       : in    slv(7 downto 0);
+      pciTxP       : out   slv(7 downto 0);
+      pciTxN       : out   slv(7 downto 0));
 end ClinkKcu1500Pgp4;
 
 architecture top_level of ClinkKcu1500Pgp4 is
@@ -326,7 +329,10 @@ begin
          ------------------
          --  Hardware Ports
          ------------------
-         -- QSFP[0] Ports,
+         -- I2C Ports
+         qsfpScl               => qsfpScl,
+         qsfpSda               => qsfpSda,
+         -- QSFP[0] Ports
          qsfp0RefClkP          => qsfp0RefClkP,
          qsfp0RefClkN          => qsfp0RefClkN,
          qsfp0RxP              => qsfp0RxP,

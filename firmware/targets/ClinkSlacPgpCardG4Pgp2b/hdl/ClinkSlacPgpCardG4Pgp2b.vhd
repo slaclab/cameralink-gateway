@@ -41,42 +41,48 @@ entity ClinkSlacPgpCardG4Pgp2b is
       --  Application Ports
       ---------------------
       -- SFP Ports
-      sfpRefClkP  : in  slv(1 downto 0);
-      sfpRefClkN  : in  slv(1 downto 0);
-      sfpRxP      : in  sl;
-      sfpRxN      : in  sl;
-      sfpTxP      : out sl;
-      sfpTxN      : out sl;
+      sfpRefClkP  : in    slv(1 downto 0);
+      sfpRefClkN  : in    slv(1 downto 0);
+      sfpRxP      : in    sl;
+      sfpRxN      : in    sl;
+      sfpTxP      : out   sl;
+      sfpTxN      : out   sl;
       -- QSFP[1:0] Ports
-      qsfpRefClkP : in  sl;
-      qsfpRefClkN : in  sl;
-      qsfp0RxP    : in  slv(3 downto 0);
-      qsfp0RxN    : in  slv(3 downto 0);
-      qsfp0TxP    : out slv(3 downto 0);
-      qsfp0TxN    : out slv(3 downto 0);
-      qsfp1RxP    : in  slv(3 downto 0);
-      qsfp1RxN    : in  slv(3 downto 0);
-      qsfp1TxP    : out slv(3 downto 0);
-      qsfp1TxN    : out slv(3 downto 0);
+      qsfpRefClkP : in    sl;
+      qsfpRefClkN : in    sl;
+      qsfp0RxP    : in    slv(3 downto 0);
+      qsfp0RxN    : in    slv(3 downto 0);
+      qsfp0TxP    : out   slv(3 downto 0);
+      qsfp0TxN    : out   slv(3 downto 0);
+      qsfp1RxP    : in    slv(3 downto 0);
+      qsfp1RxN    : in    slv(3 downto 0);
+      qsfp1TxP    : out   slv(3 downto 0);
+      qsfp1TxN    : out   slv(3 downto 0);
       --------------
       --  Core Ports
       --------------
       -- System Ports
-      emcClk      : in  sl;
+      emcClk      : in    sl;
+      pwrScl      : inout sl;
+      pwrSda      : inout sl;
+      sfpScl      : inout sl;
+      sfpSda      : inout sl;
+      qsfpScl     : inout slv(1 downto 0);
+      qsfpSda     : inout slv(1 downto 0);
       -- Boot Memory Ports
-      flashCsL    : out sl;
-      flashMosi   : out sl;
-      flashMiso   : in  sl;
-      flashHoldL  : out sl;
-      flashWp     : out sl;
+      flashCsL    : out   sl;
+      flashMosi   : out   sl;
+      flashMiso   : in    sl;
+      flashHoldL  : out   sl;
+      flashWp     : out   sl;
       -- PCIe Ports
-      pciRstL     : in  sl;
-      pciRefClkP  : in  sl;
-      pciRefClkN  : in  sl;
-      pciRxP      : in  slv(7 downto 0);
-      pciRxN      : in  slv(7 downto 0);
-      pciTxP      : out slv(7 downto 0);
-      pciTxN      : out slv(7 downto 0));
+      pciRstL     : in    sl;
+      pciRefClkP  : in    sl;
+      pciRefClkN  : in    sl;
+      pciRxP      : in    slv(7 downto 0);
+      pciRxN      : in    slv(7 downto 0);
+      pciTxP      : out   slv(7 downto 0);
+      pciTxN      : out   slv(7 downto 0));
 end ClinkSlacPgpCardG4Pgp2b;
 
 architecture top_level of ClinkSlacPgpCardG4Pgp2b is
@@ -184,6 +190,12 @@ begin
          --------------
          -- System Ports
          emcClk         => emcClk,
+         pwrScl         => pwrScl,
+         pwrSda         => pwrSda,
+         sfpScl         => sfpScl,
+         sfpSda         => sfpSda,
+         qsfpScl        => qsfpScl,
+         qsfpSda        => qsfpSda,
          -- Boot Memory Ports
          flashCsL       => flashCsL,
          flashMosi      => flashMosi,
