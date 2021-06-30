@@ -42,6 +42,7 @@ class ClinkDevRoot(shared.Root):
                  enableDump     = False,
                  enableConfig   = True,
                  pcieBoardType  = None,
+                 enVcMask       = 0xD, # Enable lane mask: Don't connect data stream (VC1) by default because intended for C++ process
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
@@ -104,12 +105,13 @@ class ClinkDevRoot(shared.Root):
 
         # Create DMA streams
         for lane in self.laneConfig:
-            # CLink VC[0]=SRP, VC[2]=CLink serial, VC[3]=SEM serial
-            for vc in [0, 2, 3]:
-                if (dev is not 'sim'):
-                    self.dmaStreams[lane][vc] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+vc,1)
-                else:
-                    self.dmaStreams[lane][vc] = rogue.interfaces.stream.TcpClient('localhost', (8000+2)+(512*lane)+2*vc)
+
+            for vc in range(4):
+                if enVcMask & (0x1 << vc):
+                    if (dev is not 'sim'):
+                        self.dmaStreams[lane][vc] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+vc,1)
+                    else:
+                        self.dmaStreams[lane][vc] = rogue.interfaces.stream.TcpClient('localhost', (8000+2)+(512*lane)+2*vc)
 
         # Check if not doing simulation
         if (dev is not 'sim'):

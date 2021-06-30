@@ -159,6 +159,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--enVcMask",
+        type     = int,
+        required = False,
+        default  = 0xD,
+        help     = "4-bit bitmask for selecting which VC's will be used",
+    )
+
+    parser.add_argument(
         "--guiType",
         type     = str,
         required = False,
@@ -210,6 +218,7 @@ if __name__ == "__main__":
             pgp4           = args.pgp4,
             seuDumpDir     = args.seuDumpDir,
             pcieBoardType  = args.pcieBoardType,
+            enVcMask       = args.enVcMask,
         ) as root:
 
         ######################
