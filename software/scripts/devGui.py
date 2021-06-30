@@ -139,7 +139,7 @@ if __name__ == "__main__":
         type     = str,
         required = False,
         default  = None,
-        help     = "define the type of PCIe card, used to select I2C mapping. Options: [none or SlacPgpCardG3]",
+        help     = "define the type of PCIe card, used to select I2C mapping. Options: [none or SlacPgpCardG4]",
     )
 
     parser.add_argument(
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--enVcMask",
-        type     = int,
+        type     = lambda x: int(x,0), # "auto_int" function for hex arguments
         required = False,
         default  = 0xD,
         help     = "4-bit bitmask for selecting which VC's will be used",

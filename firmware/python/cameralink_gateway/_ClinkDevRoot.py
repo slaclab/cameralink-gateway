@@ -25,6 +25,15 @@ import l2si_core              as l2si
 rogue.Version.minVersion('5.1.0')
 # rogue.Version.exactVersion('5.1.0')
 
+class DummyBiDirStream(rogue.interfaces.stream.Master, rogue.interfaces.stream.Slave):
+
+    def __init__(self):
+        rogue.interfaces.stream.Slave.__init__(self)
+        rogue.interfaces.stream.Master.__init__(self)
+
+    def __eq__(self,other):
+        pyrogue.streamConnectBiDir(other,self)
+
 class ClinkDevRoot(shared.Root):
 
     def __init__(self,
@@ -102,12 +111,14 @@ class ClinkDevRoot(shared.Root):
         self.semDataWriter  = [None for x in range(4)]
         self._dbg           = [None for x in range(4)]
         self.unbatchers     = [None for x in range(4)]
+        self.enVcMask       = [False for x in range(4)]
 
         # Create DMA streams
         for lane in self.laneConfig:
 
             for vc in range(4):
                 if enVcMask & (0x1 << vc):
+                    self.enVcMask[vc] = True
                     if (dev is not 'sim'):
                         self.dmaStreams[lane][vc] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+vc,1)
                     else:
@@ -119,28 +130,40 @@ class ClinkDevRoot(shared.Root):
             # Create the stream interface
             for lane in self.laneConfig:
 
-                # SRP
-                self._srp[lane] = rogue.protocols.srp.SrpV3()
-                self._srp[lane].setName(f'SRPv3[{lane}]')
-                pr.streamConnectBiDir(self.dmaStreams[lane][0],self._srp[lane])
+                # Check if PGP[lane].VC[0] = SRPv3 (register access) is enabled
+                if self.enVcMask[0]:
+                    # Create the SRPv3
+                    self._srp[lane] = rogue.protocols.srp.SrpV3()
+                    self._srp[lane].setName(f'SRPv3[{lane}]')
+                    # Connect DMA to SRPv3
+                    self.dmaStreams[lane][0] == self._srp[lane]
 
-                # Add pointer to the list
-                self.RemRxLinkReady[lane] = self.ClinkPcie.Hsio.PgpMon[lane].RxStatus.RemRxLinkReady if pgp4 else self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady
+                    # Add pointer to the list
+                    self.RemRxLinkReady[lane] = self.ClinkPcie.Hsio.PgpMon[lane].RxStatus.RemRxLinkReady if pgp4 else self.ClinkPcie.Hsio.PgpMon[lane].RxRemLinkReady
 
-                # CameraLink Feb Board
-                self.add(feb.ClinkFeb(
-                    name       = (f'ClinkFeb[{lane}]'),
-                    memBase    = self._srp[lane],
-                    serial     = self.dmaStreams[lane][2],
-                    camType    = self.laneConfig[lane],
-                    enableDeps = [self.RemRxLinkReady[lane]], # Only allow access if the PGP link is established
-                    expand     = True,
-                ))
+                    # Check if PGP[lane].VC[2] = Camera UART (streaming data) is disabled
+                    if not self.enVcMask[2]:
+                        # Assign a "dummy" stream to the serial path so it doesn't break variable tree
+                        self.dmaStreams[lane][2] = DummyBiDirStream()
 
-                # Add SEM module
-                if seuDumpDir is not None:
-                    self.semDataWriter[lane] = feb.SemAsciiFileWriter(index=lane,dumpDir=seuDumpDir)
-                    self.dmaStreams[lane][3] >> self.semDataWriter[lane]
+                    # CameraLink Feb Board
+                    self.add(feb.ClinkFeb(
+                        name       = (f'ClinkFeb[{lane}]'),
+                        memBase    = self._srp[lane],
+                        serial     = self.dmaStreams[lane][2],
+                        camType    = self.laneConfig[lane],
+                        enableDeps = [self.RemRxLinkReady[lane]], # Only allow access if the PGP link is established
+                        expand     = True,
+                    ))
+
+                # Check if PGP[lane].VC[3] = SEM UART (streaming data) is enabled
+                if self.enVcMask[3]:
+                    # Add SEM module
+                    if seuDumpDir is not None:
+                        # Create the writer
+                        self.semDataWriter[lane] = feb.SemAsciiFileWriter(index=lane,dumpDir=seuDumpDir)
+                        # Connect DMA to writer
+                        self.dmaStreams[lane][3] >> self.semDataWriter[lane]
 
         # Else doing Rogue VCS simulation
         else:
@@ -149,83 +172,96 @@ class ClinkDevRoot(shared.Root):
             # Create the stream interface
             for lane in range(laneSize):
 
-                # Create the frame generator
-                self._frameGen[lane] = MyCustomMaster()
+                # Check if PGP[lane].VC[1] = Camera Image (streaming data) is enabled
+                if self.enVcMask[1]:
 
-                # Connect the frame generator
-                print(self.roguePgp.pgpStreams)
-                self._frameGen[lane] >> self.roguePgp.pgpStreams[lane][1]
+                    # Create the frame generator
+                    self._frameGen[lane] = MyCustomMaster()
 
-                # Create a command to execute the frame generator
-                self.add(pr.BaseCommand(
-                    name         = f'GenFrame[{lane}]',
-                    function     = lambda cmd, lane=lane: self._frameGen[lane].myFrameGen(),
-                ))
+                    # Connect the frame generator
+                    print(self.roguePgp.pgpStreams)
+                    self._frameGen[lane] >> self.roguePgp.pgpStreams[lane][1]
 
-                # Create a command to execute the frame generator. Accepts user data argument
-                self.add(pr.BaseCommand(
-                    name         = f'GenUserFrame[{lane}]',
-                    function     = lambda cmd, lane=lane: self._frameGen[lane].myFrameGen,
-                ))
+                    # Create a command to execute the frame generator
+                    self.add(pr.BaseCommand(
+                        name         = f'GenFrame[{lane}]',
+                        function     = lambda cmd, lane=lane: self._frameGen[lane].myFrameGen(),
+                    ))
+
+                    # Create a command to execute the frame generator. Accepts user data argument
+                    self.add(pr.BaseCommand(
+                        name         = f'GenUserFrame[{lane}]',
+                        function     = lambda cmd, lane=lane: self._frameGen[lane].myFrameGen,
+                    ))
 
         # Create the stream interface
         for lane in self.laneConfig:
-            # Create the unbatcher
-            self.unbatchers[lane] = rogue.protocols.batcher.SplitterV1()
 
-            # Debug slave
-            if dataDebug:
-                # Connect the streams
-                self.dmaStreams[lane][1] >> self.unbatchers[lane] >> self._dbg[lane]
+            # Check if PGP[lane].VC[1] = Camera Image (streaming data) is enabled
+            if self.enVcMask[1]:
 
-        self.add(pr.LocalVariable(
-            name        = 'RunState',
-            description = 'Run state status, which is controlled by the StopRun() and StartRun() commands',
-            mode        = 'RO',
-            value       = False,
-        ))
+                # Create the unbatcher
+                self.unbatchers[lane] = rogue.protocols.batcher.SplitterV1()
+
+                # Debug slave
+                if dataDebug:
+                    # Connect the streams
+                    self.dmaStreams[lane][1] >> self.unbatchers[lane] >> self._dbg[lane]
+
+        # Check if PGP[lane].VC[0] = SRPv3 (register access) is enabled
+        if self.enVcMask[0]:
+            self.add(pr.LocalVariable(
+                name        = 'RunState',
+                description = 'Run state status, which is controlled by the StopRun() and StartRun() commands',
+                mode        = 'RO',
+                value       = False,
+            ))
 
         @self.command(description  = 'Stops the triggers and blows off data in the pipeline')
         def StopRun():
-            print ('ClinkDev.StopRun() executed')
+            # Check if PGP[lane].VC[0] = SRPv3 (register access) is enabled
+            if self.enVcMask[0]:
+                print ('ClinkDev.StopRun() executed')
 
-            # Get devices
-            eventBuilder = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
-            trigger      = self.find(typ=l2si.TriggerEventBuffer)
+                # Get devices
+                eventBuilder = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
+                trigger      = self.find(typ=l2si.TriggerEventBuffer)
 
-            # Turn off the triggering
-            for devPtr in trigger:
-                devPtr.MasterEnable.set(False)
+                # Turn off the triggering
+                for devPtr in trigger:
+                    devPtr.MasterEnable.set(False)
 
-            # Flush the downstream data/trigger pipelines
-            for devPtr in eventBuilder:
-                devPtr.Blowoff.set(True)
+                # Flush the downstream data/trigger pipelines
+                for devPtr in eventBuilder:
+                    devPtr.Blowoff.set(True)
 
-            # Update the run state status variable
-            self.RunState.set(False)
+                # Update the run state status variable
+                self.RunState.set(False)
 
         @self.command(description  = 'starts the triggers and allow steams to flow to DMA engine')
         def StartRun():
-            print ('ClinkDev.StartRun() executed')
+            # Check if PGP[lane].VC[0] = SRPv3 (register access) is enabled
+            if self.enVcMask[0]:
+                print ('ClinkDev.StartRun() executed')
 
-            # Get devices
-            eventBuilder = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
-            trigger      = self.find(typ=l2si.TriggerEventBuffer)
+                # Get devices
+                eventBuilder = self.find(typ=batcher.AxiStreamBatcherEventBuilder)
+                trigger      = self.find(typ=l2si.TriggerEventBuffer)
 
-            # Reset all counters
-            self.CountReset()
+                # Reset all counters
+                self.CountReset()
 
-            # Arm for data/trigger stream
-            for devPtr in eventBuilder:
-                devPtr.Blowoff.set(False)
-                devPtr.SoftRst()
+                # Arm for data/trigger stream
+                for devPtr in eventBuilder:
+                    devPtr.Blowoff.set(False)
+                    devPtr.SoftRst()
 
-            # Turn on the triggering
-            for devPtr in trigger:
-                devPtr.MasterEnable.set(True)
+                # Turn on the triggering
+                for devPtr in trigger:
+                    devPtr.MasterEnable.set(True)
 
-            # Update the run state status variable
-            self.RunState.set(True)
+                # Update the run state status variable
+                self.RunState.set(True)
 
     def start(self, **kwargs):
         super().start(**kwargs)
@@ -239,7 +275,8 @@ class ClinkDevRoot(shared.Root):
         if (self.dev is 'sim'):
             pass
 
-        else:
+        # Check if PGP[lane].VC[0] = SRPv3 (register access) is enabled
+        elif self.enVcMask[0]:
             self.ReadAll()
             self.ReadAll()
             if (self.enableDump):
@@ -288,75 +325,78 @@ class ClinkDevRoot(shared.Root):
                     # Collapse the lanes with links that are down
                     self.ClinkPcie.Application.AppLane[lane]._expand = False
 
-            # Startup procedures for OPAL1000
-            uartDev = self.find(typ=cl.UartOpal1000)
-            for dev in uartDev:
-                pass
+            # Check if PGP[lane].VC[2] = Camera UART (streaming data) is enabled
+            if self.enVcMask[2]:
 
-            # Startup procedures for Piranha4
-            uartDev = self.find(typ=cl.UartPiranha4)
-            for dev in uartDev:
-                dev.SendEscape()
-                dev.SPF.setDisp('0')
-                dev.GCP()
+                # Startup procedures for OPAL1000
+                uartDev = self.find(typ=cl.UartOpal1000)
+                for dev in uartDev:
+                    pass
 
-            # Startup procedures for Up900cl12b
-            uartDev = self.find(typ=cl.UartUp900cl12b)
-            for dev in uartDev:
-                clCh = self.find(typ=cl.ClinkChannel)
-                for clChDev in clCh:
-                    clChDev.SerThrottle.set(30000)
-                dev.AM()
-                dev.SM.set('f')
-                dev.RP()
+                # Startup procedures for Piranha4
+                uartDev = self.find(typ=cl.UartPiranha4)
+                for dev in uartDev:
+                    dev.SendEscape()
+                    dev.SPF.setDisp('0')
+                    dev.GCP()
 
-        # Load the configurations
-        if self.enableConfig:
+                # Startup procedures for Up900cl12b
+                uartDev = self.find(typ=cl.UartUp900cl12b)
+                for dev in uartDev:
+                    clCh = self.find(typ=cl.ClinkChannel)
+                    for clChDev in clCh:
+                        clChDev.SerThrottle.set(30000)
+                    dev.AM()
+                    dev.SM.set('f')
+                    dev.RP()
 
-            # Useful pointer
-            timingRx = self.ClinkPcie.Hsio.TimingRx
+            # Load the configurations
+            if self.enableConfig:
 
-            # Start up the timing system = LCLS-II mode
-            if self.startupMode:
+                # Useful pointer
+                timingRx = self.ClinkPcie.Hsio.TimingRx
 
-                # Set the default to  LCLS-II mode
-                defaultFile = ['config/defaults_LCLS-II.yml']
+                # Start up the timing system = LCLS-II mode
+                if self.startupMode:
 
-                # Startup in LCLS-II mode
-                if self.standAloneMode:
-                    timingRx.ConfigureXpmMini()
+                    # Set the default to  LCLS-II mode
+                    defaultFile = ['config/defaults_LCLS-II.yml']
+
+                    # Startup in LCLS-II mode
+                    if self.standAloneMode:
+                        timingRx.ConfigureXpmMini()
+                    else:
+                        timingRx.ConfigLclsTimingV2()
+
+                # Else LCLS-I mode
                 else:
-                    timingRx.ConfigLclsTimingV2()
 
-            # Else LCLS-I mode
-            else:
+                    # Set the default to  LCLS-I mode
+                    defaultFile = ['config/defaults_LCLS-I.yml']
 
-                # Set the default to  LCLS-I mode
-                defaultFile = ['config/defaults_LCLS-I.yml']
+                    # Startup in LCLS-I mode
+                    if self.standAloneMode:
+                        timingRx.ConfigureTpgMiniStream()
+                    else:
+                        timingRx.ConfigLclsTimingV1()
 
-                # Startup in LCLS-I mode
-                if self.standAloneMode:
-                    timingRx.ConfigureTpgMiniStream()
-                else:
-                    timingRx.ConfigLclsTimingV1()
+                # Read all the variables
+                self.ReadAll()
+                self.ReadAll()
 
-            # Read all the variables
-            self.ReadAll()
-            self.ReadAll()
+                # Load the YAML configurations
+                defaultFile.extend(self.defaultFile)
+                print(f'Loading {defaultFile} Configuration File...')
+                self.LoadConfig(defaultFile)
 
-            # Load the YAML configurations
-            defaultFile.extend(self.defaultFile)
-            print(f'Loading {defaultFile} Configuration File...')
-            self.LoadConfig(defaultFile)
-
-        if (self.enableDump):
-            # Dump the state of the hardware before configuration
-            self.ReadAll()
-            self.ReadAll()
-            print(f'Dumping post-configurations...')
-            self.SaveConfig('dump/config-dump-post-config.yml')
-            self.SaveState('dump/state-dump-post-config.yml')
-            self.remoteVariableDump('dump/regdump-post-config.txt', ['RW','WO'], False );
+            if (self.enableDump):
+                # Dump the state of the hardware before configuration
+                self.ReadAll()
+                self.ReadAll()
+                print(f'Dumping post-configurations...')
+                self.SaveConfig('dump/config-dump-post-config.yml')
+                self.SaveState('dump/state-dump-post-config.yml')
+                self.remoteVariableDump('dump/regdump-post-config.txt', ['RW','WO'], False );
 
     # Function calls after loading YAML configuration
     def initialize(self):
