@@ -69,6 +69,10 @@ entity ClinkSlacPgpCardG4Pgp2b is
       sfpSda      : inout sl;
       qsfpScl     : inout slv(1 downto 0);
       qsfpSda     : inout slv(1 downto 0);
+      qsfpRstL    : out   slv(1 downto 0);
+      qsfpLpMode  : out   slv(1 downto 0);
+      qsfpModSelL : out   slv(1 downto 0);
+      qsfpModPrsL : in    slv(1 downto 0);
       -- Boot Memory Ports
       flashCsL    : out   sl;
       flashMosi   : out   sl;
@@ -196,6 +200,10 @@ begin
          sfpSda         => sfpSda,
          qsfpScl        => qsfpScl,
          qsfpSda        => qsfpSda,
+         qsfpRstL       => qsfpRstL,
+         qsfpLpMode     => qsfpLpMode,
+         qsfpModSelL    => qsfpModSelL,
+         qsfpModPrsL    => qsfpModPrsL,
          -- Boot Memory Ports
          flashCsL       => flashCsL,
          flashMosi      => flashMosi,
