@@ -20,6 +20,7 @@ class ClinkPcieFpga(pr.Device):
                  pgp4       = False,
                  enLclsI    = True,
                  enLclsII   = False,
+                 boardType  = None,
                  **kwargs):
         super().__init__(**kwargs)
 
@@ -27,6 +28,7 @@ class ClinkPcieFpga(pr.Device):
         self.add(pcie.AxiPcieCore(
             offset      = 0x0000_0000,
             numDmaLanes = 4,
+            boardType   = boardType,
             expand      = False,
         ))
 

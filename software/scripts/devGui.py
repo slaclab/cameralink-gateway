@@ -135,6 +135,14 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--pcieBoardType",
+        type     = str,
+        required = False,
+        default  = None,
+        help     = "define the type of PCIe card, used to select I2C mapping. Options: [none or SlacPgpCardG3]",
+    )
+
+    parser.add_argument(
         "--serverPort",
         type     = int,
         required = False,
@@ -155,7 +163,7 @@ if __name__ == "__main__":
         type     = str,
         required = False,
         default  = 'PyDM',
-        help     = "Sets the GUI type (PyDM, PyQt, or None)",
+        help     = "Sets the GUI type (PyDM or None)",
     )
 
     # Get the arguments
@@ -201,37 +209,19 @@ if __name__ == "__main__":
             enableConfig   = args.enableConfig,
             pgp4           = args.pgp4,
             seuDumpDir     = args.seuDumpDir,
+            pcieBoardType  = args.pcieBoardType,
         ) as root:
-
-        if args.guiType == 'PyDM' or args.guiType == 'PyQt':
-            import pyrogue.gui
-            import pyrogue.pydm
 
         ######################
         # Development PyDM GUI
         ######################
         if (args.guiType == 'PyDM'):
-
+            import pyrogue.pydm
             pyrogue.pydm.runPyDM(
                 root  = root,
                 sizeX = 800,
                 sizeY = 1000,
             )
-
-        #################
-        # Legacy PyQT GUI
-        #################
-        elif (args.guiType == 'PyQt'):
-
-            # Create GUI
-            appTop = pyrogue.gui.application(sys.argv)
-            guiTop = pyrogue.gui.GuiTop()
-            guiTop.addTree(root)
-            guiTop.resize(800, 1000)
-
-            # Run gui
-            appTop.exec_()
-            root.stop()
 
         #################
         # No GUI

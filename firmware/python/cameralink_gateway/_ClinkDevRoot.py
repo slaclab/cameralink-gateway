@@ -41,10 +41,11 @@ class ClinkDevRoot(shared.Root):
                  seuDumpDir     = None,
                  enableDump     = False,
                  enableConfig   = True,
+                 pcieBoardType  = None,
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x07030000
+        self.FwVersionLock = 0x07040000
 
         # Set local variables
         self.laneConfig     = laneConfig
@@ -88,6 +89,7 @@ class ClinkDevRoot(shared.Root):
             pgp4       = pgp4,
             enLclsI    = enLclsI,
             enLclsII   = enLclsII,
+            boardType  = pcieBoardType,
             expand     = True,
         ))
 
