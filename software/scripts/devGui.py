@@ -139,7 +139,7 @@ if __name__ == "__main__":
         type     = str,
         required = False,
         default  = None,
-        help     = "define the type of PCIe card, used to select I2C mapping. Options: [none or SlacPgpCardG4]",
+        help     = "define the type of PCIe card, used to select I2C mapping. Options: [none or SlacPgpCardG4 or Kcu1500]",
     )
 
     parser.add_argument(
