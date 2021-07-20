@@ -7,7 +7,7 @@ ClinkTop:
     LinkMode: Full
     DataMode: 12Bit
     FrameMode: Frame
-    TapCount: 2 # TBD
+    TapCount: 8 # Full (8 taps)
     DataEn: True
     Blowoff: False
     BaudRate: 115200 # units of bps
