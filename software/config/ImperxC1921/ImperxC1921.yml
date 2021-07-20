@@ -1,0 +1,37 @@
+###################
+ClinkTop:
+###################
+  PllConfig[:]: '40MHz'
+  ###################
+  Ch[0]:
+    LinkMode: Full
+    DataMode: 12Bit
+    FrameMode: Frame
+    TapCount: 2 # TBD
+    DataEn: True
+    Blowoff: False
+    BaudRate: 115200 # units of bps
+    SerThrottle: 10000 # (30ms x 1us throttle rate) = 10000
+    SwControlValue: 0x0
+    SwControlEn: 0x0
+    ###################
+    UartImperxC1921: # Imperx C1921
+      A2D_Bits: '2' # 0x2 –12 bits
+      Bit_Dpt_Sel: '2' # 0x2 –12 bits
+      Dat_Fmt_Sel: '3' # 0x3 – Full
+      Trg_Mode_En: '1' # 0x1 – trigger is enabled; camera in trigger mode
+      Trg_Inp_Sel: '3' # 0x3 – computer; camera expects trigger from CC1 via Camera Link cable.
+      Trg_Edg_Sel: '0' # 0x0 – rising edge
+      Trg_Ovr_Sel: '1' # 0x1 – accept only after exposure is completed
+      Trg_Mod_Sel: '1' # 0x1 – fast triggering
+      Trg_Frm_Cap: '1' # Selects number of frames captured after each trigger signal
+      Trg_Str_En: '3' # 0x3 – enable both Trigger Strobe #1 and #2
+      Str_One_En: '1' # 0x1 – enable Strobe #1, each frame
+###################
+TrigCtrl[0]:
+  EnableTrig: True
+  InvCC: True # Active LOW Pulse
+  TrigMap: ChA # ChA = pgpTrigger(0)
+  TrigPulseWidth: 100.0 # units of us
+  TrigMask: 0x2 # CC2 trigger
+###################

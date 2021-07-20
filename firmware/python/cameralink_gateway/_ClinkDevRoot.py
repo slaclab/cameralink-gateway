@@ -350,6 +350,11 @@ class ClinkDevRoot(shared.Root):
                     dev.SM.set('f')
                     dev.RP()
 
+                # Startup procedures for ImperxC1921
+                uartDev = self.find(typ=cl.UartImperxC1921)
+                for dev in uartDev:
+                    dev.Soft_Reset(0xDEADBEEF)
+
             # Load the configurations
             if self.enableConfig:
 
