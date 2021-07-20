@@ -30,8 +30,8 @@ ClinkTop:
 ###################
 TrigCtrl[0]:
   EnableTrig: True
-  InvCC: True # Active LOW Pulse
+  InvCC: False # Active High Pulse
   TrigMap: ChA # ChA = pgpTrigger(0)
-  TrigPulseWidth: 100.0 # units of us
-  TrigMask: 0x2 # CC2 trigger
+  TrigPulseWidth: 32.768 # units of us
+  TrigMask: 0x1 # CC1 trigger
 ###################
