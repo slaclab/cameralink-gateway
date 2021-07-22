@@ -350,6 +350,16 @@ class ClinkDevRoot(shared.Root):
                     dev.SM.set('f')
                     dev.RP()
 
+                # Startup procedures for ImperxC1921
+                uartDev = self.find(typ=cl.UartImperxC1921)
+                for dev in uartDev:
+                    clCh = self.find(typ=cl.ClinkChannel)
+                    for clChDev in clCh:
+                        clChDev.BaudRate.set(115200)
+                        clChDev.SerThrottle.set(10000)
+                    dev.Trg_Mode_En.set('1') # 0x1 - trigger is enabled; camera in trigger mode
+                    dev.Trg_Inp_Sel.set('1') # 0x3 - computer; camera expects trigger from CC1 via Camera Link cable.
+
             # Load the configurations
             if self.enableConfig:
 
