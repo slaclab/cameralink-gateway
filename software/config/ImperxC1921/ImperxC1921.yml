@@ -1,7 +1,11 @@
 ##################################################################################################
 # 1944 (H) x 1472 (V)
+##################################################################################################
 # 2 Byte x 1944 x 1472 = 5723136 Byte Images
 # 5723136 Byte Images x 120 Hz = 5.494 Gb/s
+##################################################################################################
+# 1 Byte x 1944 x 1472 = 2861568 Byte Images
+# 2861568 Byte Images x 120 Hz = 2.747 Gb/s
 ##################################################################################################
 # https://www.imperx.com/cmos-cameras/c1921/
 # https://www.imperx.com/download/335/spec-sheets/20491/cl_c1921_r2_2019_w.pdf
@@ -12,18 +16,23 @@ ClinkTop:
   PllConfig[:]: '50MHz'
   ###################
   Ch[0]:
-    DataMode: 12Bit
-    FrameMode: Frame
-    #######################################
-    TapCount: 2 # Base (2 taps or 3 taps)
-    LinkMode: Base
-    #######################################
-    # TapCount: 4 # Medium (4 taps)
+    ################################################################
+    # Camera Link Base and Medium support 8, 10, or 12-bit output
+    # whereas Camera Link Full only supports 8 or 10 bits per pixel.
+    ################################################################
+    # LinkMode: Base
+    # TapCount: 2 # Base (2 taps or 3 taps)
+    # DataMode: 12Bit
+    ################################################################
     # LinkMode: Medium
-    #######################################
-    # TapCount: 8 # Full (8 taps)
-    # LinkMode: Full
-    #######################################
+    # TapCount: 4 # Medium (4 taps)
+    # DataMode: 12Bit
+    ################################################################
+    LinkMode: Full
+    TapCount: 8 # Full (8 taps)
+    DataMode: 10Bit
+    ################################################################
+    FrameMode: Frame
     DataEn: True
     Blowoff: False
     BaudRate: 115200 # units of bps
@@ -43,16 +52,23 @@ ClinkTop:
       Trg_Frm_Cap: '1' # Selects number of frames captured after each trigger signal
       Trg_Exp_Del: '1' # Selects delay in microseconds between trigger signal and beginning of exposure
       Trg_Str_En:  '0' # 0x0 - disable Trigger Strobe
-      #######################################
-      A2D_Bits:    '2' # 0x2 - 12 bits
-      Bit_Dpt_Sel: '2' # 0x2 - 12 bits
       Exp_Ctl_Mod: '1' # 0x1 - pulse width - for triggering
-      #######################################
-      Dat_Fmt_Sel: '0' # 0x0 - Base (2 taps)
-      # Dat_Fmt_Sel: '1' # 0x1 - Base (3 taps)
+      ################################################################
+      # Camera Link Base and Medium support 8, 10, or 12-bit output
+      # whereas Camera Link Full only supports 8 or 10 bits per pixel.
+      ################################################################
+      # A2D_Bits:    '2' # 0x2 - 12 bits
+      # Bit_Dpt_Sel: '2' # 0x2 - 12 bits
+      # Dat_Fmt_Sel: '0' # 0x0 - Base (2 taps)
+      ################################################################
+      # A2D_Bits:    '2' # 0x2 - 12 bits
+      # Bit_Dpt_Sel: '2' # 0x2 - 12 bits
       # Dat_Fmt_Sel: '2' # 0x2 - Medium (4 taps)
-      # Dat_Fmt_Sel: '3' # 0x3 - Full (8 taps)
-      #######################################
+      ################################################################
+      A2D_Bits:    '1' # 0x1 - 10 bits
+      Bit_Dpt_Sel: '1' # 0x1 - 10 bits
+      Dat_Fmt_Sel: '3' # 0x3 - Full (8 taps)
+      ################################################################
 ###################
 TrigCtrl[0]:
   EnableTrig: True
