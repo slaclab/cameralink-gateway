@@ -47,7 +47,7 @@ Targets:
       - mcs
 
 Releases:
-  all:
+  cameralink_gateway:
     Primary: True
     Targets:
       - ClinkFeb

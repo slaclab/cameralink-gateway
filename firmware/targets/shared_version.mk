@@ -3,5 +3,5 @@ export PRJ_VERSION = 0x07060000
 
 # Define release
 ifndef RELEASE
-export RELEASE = all
+export RELEASE = cameralink_gateway
 endif
