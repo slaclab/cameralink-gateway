@@ -162,7 +162,7 @@ architecture mapping of TimingRx is
    signal timingTxRst   : sl;
 --   signal txStatus   : TimingPhyStatusType := TIMING_PHY_STATUS_FORCE_C;
    signal gtTxStatus    : TimingPhyStatusArray(1 downto 0);
-   signal gtTxControl   : TimingPhyControlType;
+   signal gtTxControl   : TimingPhyControlArray(1 downto 0) := (others => TIMING_PHY_CONTROL_INIT_C);
    signal txPhyReset    : sl;
    signal txPhyPllReset : sl;
 
@@ -174,7 +174,7 @@ architecture mapping of TimingRx is
    -----------------------------------------------
    -- Event Header Cache signals
    -----------------------------------------------
-   signal temTimingTxPhy : TimingPhyType;
+   signal temTimingTxPhy : TimingPhyArray(1 downto 0) := (others => TIMING_PHY_INIT_C);
 
    signal eventTimingMessagesValid : slv(NUM_DETECTORS_G-1 downto 0);
    signal eventTimingMessages      : TimingMessageArray(NUM_DETECTORS_G-1 downto 0);
@@ -211,27 +211,12 @@ begin
             ODIV2 => gtediv2(i),
             O     => open);
 
-      U_Pll : entity surf.ClockManager7
-         generic map(
-            TPD_G             => TPD_G,
-            TYPE_G            => "PLL",
-            INPUT_BUFG_G      => true,
-            FB_BUFG_G         => false,
-            RST_IN_POLARITY_G => '1',
-            NUM_CLOCKS_G      => 1,
-            -- MMCM attributes
-            BANDWIDTH_G       => "HIGH",
-            CLKIN_PERIOD_G    => ite((i=0), 8.402, 5.382),
-            CLKFBOUT_MULT_G   => 10,
-            CLKOUT0_DIVIDE_G  => 10)
-         port map(
-            -- Clock Input
-            clkIn     => gtediv2(i),
-            rstIn     => mmcmRst,
-            -- Clock Outputs
-            clkOut(0) => refClk(i),
-            -- Reset Outputs
-            locked    => mmcmLocked(i));
+      U_BUFG : BUFG
+         port map (
+            I => gtediv2(i),
+            O => refClk(i));
+
+      mmcmLocked(i) <= not(mmcmRst);
 
    end generate GEN_GT_VEC;
 
@@ -300,15 +285,6 @@ begin
             I1 => refClk(i),            -- 1-bit input: Clock input (S=1)
             S  => useMiniTpg);          -- 1-bit input: Clock select
 
-      U_TXCLK : BUFGMUX
-         generic map (
-            CLK_SEL_TYPE => "ASYNC")    -- ASYNC, SYNC
-         port map (
-            O  => gtTxClk(i),           -- 1-bit output: Clock output
-            I0 => gtTxOutClk(i),        -- 1-bit input: Clock input (S=0)
-            I1 => refClk(i),            -- 1-bit input: Clock input (S=1)
-            S  => useMiniTpg);          -- 1-bit input: Clock select
-
       REAL_PCIE : if (not SIMULATION_G) generate
 
          U_GTP : entity lcls_timing_core.TimingGtCoreWrapper
@@ -346,10 +322,10 @@ begin
                rxDecErr         => gtRxDecErr(i),
                rxOutClk         => gtRxOutClk(i),
                -- Tx Ports
-               txControl        => gtTxControl,  --temTimingTxPhy.control,
+               txControl        => gtTxControl(i),
                txStatus         => gtTxStatus(i),
-               txData           => temTimingTxPhy.data,
-               txDataK          => temTimingTxPhy.dataK,
+               txData           => temTimingTxPhy(i).data,
+               txDataK          => temTimingTxPhy(i).dataK,
                txOutClk         => gtTxOutClk(i),
                -- Misc.
                loopback         => loopback);
@@ -419,16 +395,14 @@ begin
          I1 => gtRxClk(1),              -- 1-bit input: Clock input (S=1)
          S  => timingClkSel);           -- 1-bit input: Clock select
 
-   -- NEED to do the same thing as RX!!!!
-   -- NEED TXOUTCLKs switched in here
    U_TXCLK : BUFGMUX
       generic map (
          CLK_SEL_TYPE => "ASYNC")       -- ASYNC, SYNC
       port map (
          O  => timingTxClk,             -- 1-bit output: Clock output
-         I0 => gtTxClk(0),              -- 1-bit input: Clock input (S=0)
-         I1 => gtTxClk(1),              -- 1-bit input: Clock input (S=1)
-         S  => timingClkSel);           -- 1-bit input: Clock select
+         I0 => gtTxOutClk(1),           -- 1-bit input: Clock input (S=0)
+         I1 => refClk(1),               -- 1-bit input: Clock input (S=1)
+         S  => useMiniTpg);             -- 1-bit input: Clock select
 
    -----------------------
    -- Insert user RX reset
@@ -439,11 +413,11 @@ begin
    gtRxControl.bufferByRst <= timingRxControl.bufferByRst;
    gtRxControl.pllReset    <= timingRxControl.pllReset or rxUserRst;
 
-   gtTxControl.reset       <= temTimingTxPhy.control.reset or txPhyReset;
-   gtTxControl.pllReset    <= temTimingTxPhy.control.pllReset or txPhyPllReset;
-   gtTxControl.inhibit     <= temTimingTxPhy.control.inhibit;
-   gtTxControl.polarity    <= temTimingTxPhy.control.polarity;
-   gtTxControl.bufferByRst <= temTimingTxPhy.control.bufferByRst;
+   gtTxControl(1).reset       <= temTimingTxPhy(1).control.reset or txPhyReset;
+   gtTxControl(1).pllReset    <= temTimingTxPhy(1).control.pllReset or txPhyPllReset;
+   gtTxControl(1).inhibit     <= temTimingTxPhy(1).control.inhibit;
+   gtTxControl(1).polarity    <= temTimingTxPhy(1).control.polarity;
+   gtTxControl(1).bufferByRst <= temTimingTxPhy(1).control.bufferByRst;
 
    --------------
    -- Timing Core
@@ -496,12 +470,12 @@ begin
          timingRst => timingRxRst,       -- [in]
          dsTx(0)   => xpmMiniTimingPhy,  -- [out]
 
-         dsRxClk(0)     => timingTxClk,           -- [in]
-         dsRxRst(0)     => timingTxRst,           -- [in]
-         dsRx(0).data   => temTimingTxPhy.data,   -- [in]
-         dsRx(0).dataK  => temTimingTxPhy.dataK,  -- [in]
-         dsRx(0).decErr => (others => '0'),       -- [in]
-         dsRx(0).dspErr => (others => '0'),       -- [in]
+         dsRxClk(0)     => timingTxClk,              -- [in]
+         dsRxRst(0)     => timingTxRst,              -- [in]
+         dsRx(0).data   => temTimingTxPhy(1).data,   -- [in]
+         dsRx(0).dataK  => temTimingTxPhy(1).dataK,  -- [in]
+         dsRx(0).decErr => (others => '0'),          -- [in]
+         dsRx(0).dspErr => (others => '0'),          -- [in]
 
          tpgMiniStream => tpgMiniStreamTimingPhy,  -- [out]
 
@@ -571,7 +545,7 @@ begin
          timingMode               => appTimingMode,                  -- [in]
          timingTxClk              => timingTxClk,                    -- [in]
          timingTxRst              => timingTxRst,                    -- [in]
-         timingTxPhy              => temTimingTxPhy,                 -- [out]
+         timingTxPhy              => temTimingTxPhy(1),              -- [out]
          triggerClk               => triggerClk,                     -- [in]
          triggerRst               => triggerRst,                     -- [in]
          triggerData              => triggerData,                    -- [out]

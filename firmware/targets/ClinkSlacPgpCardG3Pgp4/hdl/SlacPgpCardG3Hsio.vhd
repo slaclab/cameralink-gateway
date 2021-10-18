@@ -157,23 +157,17 @@ architecture mapping of SlacPgpCardG3Hsio is
    signal txPllClk       : slv(2 downto 0) := (others => '0');
    signal txPllRst       : slv(2 downto 0) := (others => '0');
    signal lockedStrobe   : slv(3 downto 0) := (others => '0');
-   signal pllLock        : sl;
-   signal clkFb          : sl;
-   signal gtTxOutClkBufg : sl;
+   signal pllLock        : sl              := '0';
+   signal clkFb          : sl              := '0';
+   signal gtTxOutClkBufg : sl              := '0';
 
-   signal qPllClkTiming    : slv(1 downto 0);
-   signal qPllRefClkTiming : slv(1 downto 0);
+   signal qPllClkTiming    : slv(1 downto 0) := (others => '0');
+   signal qPllRefClkTiming : slv(1 downto 0) := (others => '0');
 
    signal iTriggerData       : TriggerEventDataArray(NUM_PGP_LANES_G-1 downto 0);
-   signal remoteTriggersComb : slv(NUM_PGP_LANES_G-1 downto 0);
-   signal remoteTriggers     : slv(NUM_PGP_LANES_G-1 downto 0);
+   signal remoteTriggersComb : slv(NUM_PGP_LANES_G-1 downto 0) := (others => '0');
+   signal remoteTriggers     : slv(NUM_PGP_LANES_G-1 downto 0) := (others => '0');
    signal triggerCodes       : slv8Array(NUM_PGP_LANES_G-1 downto 0);
-
-   signal iTriggerDataDummy          : TriggerEventDataArray(3 downto NUM_PGP_LANES_G);
-   signal l1AcksDummy                : slv(3 downto NUM_PGP_LANES_G);
-   signal eventTrigMsgMastersDummy   : AxiStreamMasterArray(3 downto NUM_PGP_LANES_G);
-   signal eventTimingMsgMastersDummy : AxiStreamMasterArray(3 downto NUM_PGP_LANES_G);
-   signal clearReadoutDummy          : slv(3 downto NUM_PGP_LANES_G);
 
 begin
 
@@ -246,14 +240,13 @@ begin
             AXI_BASE_ADDR_G      => AXIL_CONFIG_C(i).baseAddr)
          port map (
             -- Trigger Interface
-            trigger     => remoteTriggers(i),
-            triggerCode => triggerCodes(i),
+            trigger         => remoteTriggers(i),
+            triggerCode     => triggerCodes(i),
             -- PGP Serial Ports
-            pgpRxP      => pgpRxP(i+4),
-            pgpRxN      => pgpRxN(i+4),
-            pgpTxP      => pgpTxP(i+4),
-            pgpTxN      => pgpTxN(i+4),
-
+            pgpRxP          => pgpRxP(i+4),
+            pgpRxN          => pgpRxN(i+4),
+            pgpTxP          => pgpTxP(i+4),
+            pgpTxN          => pgpTxN(i+4),
             -- QPLL Interface
             qPllOutClk      => qPllOutClk(i),
             qPllOutRefClk   => qPllOutRefClk(i),
@@ -387,63 +380,41 @@ begin
          DMA_AXIS_CONFIG_G   => DMA_AXIS_CONFIG_G,
          AXIL_CLK_FREQ_G     => AXIL_CLK_FREQ_G,
          AXI_BASE_ADDR_G     => AXIL_CONFIG_C(TIMING_INDEX_C).baseAddr,
-         NUM_DETECTORS_G     => 4,      -- force 4 lanes
+         NUM_DETECTORS_G     => NUM_PGP_LANES_G,
          EN_LCLS_I_TIMING_G  => EN_LCLS_I_TIMING_G,
          EN_LCLS_II_TIMING_G => EN_LCLS_II_TIMING_G)
       port map (
-         -- Trigger / event interfaces
-         triggerClk => triggerClk,      -- [in]
-         triggerRst => triggerRst,      -- [in]
-
-         triggerData(NUM_PGP_LANES_G-1 downto 0) => iTriggerData,
-         triggerData(3 downto NUM_PGP_LANES_G)   => iTriggerDataDummy,
-
-         l1Clk => l1Clk,                -- [in]
-         l1Rst => l1Rst,                -- [in]
-
-         l1Feedbacks(NUM_PGP_LANES_G-1 downto 0) => l1Feedbacks,
-         l1Feedbacks(3 downto NUM_PGP_LANES_G)   => (others => TRIGGER_L1_FEEDBACK_INIT_C),
-
-         l1Acks(NUM_PGP_LANES_G-1 downto 0) => l1Acks,
-         l1Acks(3 downto NUM_PGP_LANES_G)   => l1AcksDummy,
-
-         eventClk => eventClk,          -- [in]
-         eventRst => eventRst,          -- [in]
-
-         eventTrigMsgMasters(NUM_PGP_LANES_G-1 downto 0) => eventTrigMsgMasters,
-         eventTrigMsgMasters(3 downto NUM_PGP_LANES_G)   => eventTrigMsgMastersDummy,
-
-         eventTrigMsgSlaves(NUM_PGP_LANES_G-1 downto 0) => eventTrigMsgSlaves,
-         eventTrigMsgSlaves(3 downto NUM_PGP_LANES_G)   => (others => AXI_STREAM_SLAVE_FORCE_C),
-
-         eventTrigMsgCtrl(NUM_PGP_LANES_G-1 downto 0) => eventTrigMsgCtrl,
-         eventTrigMsgCtrl(3 downto NUM_PGP_LANES_G)   => (others => AXI_STREAM_CTRL_UNUSED_C),
-
-         eventTimingMsgMasters(NUM_PGP_LANES_G-1 downto 0) => eventTimingMsgMasters,
-         eventTimingMsgMasters(3 downto NUM_PGP_LANES_G)   => eventTimingMsgMastersDummy,
-
-         eventTimingMsgSlaves(NUM_PGP_LANES_G-1 downto 0) => eventTimingMsgSlaves,
-         eventTimingMsgSlaves(3 downto NUM_PGP_LANES_G)   => (others => AXI_STREAM_SLAVE_FORCE_C),
-
-         clearReadout(NUM_PGP_LANES_G-1 downto 0) => clearReadout,
-         clearReadout(3 downto NUM_PGP_LANES_G)   => clearReadoutDummy,
-
+         triggerClk            => triggerClk,             -- [in]
+         triggerRst            => triggerRst,             -- [in]
+         triggerData           => iTriggerData,           -- [out]
+         l1Clk                 => l1Clk,                  -- [in]
+         l1Rst                 => l1Rst,                  -- [in]
+         l1Feedbacks           => l1Feedbacks,            -- [in]
+         l1Acks                => l1Acks,                 -- [out]
+         eventClk              => eventClk,               -- [in]
+         eventRst              => eventRst,               -- [in]
+         eventTrigMsgMasters   => eventTrigMsgMasters,    -- [out]
+         eventTrigMsgSlaves    => eventTrigMsgSlaves,     -- [in]
+         eventTrigMsgCtrl      => eventTrigMsgCtrl,       -- [in]
+         eventTimingMsgMasters => eventTimingMsgMasters,  -- [out]
+         eventTimingMsgSlaves  => eventTimingMsgSlaves,   -- [in]
+         clearReadout          => clearReadout,           -- [out]
          -- AXI-Lite Interface (axilClk domain)
-         axilClk          => axilClk,
-         axilRst          => axilRst,
-         axilReadMaster   => axilReadMasters(TIMING_INDEX_C),
-         axilReadSlave    => axilReadSlaves(TIMING_INDEX_C),
-         axilWriteMaster  => axilWriteMasters(TIMING_INDEX_C),
-         axilWriteSlave   => axilWriteSlaves(TIMING_INDEX_C),
+         axilClk               => axilClk,
+         axilRst               => axilRst,
+         axilReadMaster        => axilReadMasters(TIMING_INDEX_C),
+         axilReadSlave         => axilReadSlaves(TIMING_INDEX_C),
+         axilWriteMaster       => axilWriteMasters(TIMING_INDEX_C),
+         axilWriteSlave        => axilWriteSlaves(TIMING_INDEX_C),
          -- GT Serial Ports
-         refClkP          => evrRefClkP,
-         refClkN          => evrRefClkN,
-         qPllClkTiming    => qPllClkTiming,
-         qPllRefClkTiming => qPllRefClkTiming,
-         timingRxP        => pgpRxP(1 downto 0),
-         timingRxN        => pgpRxN(1 downto 0),
-         timingTxP        => pgpTxP(1 downto 0),
-         timingTxN        => pgpTxN(1 downto 0));
+         refClkP               => evrRefClkP,
+         refClkN               => evrRefClkN,
+         qPllClkTiming         => qPllClkTiming,
+         qPllRefClkTiming      => qPllRefClkTiming,
+         timingRxP             => pgpRxP(1 downto 0),
+         timingRxN             => pgpRxN(1 downto 0),
+         timingTxP             => pgpTxP(1 downto 0),
+         timingTxN             => pgpTxN(1 downto 0));
 
    --------------------------------
    -- Feed triggers directly to PGP
