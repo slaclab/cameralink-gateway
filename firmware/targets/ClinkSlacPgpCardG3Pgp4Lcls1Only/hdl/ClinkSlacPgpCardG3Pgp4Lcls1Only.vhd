@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
--- File       : ClinkSlacPgpCardG3Pgp4.vhd
+-- File       : ClinkSlacPgpCardG3Pgp4Lcls1Only.vhd
 -- Company    : SLAC National Accelerator Laboratory
 -------------------------------------------------------------------------------
 -- Description: Camera link gateway PCIe card with PGPv2b
@@ -31,7 +31,7 @@ use axi_pcie_core.AxiPciePkg.all;
 library unisim;
 use unisim.vcomponents.all;
 
-entity ClinkSlacPgpCardG3Pgp4 is
+entity ClinkSlacPgpCardG3Pgp4Lcls1Only is
    generic (
       TPD_G          : time    := 1 ns;
       ROGUE_SIM_EN_G : boolean := false;
@@ -78,9 +78,9 @@ entity ClinkSlacPgpCardG3Pgp4 is
       pciRxN     : in    slv(3 downto 0);
       pciTxP     : out   slv(3 downto 0);
       pciTxN     : out   slv(3 downto 0));
-end ClinkSlacPgpCardG3Pgp4;
+end ClinkSlacPgpCardG3Pgp4Lcls1Only;
 
-architecture top_level of ClinkSlacPgpCardG3Pgp4 is
+architecture top_level of ClinkSlacPgpCardG3Pgp4Lcls1Only is
 
    constant DMA_SIZE_C : positive := 1;
 
@@ -255,8 +255,8 @@ begin
          DMA_AXIS_CONFIG_G   => DMA_AXIS_CONFIG_C,
          AXIL_CLK_FREQ_G     => DMA_CLK_FREQ_C,
          AXI_BASE_ADDR_G     => AXIL_CONFIG_C(HW_INDEX_C).baseAddr,
-         EN_LCLS_I_TIMING_G  => true,
-         EN_LCLS_II_TIMING_G => true)
+         EN_LCLS_I_TIMING_G  => true,   -- LCLS-I only
+         EN_LCLS_II_TIMING_G => false)  -- LCLS-I only
       port map (
          ------------------------
          --  Top Level Interfaces

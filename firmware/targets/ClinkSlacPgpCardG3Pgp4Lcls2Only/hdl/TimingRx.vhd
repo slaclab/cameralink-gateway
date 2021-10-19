@@ -237,8 +237,8 @@ begin
 
       U_CLK_BUF : BUFH
          port map (
-            I   => refClk(i),
-            O   => gtRefClk(i));
+            I => refClk(i),
+            O => gtRefClk(i));
 
    end generate GEN_GT_VEC;
 
@@ -306,6 +306,15 @@ begin
             I0 => gtRxOutClk(i),        -- 1-bit input: Clock input (S=0)
             I1 => refClk(i),            -- 1-bit input: Clock input (S=1)
             S  => useMiniTpg);          -- 1-bit input: Clock select
+
+      U_TXCLK : BUFGMUX
+         generic map (
+            CLK_SEL_TYPE => "ASYNC")    -- ASYNC, SYNC
+         port map (
+            O  => gtTxClk(i),           -- 1-bit output: Clock output
+            I0 => gtTxOutClk(i),        -- 1-bit input: Clock input (S=0)
+            I1 => refClk(i),            -- 1-bit input: Clock input (S=1)
+            S  => useMiniTpg);        -- 1-bit input: Clock select            
 
       REAL_PCIE : if (not SIMULATION_G) generate
 
@@ -408,23 +417,8 @@ begin
       end if;
    end process;
 
-   U_RXCLK : BUFGMUX
-      generic map (
-         CLK_SEL_TYPE => "ASYNC")       -- ASYNC, SYNC
-      port map (
-         O  => timingRxClk,             -- 1-bit output: Clock output
-         I0 => gtRxClk(0),              -- 1-bit input: Clock input (S=0)
-         I1 => gtRxClk(1),              -- 1-bit input: Clock input (S=1)
-         S  => timingClkSel);           -- 1-bit input: Clock select
-
-   U_TXCLK : BUFGMUX
-      generic map (
-         CLK_SEL_TYPE => "ASYNC")       -- ASYNC, SYNC
-      port map (
-         O  => timingTxClk,             -- 1-bit output: Clock output
-         I0 => gtTxOutClk(1),           -- 1-bit input: Clock input (S=0)
-         I1 => refClk(1),               -- 1-bit input: Clock input (S=1)
-         S  => useMiniTpg);             -- 1-bit input: Clock select
+   timingRxClk <= gtRxClk(1) when(EN_LCLS_II_TIMING_G) else gtRxClk(0);
+   timingTxClk <= gtTxClk(1) when(EN_LCLS_II_TIMING_G) else gtTxClk(0);
 
    -----------------------
    -- Insert user RX reset
@@ -552,8 +546,8 @@ begin
    U_TriggerEventManager_1 : entity l2si_core.TriggerEventManager
       generic map (
          TPD_G                          => TPD_G,
-         EN_LCLS_I_TIMING_G             => EN_LCLS_I_TIMING_G,
-         EN_LCLS_II_TIMING_G            => EN_LCLS_II_TIMING_G,
+         EN_LCLS_I_TIMING_G             => true,  -- Always have LCLS-II registers
+         EN_LCLS_II_TIMING_G            => true,  -- Always have LCLS-II registers
          NUM_DETECTORS_G                => NUM_DETECTORS_G,
          AXIL_BASE_ADDR_G               => AXIL_CONFIG_C(TEM_INDEX_C).baseAddr,
          EVENT_AXIS_CONFIG_G            => DMA_AXIS_CONFIG_G,
@@ -568,24 +562,24 @@ begin
          timingTxClk              => timingTxClk,                    -- [in]
          timingTxRst              => timingTxRst,                    -- [in]
          timingTxPhy              => temTimingTxPhy(1),              -- [out]
-         triggerClk               => triggerClk,                     -- [in]
-         triggerRst               => triggerRst,                     -- [in]
+         triggerClk               => triggerClk,  -- [in]
+         triggerRst               => triggerRst,  -- [in]
          triggerData              => triggerData,                    -- [out]
          clearReadout             => clearReadout,                   -- [out]
-         l1Clk                    => l1Clk,                          -- [in]
-         l1Rst                    => l1Rst,                          -- [in]
+         l1Clk                    => l1Clk,       -- [in]
+         l1Rst                    => l1Rst,       -- [in]
          l1Feedbacks              => l1Feedbacks,                    -- [in]
-         l1Acks                   => l1Acks,                         -- [out]
-         eventClk                 => eventClk,                       -- [in]
-         eventRst                 => eventRst,                       -- [in]
+         l1Acks                   => l1Acks,      -- [out]
+         eventClk                 => eventClk,    -- [in]
+         eventRst                 => eventRst,    -- [in]
          eventTimingMessagesValid => eventTimingMessagesValid,       -- [out]
          eventTimingMessages      => eventTimingMessages,            -- [out]
          eventTimingMessagesRd    => eventTimingMessagesRd,          -- [in]
          eventAxisMasters         => eventTrigMsgMasters,            -- [out]
          eventAxisSlaves          => eventTrigMsgSlaves,             -- [in]
          eventAxisCtrl            => eventTrigMsgCtrl,               -- [in]
-         axilClk                  => axilClk,                        -- [in]
-         axilRst                  => axilRst,                        -- [in]
+         axilClk                  => axilClk,     -- [in]
+         axilRst                  => axilRst,     -- [in]
          axilReadMaster           => axilReadMasters(TEM_INDEX_C),   -- [in]
          axilReadSlave            => axilReadSlaves(TEM_INDEX_C),    -- [out]
          axilWriteMaster          => axilWriteMasters(TEM_INDEX_C),  -- [in]

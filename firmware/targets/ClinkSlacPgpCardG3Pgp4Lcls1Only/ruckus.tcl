@@ -22,8 +22,12 @@ loadSource -lib l2si_core -dir "$::env(PROJ_DIR)/../../submodules/l2si-core/base
 loadRuckusTcl $::env(PROJ_DIR)/../../common
 
 # Load local source Code
-loadSource      -dir "$::DIR_PATH/hdl"
-loadConstraints -dir "$::DIR_PATH/hdl"
+loadSource      -dir  "$::DIR_PATH/hdl"
+loadConstraints -dir  "$::DIR_PATH/hdl"
+loadConstraints -dir  "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl"
+loadSource      -path "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl/SlacPgpCardG3Hsio.vhd"
+loadSource      -path "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl/Pgp4Lane.vhd"
+loadSource      -path "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl/TimingRx.vhd"
 
 # Updating impl_1 strategy
 set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
