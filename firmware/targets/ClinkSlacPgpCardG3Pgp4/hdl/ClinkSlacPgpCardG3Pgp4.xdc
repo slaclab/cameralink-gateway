@@ -8,12 +8,44 @@
 ## the terms contained in the LICENSE.txt file.
 ##############################################################################
 
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets U_HSIO/U_TimingRx/refClk_0]
-set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets U_HSIO/U_TimingRx/refClk_1]
 set_property CLOCK_DEDICATED_ROUTE ANY_CMT_COLUMN [get_nets U_HSIO/U_TimingRx/gtRxClk_0]
+set_property CLOCK_DEDICATED_ROUTE ANY_CMT_COLUMN [get_nets U_HSIO/U_TimingRx/gtRxClk_1]
 
-create_generated_clock -name clk119 [get_pins {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_IBUFDS/ODIV2}]
-create_generated_clock -name clk186 [get_pins {U_HSIO/U_TimingRx/GEN_GT_VEC[1].U_IBUFDS/ODIV2}]
+# set_property LOC MMCME2_ADV_X0Y0 [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_Pll/MmcmGen.U_Mmcm}]
+# set_property LOC PLLE2_ADV_X0Y0  [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[1].U_Pll/PllGen.U_Pll}]
+# set_property LOC BUFHCE_X0Y0 [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_CLK_BUF}]
+# set_property LOC BUFHCE_X0Y1 [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[1].U_CLK_BUF}]
+
+# set_property LOC MMCME2_ADV_X1Y0  [get_cells {U_HSIO/U_TX_PLL/MmcmGen.U_Mmcm}]
+# set_property LOC BUFR_X1Y0 [get_cells {U_HSIO/U_txPllClk0}]
+# set_property LOC BUFR_X1Y1 [get_cells {U_HSIO/U_txPllClk1}]
+# set_property LOC BUFR_X1Y2 [get_cells {U_HSIO/U_txPllClk2}]
+# set_property LOC BUFHCE_X1Y0 [get_cells {U_HSIO/U_txPllClkIn}]
+
+# set_property LOC PLLE2_ADV_X1Y0  [get_cells {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_RX_PLL}]
+
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_Pll/InputBufgGen.U_Bufg}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_Pll/OutBufgGen.ClkOutGen[0].U_Bufg}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[1].U_Pll/InputBufgGen.U_Bufg}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_GT_VEC[1].U_Pll/OutBufgGen.ClkOutGen[0].U_Bufg}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_VEC[0].U_RXCLK}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_VEC[1].U_RXCLK}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/U_RXCLK}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/U_TXCLK}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTP/TxBUFG_Inst}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_VEC[1].REAL_PCIE.U_GTP/TxBUFG_Inst}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_VEC[0].REAL_PCIE.U_GTP/U_Gtp/BUFG_RX_OUT_CLK}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/U_TimingRx/GEN_VEC[1].REAL_PCIE.U_GTP/U_Gtp/BUFG_RX_OUT_CLK}]
+
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/GEN_6G.U_Pgp3Gtp7Ip6G/U0/rxout0_i}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_Bufg}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_rxPllClk1}]
+# set_property LOC BUFGCE_XZYZZ [get_cells {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_rxPllClk2}]
+
+# Base Clocks
+
+create_generated_clock -name clk119 [get_pins {U_HSIO/U_TimingRx/GEN_GT_VEC[0].U_Pll/MmcmGen.U_Mmcm/CLKOUT0}]
+create_generated_clock -name clk186 [get_pins {U_HSIO/U_TimingRx/GEN_GT_VEC[1].U_Pll/PllGen.U_Pll/CLKOUT0}]
 
 # GT Out Clocks
 
@@ -106,11 +138,16 @@ set_clock_groups -asynchronous \
     -group [get_clocks -include_generated_clocks {evrRefClk1}] \
     -group [get_clocks -include_generated_clocks {sysClk}]
 
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT0]] -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT2]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT0]] -group [get_clocks -of_objects [get_pins {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_RX_PLL/CLKOUT2}]]
+#set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT0]] -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT2]]
+#set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT0]] -group [get_clocks -of_objects [get_pins {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_RX_PLL/CLKOUT2}]]
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]] -group [get_clocks -of_objects [get_pins {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_RX_PLL/CLKOUT1}]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]] -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT0]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]] -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT1]]
+#set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]] -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT0]]
+#set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]] -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT1]]
 set_clock_groups -asynchronous -group [get_clocks {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/GEN_6G.U_Pgp3Gtp7Ip6G/U0/Pgp3Gtp7Ip6G_i/gt0_Pgp3Gtp7Ip6G_i/gtpe2_i/RXOUTCLK}] -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]]
 set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_RX_PLL/CLKOUT2}]] -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]]
-set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT2]] -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]]
+#set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_TX_PLL/CLKOUT2]] -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]] -group [get_clocks -of_objects [get_pins U_HSIO/U_txPllClk0/O]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]] -group [get_clocks -of_objects [get_pins U_HSIO/U_txPllClk1/O]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins {U_HSIO/GEN_LANE[0].U_Lane/REAL_PGP.U_Pgp/U_Pgp3Gtp7IpWrapper/U_RX_PLL/CLKOUT2}]] -group [get_clocks -of_objects [get_pins U_HSIO/U_txPllClk0/O]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_txPllClk2/O]] -group [get_clocks -of_objects [get_pins U_Core/REAL_PCIE.U_AxiPciePhy/U_AxiPcie/inst/comp_axi_enhanced_pcie/comp_enhanced_core_top_wrap/axi_pcie_enhanced_core_top_i/pcie_7x_v2_0_2_inst/pcie_top_with_gt_top.gt_ges.gt_top_i/pipe_wrapper_i/pipe_clock_int.pipe_clock_i/mmcm_i/CLKOUT3]]
+set_clock_groups -asynchronous -group [get_clocks -of_objects [get_pins U_HSIO/U_txPllClk0/O]] -group [get_clocks -of_objects [get_pins U_HSIO/U_txPllClk2/O]]

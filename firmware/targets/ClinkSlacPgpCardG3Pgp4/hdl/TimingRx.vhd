@@ -130,6 +130,7 @@ architecture mapping of TimingRx is
    signal mmcmRst      : sl;
    signal gtediv2      : slv(1 downto 0);
    signal refClk       : slv(1 downto 0);
+   signal gtRefClk     : slv(1 downto 0);
    signal refRst       : slv(1 downto 0);
    signal mmcmLocked   : slv(1 downto 0);
    signal timingClkSel : sl;
@@ -211,12 +212,33 @@ begin
             ODIV2 => gtediv2(i),
             O     => open);
 
-      U_BUFG : BUFG
-         port map (
-            I => gtediv2(i),
-            O => refClk(i));
+      U_Pll : entity surf.ClockManager7
+         generic map(
+            TPD_G             => TPD_G,
+            TYPE_G            => ite(i = 0, "MMCM", "PLL"),
+            INPUT_BUFG_G      => true,
+            FB_BUFG_G         => false,
+            OUTPUT_BUFG_G     => false,
+            RST_IN_POLARITY_G => '1',
+            NUM_CLOCKS_G      => 1,
+            -- MMCM attributes
+            BANDWIDTH_G       => "OPTIMIZED",
+            CLKIN_PERIOD_G    => ite((i = 0), 8.402, 5.382),
+            CLKFBOUT_MULT_G   => ite((i = 0), 7, 5),
+            CLKOUT0_DIVIDE_G  => ite((i = 0), 7, 5))
+         port map(
+            -- Clock Input
+            clkIn     => gtediv2(i),
+            rstIn     => mmcmRst,
+            -- Clock Outputs
+            clkOut(0) => refClk(i),
+            -- Reset Outputs
+            locked    => mmcmLocked(i));
 
-      mmcmLocked(i) <= not(mmcmRst);
+      U_CLK_BUF : BUFH
+         port map (
+            I   => refClk(i),
+            O   => gtRefClk(i));
 
    end generate GEN_GT_VEC;
 
@@ -234,7 +256,7 @@ begin
          PLL1_FBDIV_45_IN_G   => 5,
          PLL1_REFCLK_DIV_IN_G => 1)
       port map (
-         qPllRefClk     => refClk,
+         qPllRefClk     => gtRefClk,
          qPllOutClk     => qPllClk,
          qPllOutRefClk  => qPllRefClk,
          qPllLock       => qPllLock,

@@ -169,6 +169,12 @@ architecture mapping of SlacPgpCardG3Hsio is
    signal remoteTriggers     : slv(NUM_PGP_LANES_G-1 downto 0) := (others => '0');
    signal triggerCodes       : slv8Array(NUM_PGP_LANES_G-1 downto 0);
 
+   signal iTriggerDataDummy          : TriggerEventDataArray(3 downto NUM_PGP_LANES_G);
+   signal l1AcksDummy                : slv(3 downto NUM_PGP_LANES_G);
+   signal eventTrigMsgMastersDummy   : AxiStreamMasterArray(3 downto NUM_PGP_LANES_G);
+   signal eventTimingMsgMastersDummy : AxiStreamMasterArray(3 downto NUM_PGP_LANES_G);
+   signal clearReadoutDummy          : slv(3 downto NUM_PGP_LANES_G);
+
 begin
 
    ---------------------
@@ -292,53 +298,66 @@ begin
 
    end generate GEN_LANE;
 
-   U_Bufg : BUFH
+   U_txPllClkIn : BUFH
       port map (
          I => gtTxOutClk(0),
          O => gtTxOutClkBufg);
+         
+   U_TX_PLL : entity surf.ClockManager7
+      generic map(
+         TPD_G             => TPD_G,
+         -- TYPE_G            => "PLL",
+         TYPE_G            => "MMCM",
+         INPUT_BUFG_G      => false,
+         FB_BUFG_G         => false,
+         OUTPUT_BUFG_G     => false,
+         RST_IN_POLARITY_G => '1',
+         NUM_CLOCKS_G      => 3,
+         -- MMCM attributes
+         BANDWIDTH_G       => "HIGH",
+         CLKIN_PERIOD_G    => 2.56,
+         DIVCLK_DIVIDE_G  => 1,
+         CLKFBOUT_MULT_G  => 4,
+         CLKOUT0_DIVIDE_G => 16,
+         CLKOUT1_DIVIDE_G => 4,
+         CLKOUT2_DIVIDE_G => 8)
+      port map(
+         -- Clock Input
+         clkIn     => gtTxOutClkBufg,
+         rstIn     => gtTxPllRst(0),
+         -- Clock Outputs
+         clkOut    => pllOut,
+         -- Reset Outputs
+         locked    => pllLock);
 
-   U_TX_PLL : PLLE2_ADV
+   U_txPllClk0 : BUFR
       generic map (
-         BANDWIDTH      => "HIGH",
-         CLKIN1_PERIOD  => 2.56,
-         DIVCLK_DIVIDE  => 1,
-         CLKFBOUT_MULT  => 4,
-         CLKOUT0_DIVIDE => 16,
-         CLKOUT1_DIVIDE => 4,
-         CLKOUT2_DIVIDE => 8)
-      port map (
-         DCLK     => axilClk,
-         DRDY     => open,
-         DEN      => '0',
-         DWE      => '0',
-         DADDR    => (others => '0'),
-         DI       => (others => '0'),
-         DO       => open,
-         PWRDWN   => '0',
-         RST      => gtTxPllRst(0),
-         CLKIN1   => gtTxOutClkBufg,
-         CLKIN2   => '0',
-         CLKINSEL => '1',
-         CLKFBOUT => clkFb,
-         CLKFBIN  => clkFb,
-         LOCKED   => pllLock,
-         CLKOUT0  => pllOut(0),
-         CLKOUT1  => pllOut(1),
-         CLKOUT2  => pllOut(2));
-
-   U_txPllClk0 : BUFG
-      port map (
-         I => pllOut(0),
-         O => txPllClk(0));
-
-   U_txPllClk1 : BUFG
+         BUFR_DIVIDE => "4",
+         SIM_DEVICE  => "7SERIES")
       port map (
          I => pllOut(1),
+            CE  => '1',
+            CLR => '0',         
+         O => txPllClk(0));
+
+   U_txPllClk1 : BUFR
+      generic map (
+         BUFR_DIVIDE => "1",
+         SIM_DEVICE  => "7SERIES")
+      port map (
+         I => pllOut(1),
+            CE  => '1',
+            CLR => '0',         
          O => txPllClk(1));
 
-   U_txPllClk2 : BUFG
+   U_txPllClk2 : BUFR
+      generic map (
+         BUFR_DIVIDE => "2",
+         SIM_DEVICE  => "7SERIES")
       port map (
-         I => pllOut(2),
+         I => pllOut(1),
+            CE  => '1',
+            CLR => '0',         
          O => txPllClk(2));
 
    GEN_RST : for i in 2 downto 0 generate
@@ -380,41 +399,63 @@ begin
          DMA_AXIS_CONFIG_G   => DMA_AXIS_CONFIG_G,
          AXIL_CLK_FREQ_G     => AXIL_CLK_FREQ_G,
          AXI_BASE_ADDR_G     => AXIL_CONFIG_C(TIMING_INDEX_C).baseAddr,
-         NUM_DETECTORS_G     => NUM_PGP_LANES_G,
+         NUM_DETECTORS_G     => 4,      -- force 4 lanes
          EN_LCLS_I_TIMING_G  => EN_LCLS_I_TIMING_G,
          EN_LCLS_II_TIMING_G => EN_LCLS_II_TIMING_G)
       port map (
-         triggerClk            => triggerClk,             -- [in]
-         triggerRst            => triggerRst,             -- [in]
-         triggerData           => iTriggerData,           -- [out]
-         l1Clk                 => l1Clk,                  -- [in]
-         l1Rst                 => l1Rst,                  -- [in]
-         l1Feedbacks           => l1Feedbacks,            -- [in]
-         l1Acks                => l1Acks,                 -- [out]
-         eventClk              => eventClk,               -- [in]
-         eventRst              => eventRst,               -- [in]
-         eventTrigMsgMasters   => eventTrigMsgMasters,    -- [out]
-         eventTrigMsgSlaves    => eventTrigMsgSlaves,     -- [in]
-         eventTrigMsgCtrl      => eventTrigMsgCtrl,       -- [in]
-         eventTimingMsgMasters => eventTimingMsgMasters,  -- [out]
-         eventTimingMsgSlaves  => eventTimingMsgSlaves,   -- [in]
-         clearReadout          => clearReadout,           -- [out]
+         -- Trigger / event interfaces
+         triggerClk => triggerClk,      -- [in]
+         triggerRst => triggerRst,      -- [in]
+
+         triggerData(NUM_PGP_LANES_G-1 downto 0) => iTriggerData,
+         triggerData(3 downto NUM_PGP_LANES_G)   => iTriggerDataDummy,
+
+         l1Clk => l1Clk,                -- [in]
+         l1Rst => l1Rst,                -- [in]
+
+         l1Feedbacks(NUM_PGP_LANES_G-1 downto 0) => l1Feedbacks,
+         l1Feedbacks(3 downto NUM_PGP_LANES_G)   => (others => TRIGGER_L1_FEEDBACK_INIT_C),
+
+         l1Acks(NUM_PGP_LANES_G-1 downto 0) => l1Acks,
+         l1Acks(3 downto NUM_PGP_LANES_G)   => l1AcksDummy,
+
+         eventClk => eventClk,          -- [in]
+         eventRst => eventRst,          -- [in]
+
+         eventTrigMsgMasters(NUM_PGP_LANES_G-1 downto 0) => eventTrigMsgMasters,
+         eventTrigMsgMasters(3 downto NUM_PGP_LANES_G)   => eventTrigMsgMastersDummy,
+
+         eventTrigMsgSlaves(NUM_PGP_LANES_G-1 downto 0) => eventTrigMsgSlaves,
+         eventTrigMsgSlaves(3 downto NUM_PGP_LANES_G)   => (others => AXI_STREAM_SLAVE_FORCE_C),
+
+         eventTrigMsgCtrl(NUM_PGP_LANES_G-1 downto 0) => eventTrigMsgCtrl,
+         eventTrigMsgCtrl(3 downto NUM_PGP_LANES_G)   => (others => AXI_STREAM_CTRL_UNUSED_C),
+
+         eventTimingMsgMasters(NUM_PGP_LANES_G-1 downto 0) => eventTimingMsgMasters,
+         eventTimingMsgMasters(3 downto NUM_PGP_LANES_G)   => eventTimingMsgMastersDummy,
+
+         eventTimingMsgSlaves(NUM_PGP_LANES_G-1 downto 0) => eventTimingMsgSlaves,
+         eventTimingMsgSlaves(3 downto NUM_PGP_LANES_G)   => (others => AXI_STREAM_SLAVE_FORCE_C),
+
+         clearReadout(NUM_PGP_LANES_G-1 downto 0) => clearReadout,
+         clearReadout(3 downto NUM_PGP_LANES_G)   => clearReadoutDummy,
+
          -- AXI-Lite Interface (axilClk domain)
-         axilClk               => axilClk,
-         axilRst               => axilRst,
-         axilReadMaster        => axilReadMasters(TIMING_INDEX_C),
-         axilReadSlave         => axilReadSlaves(TIMING_INDEX_C),
-         axilWriteMaster       => axilWriteMasters(TIMING_INDEX_C),
-         axilWriteSlave        => axilWriteSlaves(TIMING_INDEX_C),
+         axilClk          => axilClk,
+         axilRst          => axilRst,
+         axilReadMaster   => axilReadMasters(TIMING_INDEX_C),
+         axilReadSlave    => axilReadSlaves(TIMING_INDEX_C),
+         axilWriteMaster  => axilWriteMasters(TIMING_INDEX_C),
+         axilWriteSlave   => axilWriteSlaves(TIMING_INDEX_C),
          -- GT Serial Ports
-         refClkP               => evrRefClkP,
-         refClkN               => evrRefClkN,
-         qPllClkTiming         => qPllClkTiming,
-         qPllRefClkTiming      => qPllRefClkTiming,
-         timingRxP             => pgpRxP(1 downto 0),
-         timingRxN             => pgpRxN(1 downto 0),
-         timingTxP             => pgpTxP(1 downto 0),
-         timingTxN             => pgpTxN(1 downto 0));
+         refClkP          => evrRefClkP,
+         refClkN          => evrRefClkN,
+         qPllClkTiming    => qPllClkTiming,
+         qPllRefClkTiming => qPllRefClkTiming,
+         timingRxP        => pgpRxP(1 downto 0),
+         timingRxN        => pgpRxN(1 downto 0),
+         timingTxP        => pgpTxP(1 downto 0),
+         timingTxN        => pgpTxN(1 downto 0));
 
    --------------------------------
    -- Feed triggers directly to PGP
