@@ -66,26 +66,38 @@ architecture mapping of Application is
 
 begin
 
-   --------------------
-   -- AXI-Lite Crossbar
-   --------------------
-   U_AXIL_XBAR : entity surf.AxiLiteCrossbar
-      generic map (
-         TPD_G              => TPD_G,
-         NUM_SLAVE_SLOTS_G  => 1,
-         NUM_MASTER_SLOTS_G => DMA_SIZE_G,
-         MASTERS_CONFIG_G   => AXIL_CONFIG_C)
-      port map (
-         axiClk              => axilClk,
-         axiClkRst           => axilRst,
-         sAxiWriteMasters(0) => axilWriteMaster,
-         sAxiWriteSlaves(0)  => axilWriteSlave,
-         sAxiReadMasters(0)  => axilReadMaster,
-         sAxiReadSlaves(0)   => axilReadSlave,
-         mAxiWriteMasters    => axilWriteMasters,
-         mAxiWriteSlaves     => axilWriteSlaves,
-         mAxiReadMasters     => axilReadMasters,
-         mAxiReadSlaves      => axilReadSlaves);
+   GEN_XBAR : if (DMA_SIZE_G > 1) generate
+      --------------------
+      -- AXI-Lite Crossbar
+      --------------------
+      U_AXIL_XBAR : entity surf.AxiLiteCrossbar
+         generic map (
+            TPD_G              => TPD_G,
+            NUM_SLAVE_SLOTS_G  => 1,
+            NUM_MASTER_SLOTS_G => DMA_SIZE_G,
+            MASTERS_CONFIG_G   => AXIL_CONFIG_C)
+         port map (
+            axiClk              => axilClk,
+            axiClkRst           => axilRst,
+            sAxiWriteMasters(0) => axilWriteMaster,
+            sAxiWriteSlaves(0)  => axilWriteSlave,
+            sAxiReadMasters(0)  => axilReadMaster,
+            sAxiReadSlaves(0)   => axilReadSlave,
+            mAxiWriteMasters    => axilWriteMasters,
+            mAxiWriteSlaves     => axilWriteSlaves,
+            mAxiReadMasters     => axilReadMasters,
+            mAxiReadSlaves      => axilReadSlaves);
+   end generate;
+
+   BYP_XBAR : if (DMA_SIZE_G = 1) generate
+
+      axilWriteMasters(0) <= axilWriteMaster;
+      axilWriteSlave      <= axilWriteSlaves(0);
+
+      axilReadMasters(0) <= axilReadMaster;
+      axilReadSlave      <= axilReadSlaves(0);
+
+   end generate;
 
    -------------------
    -- Application Lane
