@@ -54,7 +54,7 @@ entity SlacPgpCardG3Hsio is
       AXIL_CLK_FREQ_G                : real                        := 156.25E+6;  -- units of Hz
       AXI_BASE_ADDR_G                : slv(31 downto 0)            := x"0080_0000";
       NUM_PGP_LANES_G                : integer range 1 to 4        := 4;
-      EN_LCLS_I_TIMING_G             : boolean                     := false;
+      EN_LCLS_I_TIMING_G             : boolean                     := true;
       EN_LCLS_II_TIMING_G            : boolean                     := true;
       L1_CLK_IS_TIMING_TX_CLK_G      : boolean                     := false;
       TRIGGER_CLK_IS_TIMING_RX_CLK_G : boolean                     := false;
@@ -157,16 +157,16 @@ architecture mapping of SlacPgpCardG3Hsio is
    signal txPllClk       : slv(2 downto 0) := (others => '0');
    signal txPllRst       : slv(2 downto 0) := (others => '0');
    signal lockedStrobe   : slv(3 downto 0) := (others => '0');
-   signal pllLock        : sl;
-   signal clkFb          : sl;
-   signal gtTxOutClkBufg : sl;
+   signal pllLock        : sl              := '0';
+   signal clkFb          : sl              := '0';
+   signal gtTxOutClkBufg : sl              := '0';
 
-   signal qPllClkTiming    : slv(1 downto 0);
-   signal qPllRefClkTiming : slv(1 downto 0);
+   signal qPllClkTiming    : slv(1 downto 0) := (others => '0');
+   signal qPllRefClkTiming : slv(1 downto 0) := (others => '0');
 
    signal iTriggerData       : TriggerEventDataArray(NUM_PGP_LANES_G-1 downto 0);
-   signal remoteTriggersComb : slv(NUM_PGP_LANES_G-1 downto 0);
-   signal remoteTriggers     : slv(NUM_PGP_LANES_G-1 downto 0);
+   signal remoteTriggersComb : slv(NUM_PGP_LANES_G-1 downto 0) := (others => '0');
+   signal remoteTriggers     : slv(NUM_PGP_LANES_G-1 downto 0) := (others => '0');
    signal triggerCodes       : slv8Array(NUM_PGP_LANES_G-1 downto 0);
 
    signal iTriggerDataDummy          : TriggerEventDataArray(3 downto NUM_PGP_LANES_G);
@@ -246,14 +246,13 @@ begin
             AXI_BASE_ADDR_G      => AXIL_CONFIG_C(i).baseAddr)
          port map (
             -- Trigger Interface
-            trigger     => remoteTriggers(i),
-            triggerCode => triggerCodes(i),
+            trigger         => remoteTriggers(i),
+            triggerCode     => triggerCodes(i),
             -- PGP Serial Ports
-            pgpRxP      => pgpRxP(i+4),
-            pgpRxN      => pgpRxN(i+4),
-            pgpTxP      => pgpTxP(i+4),
-            pgpTxN      => pgpTxN(i+4),
-
+            pgpRxP          => pgpRxP(i+4),
+            pgpRxN          => pgpRxN(i+4),
+            pgpTxP          => pgpTxP(i+4),
+            pgpTxN          => pgpTxN(i+4),
             -- QPLL Interface
             qPllOutClk      => qPllOutClk(i),
             qPllOutRefClk   => qPllOutRefClk(i),
@@ -299,53 +298,66 @@ begin
 
    end generate GEN_LANE;
 
-   U_Bufg : BUFH
+   U_txPllClkIn : BUFH
       port map (
          I => gtTxOutClk(0),
          O => gtTxOutClkBufg);
+         
+   U_TX_PLL : entity surf.ClockManager7
+      generic map(
+         TPD_G             => TPD_G,
+         -- TYPE_G            => "PLL",
+         TYPE_G            => "MMCM",
+         INPUT_BUFG_G      => false,
+         FB_BUFG_G         => false,
+         OUTPUT_BUFG_G     => false,
+         RST_IN_POLARITY_G => '1',
+         NUM_CLOCKS_G      => 3,
+         -- MMCM attributes
+         BANDWIDTH_G       => "HIGH",
+         CLKIN_PERIOD_G    => 2.56,
+         DIVCLK_DIVIDE_G  => 1,
+         CLKFBOUT_MULT_G  => 4,
+         CLKOUT0_DIVIDE_G => 16,
+         CLKOUT1_DIVIDE_G => 4,
+         CLKOUT2_DIVIDE_G => 8)
+      port map(
+         -- Clock Input
+         clkIn     => gtTxOutClkBufg,
+         rstIn     => gtTxPllRst(0),
+         -- Clock Outputs
+         clkOut    => pllOut,
+         -- Reset Outputs
+         locked    => pllLock);
 
-   U_TX_PLL : PLLE2_ADV
+   U_txPllClk0 : BUFR
       generic map (
-         BANDWIDTH      => "HIGH",
-         CLKIN1_PERIOD  => 2.56,
-         DIVCLK_DIVIDE  => 1,
-         CLKFBOUT_MULT  => 4,
-         CLKOUT0_DIVIDE => 16,
-         CLKOUT1_DIVIDE => 4,
-         CLKOUT2_DIVIDE => 8)
-      port map (
-         DCLK     => axilClk,
-         DRDY     => open,
-         DEN      => '0',
-         DWE      => '0',
-         DADDR    => (others => '0'),
-         DI       => (others => '0'),
-         DO       => open,
-         PWRDWN   => '0',
-         RST      => gtTxPllRst(0),
-         CLKIN1   => gtTxOutClkBufg,
-         CLKIN2   => '0',
-         CLKINSEL => '1',
-         CLKFBOUT => clkFb,
-         CLKFBIN  => clkFb,
-         LOCKED   => pllLock,
-         CLKOUT0  => pllOut(0),
-         CLKOUT1  => pllOut(1),
-         CLKOUT2  => pllOut(2));
-
-   U_txPllClk0 : BUFG
-      port map (
-         I => pllOut(0),
-         O => txPllClk(0));
-
-   U_txPllClk1 : BUFG
+         BUFR_DIVIDE => "4",
+         SIM_DEVICE  => "7SERIES")
       port map (
          I => pllOut(1),
+            CE  => '1',
+            CLR => '0',         
+         O => txPllClk(0));
+
+   U_txPllClk1 : BUFR
+      generic map (
+         BUFR_DIVIDE => "1",
+         SIM_DEVICE  => "7SERIES")
+      port map (
+         I => pllOut(1),
+            CE  => '1',
+            CLR => '0',         
          O => txPllClk(1));
 
-   U_txPllClk2 : BUFG
+   U_txPllClk2 : BUFR
+      generic map (
+         BUFR_DIVIDE => "2",
+         SIM_DEVICE  => "7SERIES")
       port map (
-         I => pllOut(2),
+         I => pllOut(1),
+            CE  => '1',
+            CLR => '0',         
          O => txPllClk(2));
 
    GEN_RST : for i in 2 downto 0 generate

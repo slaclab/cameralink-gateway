@@ -130,6 +130,7 @@ architecture mapping of TimingRx is
    signal mmcmRst      : sl;
    signal gtediv2      : slv(1 downto 0);
    signal refClk       : slv(1 downto 0);
+   signal gtRefClk     : slv(1 downto 0);
    signal refRst       : slv(1 downto 0);
    signal mmcmLocked   : slv(1 downto 0);
    signal timingClkSel : sl;
@@ -162,7 +163,7 @@ architecture mapping of TimingRx is
    signal timingTxRst   : sl;
 --   signal txStatus   : TimingPhyStatusType := TIMING_PHY_STATUS_FORCE_C;
    signal gtTxStatus    : TimingPhyStatusArray(1 downto 0);
-   signal gtTxControl   : TimingPhyControlType;
+   signal gtTxControl   : TimingPhyControlArray(1 downto 0) := (others => TIMING_PHY_CONTROL_INIT_C);
    signal txPhyReset    : sl;
    signal txPhyPllReset : sl;
 
@@ -174,7 +175,7 @@ architecture mapping of TimingRx is
    -----------------------------------------------
    -- Event Header Cache signals
    -----------------------------------------------
-   signal temTimingTxPhy : TimingPhyType;
+   signal temTimingTxPhy : TimingPhyArray(1 downto 0) := (others => TIMING_PHY_INIT_C);
 
    signal eventTimingMessagesValid : slv(NUM_DETECTORS_G-1 downto 0);
    signal eventTimingMessages      : TimingMessageArray(NUM_DETECTORS_G-1 downto 0);
@@ -214,16 +215,17 @@ begin
       U_Pll : entity surf.ClockManager7
          generic map(
             TPD_G             => TPD_G,
-            TYPE_G            => "PLL",
+            TYPE_G            => ite(i = 0, "MMCM", "PLL"),
             INPUT_BUFG_G      => true,
             FB_BUFG_G         => false,
+            OUTPUT_BUFG_G     => false,
             RST_IN_POLARITY_G => '1',
             NUM_CLOCKS_G      => 1,
             -- MMCM attributes
-            BANDWIDTH_G       => "HIGH",
-            CLKIN_PERIOD_G    => ite((i=0), 8.402, 5.382),
-            CLKFBOUT_MULT_G   => 10,
-            CLKOUT0_DIVIDE_G  => 10)
+            BANDWIDTH_G       => "OPTIMIZED",
+            CLKIN_PERIOD_G    => ite((i = 0), 8.402, 5.382),
+            CLKFBOUT_MULT_G   => ite((i = 0), 7, 5),
+            CLKOUT0_DIVIDE_G  => ite((i = 0), 7, 5))
          port map(
             -- Clock Input
             clkIn     => gtediv2(i),
@@ -232,6 +234,11 @@ begin
             clkOut(0) => refClk(i),
             -- Reset Outputs
             locked    => mmcmLocked(i));
+
+      U_CLK_BUF : BUFH
+         port map (
+            I => refClk(i),
+            O => gtRefClk(i));
 
    end generate GEN_GT_VEC;
 
@@ -249,7 +256,7 @@ begin
          PLL1_FBDIV_45_IN_G   => 5,
          PLL1_REFCLK_DIV_IN_G => 1)
       port map (
-         qPllRefClk     => refClk,
+         qPllRefClk     => gtRefClk,
          qPllOutClk     => qPllClk,
          qPllOutRefClk  => qPllRefClk,
          qPllLock       => qPllLock,
@@ -307,7 +314,7 @@ begin
             O  => gtTxClk(i),           -- 1-bit output: Clock output
             I0 => gtTxOutClk(i),        -- 1-bit input: Clock input (S=0)
             I1 => refClk(i),            -- 1-bit input: Clock input (S=1)
-            S  => useMiniTpg);          -- 1-bit input: Clock select
+            S  => useMiniTpg);        -- 1-bit input: Clock select            
 
       REAL_PCIE : if (not SIMULATION_G) generate
 
@@ -346,10 +353,10 @@ begin
                rxDecErr         => gtRxDecErr(i),
                rxOutClk         => gtRxOutClk(i),
                -- Tx Ports
-               txControl        => gtTxControl,  --temTimingTxPhy.control,
+               txControl        => gtTxControl(i),
                txStatus         => gtTxStatus(i),
-               txData           => temTimingTxPhy.data,
-               txDataK          => temTimingTxPhy.dataK,
+               txData           => temTimingTxPhy(i).data,
+               txDataK          => temTimingTxPhy(i).dataK,
                txOutClk         => gtTxOutClk(i),
                -- Misc.
                loopback         => loopback);
@@ -410,25 +417,8 @@ begin
       end if;
    end process;
 
-   U_RXCLK : BUFGMUX
-      generic map (
-         CLK_SEL_TYPE => "ASYNC")       -- ASYNC, SYNC
-      port map (
-         O  => timingRxClk,             -- 1-bit output: Clock output
-         I0 => gtRxClk(0),              -- 1-bit input: Clock input (S=0)
-         I1 => gtRxClk(1),              -- 1-bit input: Clock input (S=1)
-         S  => timingClkSel);           -- 1-bit input: Clock select
-
-   -- NEED to do the same thing as RX!!!!
-   -- NEED TXOUTCLKs switched in here
-   U_TXCLK : BUFGMUX
-      generic map (
-         CLK_SEL_TYPE => "ASYNC")       -- ASYNC, SYNC
-      port map (
-         O  => timingTxClk,             -- 1-bit output: Clock output
-         I0 => gtTxClk(0),              -- 1-bit input: Clock input (S=0)
-         I1 => gtTxClk(1),              -- 1-bit input: Clock input (S=1)
-         S  => timingClkSel);           -- 1-bit input: Clock select
+   timingRxClk <= gtRxClk(1) when(EN_LCLS_II_TIMING_G) else gtRxClk(0);
+   timingTxClk <= gtTxClk(1) when(EN_LCLS_II_TIMING_G) else gtTxClk(0);
 
    -----------------------
    -- Insert user RX reset
@@ -439,11 +429,11 @@ begin
    gtRxControl.bufferByRst <= timingRxControl.bufferByRst;
    gtRxControl.pllReset    <= timingRxControl.pllReset or rxUserRst;
 
-   gtTxControl.reset       <= temTimingTxPhy.control.reset or txPhyReset;
-   gtTxControl.pllReset    <= temTimingTxPhy.control.pllReset or txPhyPllReset;
-   gtTxControl.inhibit     <= temTimingTxPhy.control.inhibit;
-   gtTxControl.polarity    <= temTimingTxPhy.control.polarity;
-   gtTxControl.bufferByRst <= temTimingTxPhy.control.bufferByRst;
+   gtTxControl(1).reset       <= temTimingTxPhy(1).control.reset or txPhyReset;
+   gtTxControl(1).pllReset    <= temTimingTxPhy(1).control.pllReset or txPhyPllReset;
+   gtTxControl(1).inhibit     <= temTimingTxPhy(1).control.inhibit;
+   gtTxControl(1).polarity    <= temTimingTxPhy(1).control.polarity;
+   gtTxControl(1).bufferByRst <= temTimingTxPhy(1).control.bufferByRst;
 
    --------------
    -- Timing Core
@@ -496,12 +486,12 @@ begin
          timingRst => timingRxRst,       -- [in]
          dsTx(0)   => xpmMiniTimingPhy,  -- [out]
 
-         dsRxClk(0)     => timingTxClk,           -- [in]
-         dsRxRst(0)     => timingTxRst,           -- [in]
-         dsRx(0).data   => temTimingTxPhy.data,   -- [in]
-         dsRx(0).dataK  => temTimingTxPhy.dataK,  -- [in]
-         dsRx(0).decErr => (others => '0'),       -- [in]
-         dsRx(0).dspErr => (others => '0'),       -- [in]
+         dsRxClk(0)     => timingTxClk,              -- [in]
+         dsRxRst(0)     => timingTxRst,              -- [in]
+         dsRx(0).data   => temTimingTxPhy(1).data,   -- [in]
+         dsRx(0).dataK  => temTimingTxPhy(1).dataK,  -- [in]
+         dsRx(0).decErr => (others => '0'),          -- [in]
+         dsRx(0).dspErr => (others => '0'),          -- [in]
 
          tpgMiniStream => tpgMiniStreamTimingPhy,  -- [out]
 
@@ -556,8 +546,8 @@ begin
    U_TriggerEventManager_1 : entity l2si_core.TriggerEventManager
       generic map (
          TPD_G                          => TPD_G,
-         EN_LCLS_I_TIMING_G             => EN_LCLS_I_TIMING_G,
-         EN_LCLS_II_TIMING_G            => EN_LCLS_II_TIMING_G,
+         EN_LCLS_I_TIMING_G             => true,  -- Always have LCLS-II registers
+         EN_LCLS_II_TIMING_G            => true,  -- Always have LCLS-II registers
          NUM_DETECTORS_G                => NUM_DETECTORS_G,
          AXIL_BASE_ADDR_G               => AXIL_CONFIG_C(TEM_INDEX_C).baseAddr,
          EVENT_AXIS_CONFIG_G            => DMA_AXIS_CONFIG_G,
@@ -571,25 +561,25 @@ begin
          timingMode               => appTimingMode,                  -- [in]
          timingTxClk              => timingTxClk,                    -- [in]
          timingTxRst              => timingTxRst,                    -- [in]
-         timingTxPhy              => temTimingTxPhy,                 -- [out]
-         triggerClk               => triggerClk,                     -- [in]
-         triggerRst               => triggerRst,                     -- [in]
+         timingTxPhy              => temTimingTxPhy(1),              -- [out]
+         triggerClk               => triggerClk,  -- [in]
+         triggerRst               => triggerRst,  -- [in]
          triggerData              => triggerData,                    -- [out]
          clearReadout             => clearReadout,                   -- [out]
-         l1Clk                    => l1Clk,                          -- [in]
-         l1Rst                    => l1Rst,                          -- [in]
+         l1Clk                    => l1Clk,       -- [in]
+         l1Rst                    => l1Rst,       -- [in]
          l1Feedbacks              => l1Feedbacks,                    -- [in]
-         l1Acks                   => l1Acks,                         -- [out]
-         eventClk                 => eventClk,                       -- [in]
-         eventRst                 => eventRst,                       -- [in]
+         l1Acks                   => l1Acks,      -- [out]
+         eventClk                 => eventClk,    -- [in]
+         eventRst                 => eventRst,    -- [in]
          eventTimingMessagesValid => eventTimingMessagesValid,       -- [out]
          eventTimingMessages      => eventTimingMessages,            -- [out]
          eventTimingMessagesRd    => eventTimingMessagesRd,          -- [in]
          eventAxisMasters         => eventTrigMsgMasters,            -- [out]
          eventAxisSlaves          => eventTrigMsgSlaves,             -- [in]
          eventAxisCtrl            => eventTrigMsgCtrl,               -- [in]
-         axilClk                  => axilClk,                        -- [in]
-         axilRst                  => axilRst,                        -- [in]
+         axilClk                  => axilClk,     -- [in]
+         axilRst                  => axilRst,     -- [in]
          axilReadMaster           => axilReadMasters(TEM_INDEX_C),   -- [in]
          axilReadSlave            => axilReadSlaves(TEM_INDEX_C),    -- [out]
          axilWriteMaster          => axilWriteMasters(TEM_INDEX_C),  -- [in]

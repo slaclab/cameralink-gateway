@@ -22,13 +22,12 @@ loadSource -lib l2si_core -dir "$::env(PROJ_DIR)/../../submodules/l2si-core/base
 loadRuckusTcl $::env(PROJ_DIR)/../../common
 
 # Load local source Code
-loadSource      -dir "$::DIR_PATH/hdl"
-loadConstraints -dir "$::DIR_PATH/hdl"
+loadSource      -dir  "$::DIR_PATH/hdl"
+loadConstraints -dir  "$::DIR_PATH/hdl"
+loadConstraints -dir  "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl"
+loadSource      -path "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl/SlacPgpCardG3Hsio.vhd"
+loadSource      -path "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl/Pgp4Lane.vhd"
+loadSource      -path "$::DIR_PATH/../ClinkSlacPgpCardG3Pgp4Lcls2Only/hdl/TimingRx.vhd"
 
 # Updating impl_1 strategy
 set_property strategy Performance_ExplorePostRoutePhysOpt [get_runs impl_1]
-
-# Use an existing .DCP from previous routed.dcp file that's known to meet timing as the starting point
-set_property AUTO_INCREMENTAL_CHECKPOINT 0 [get_runs impl_1]
-import_files -fileset utils_1 "$::DIR_PATH/dcp/ClinkSlacPgpCardG3Pgp4_incremental_compile.dcp"
-set_property incremental_checkpoint [get_files {ClinkSlacPgpCardG3Pgp4_incremental_compile.dcp}] [get_runs impl_1]
