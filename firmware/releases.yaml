@@ -25,14 +25,6 @@ Targets:
     ImageDir: targets/ClinkFeb/images
     Extensions:
       - mcs      
-  ClinkSlacPgpCardG3Pgp4Lcls1Only:
-    ImageDir: targets/ClinkSlacPgpCardG3Pgp4Lcls1Only/images
-    Extensions:
-      - mcs
-  ClinkSlacPgpCardG3Pgp4Lcls2Only:
-    ImageDir: targets/ClinkSlacPgpCardG3Pgp4Lcls2Only/images
-    Extensions:
-      - mcs
   ClinkSlacPgpCardG4Pgp2b:
     ImageDir: targets/ClinkSlacPgpCardG4Pgp2b/images
     Extensions:
@@ -55,8 +47,6 @@ Releases:
     Primary: True
     Targets:
       - ClinkFeb
-      - ClinkSlacPgpCardG3Pgp4Lcls1Only
-      - ClinkSlacPgpCardG3Pgp4Lcls2Only
       - ClinkSlacPgpCardG4Pgp2b
       - ClinkSlacPgpCardG4Pgp4
       - ClinkKcu1500Pgp2b
