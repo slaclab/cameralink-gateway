@@ -14,6 +14,10 @@ ClinkTop:
     SerThrottle: 10000 # (10ms x 1us throttle rate) = 10000
     SwControlValue: 0x0
     SwControlEn: 0x0
+    HSkip: 0x0
+    HActive: 0xFFFF
+    VSkip: 0x0
+    VActive: 0xFFFF
     ###################
     UartOpal1000: # OPAL 1000 UART interface
       OR: '12'     # Output resolution, i.e. bits per pixel.  Set to 12. (value from Bruce Hill)

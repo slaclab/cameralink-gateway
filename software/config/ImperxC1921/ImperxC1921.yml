@@ -39,6 +39,10 @@ ClinkTop:
     SerThrottle: 10000 # (30ms x 1us throttle rate) = 10000
     SwControlValue: 0x0
     SwControlEn: 0x0
+    HSkip: 0x0
+    HActive: 0xFFFF
+    VSkip: 0x0
+    VActive: 0xFFFF
     ###################
     UartImperxC1921: # Imperx C1921
       #######################################

@@ -14,6 +14,10 @@ ClinkTop:
     SerThrottle: 10000 # (1ms x 1us throttle rate) = 10000
     SwControlValue: 0x0
     SwControlEn: 0x0
+    HSkip: 0x0
+    HActive: 0xFFFF
+    VSkip: 0x0
+    VActive: 0xFFFF
     ###################
     UartBaslerAce: # Basler ACE interface
       ###############################

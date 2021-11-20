@@ -14,6 +14,10 @@ ClinkTop:
     SerThrottle: 10000 # (10ms x 1us throttle rate) = 10000
     SwControlValue: 0x0
     SwControlEn: 0x0
+    HSkip: 0x0
+    HActive: 0xFFFF
+    VSkip: 0x0
+    VActive: 0xFFFF
     ###################
     UartPiranha4: # Piranha4 UART interface
       SPF: '0'     # SFP: 0 = 8-bit mode
