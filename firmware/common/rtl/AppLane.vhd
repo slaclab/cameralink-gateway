@@ -140,7 +140,7 @@ begin
       generic map (
          TPD_G           => TPD_G,
          NUM_WRITE_REG_G => 1,
-         INI_WRITE_REG_G => (0 => x"0000_0000"))
+         INI_WRITE_REG_G => (0 => x"0000_0001"))
       port map (
          -- AXI-Lite Bus
          axiClk           => axilClk,
