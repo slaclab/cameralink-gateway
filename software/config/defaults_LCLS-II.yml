@@ -3,6 +3,7 @@ ClinkDevRoot:
     #########################################################################################################
     Application:
       AppLane[:]:
+        XpmPauseThresh: 0x1
         EventBuilder:
           Bypass: 0x0
           Timeout: 0x0
@@ -74,7 +75,7 @@ ClinkDevRoot:
             Config_L0Select_Reset: 0x0
             Config_L0Select_Enabled: True
             AxilRdEn: True
-            Config_L0Select_RateSel: '100 Hz'
+            Config_L0Select_RateSel: '10 Hz'
             Config_L0Select_DestSel: 0x8000
             Pipeline_Depth_Clks: 20000
             Pipeline_Depth_Fids: 100

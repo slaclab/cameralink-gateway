@@ -276,6 +276,7 @@ begin
          -- Trigger Event streams (axilClk domain)
          eventTrigMsgMasters   => eventTrigMsgMasters,
          eventTrigMsgSlaves    => eventTrigMsgSlaves,
+         eventTrigMsgCtrl      => eventTrigMsgCtrl,
          eventTimingMsgMasters => eventTimingMsgMasters,
          eventTimingMsgSlaves  => eventTimingMsgSlaves,
          -- DMA Interface (dmaClk domain)

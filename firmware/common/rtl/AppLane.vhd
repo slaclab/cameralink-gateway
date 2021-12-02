@@ -43,6 +43,7 @@ entity AppLane is
       -- Trigger Event streams (axilClk domain)
       eventTrigMsgMaster   : in  AxiStreamMasterType;
       eventTrigMsgSlave    : out AxiStreamSlaveType;
+      eventTrigMsgCtrl     : out AxiStreamCtrlType;
       eventTimingMsgMaster : in  AxiStreamMasterType;
       eventTimingMsgSlave  : out AxiStreamSlaveType;
       -- DMA Interface (dmaClk domain)
@@ -55,6 +56,18 @@ entity AppLane is
 end AppLane;
 
 architecture mapping of AppLane is
+
+   constant AXIL_CONFIG_C : AxiLiteCrossbarMasterConfigArray(1 downto 0) := genAxiLiteConfig(2, AXI_BASE_ADDR_G, 19, 16);
+
+   signal axilWriteMasters : AxiLiteWriteMasterArray(1 downto 0);
+   signal axilWriteSlaves  : AxiLiteWriteSlaveArray(1 downto 0);
+   signal axilReadMasters  : AxiLiteReadMasterArray(1 downto 0);
+   signal axilReadSlaves   : AxiLiteReadSlaveArray(1 downto 0);
+
+   signal eventTrigPauseThresh : slv(31 downto 0);
+
+   signal trigMsgMaster : AxiStreamMasterType;
+   signal trigMsgSlave  : AxiStreamSlaveType;
 
    signal sifClMaster : AxiStreamMasterType;
    signal sifClSlave  : AxiStreamSlaveType;
@@ -69,6 +82,75 @@ architecture mapping of AppLane is
    signal appObSlave  : AxiStreamSlaveType;
 
 begin
+
+   --------------------
+   -- AXI-Lite Crossbar
+   --------------------
+   U_AXIL_XBAR : entity surf.AxiLiteCrossbar
+      generic map (
+         TPD_G              => TPD_G,
+         NUM_SLAVE_SLOTS_G  => 1,
+         NUM_MASTER_SLOTS_G => 2,
+         MASTERS_CONFIG_G   => AXIL_CONFIG_C)
+      port map (
+         axiClk              => axilClk,
+         axiClkRst           => axilRst,
+         sAxiWriteMasters(0) => axilWriteMaster,
+         sAxiWriteSlaves(0)  => axilWriteSlave,
+         sAxiReadMasters(0)  => axilReadMaster,
+         sAxiReadSlaves(0)   => axilReadSlave,
+         mAxiWriteMasters    => axilWriteMasters,
+         mAxiWriteSlaves     => axilWriteSlaves,
+         mAxiReadMasters     => axilReadMasters,
+         mAxiReadSlaves      => axilReadSlaves);
+
+   -------------------
+   -- XPM Backpressure
+   -------------------
+   U_EventTrigPause : entity surf.AxiStreamFifoV2
+      generic map (
+         -- General Configurations
+         TPD_G               => TPD_G,
+         INT_PIPE_STAGES_G   => 0,
+         PIPE_STAGES_G       => 0,
+         SLAVE_READY_EN_G    => true,
+         -- FIFO configurations
+         GEN_SYNC_FIFO_G     => true,
+         FIFO_ADDR_WIDTH_G   => 9,
+         FIFO_FIXED_THRESH_G => false,  -- FALSE: Using dynamic fifoPauseThresh instead
+         MEMORY_TYPE_G       => "block",
+         -- AXI Stream Port Configurations
+         SLAVE_AXI_CONFIG_G  => DMA_AXIS_CONFIG_G,
+         MASTER_AXI_CONFIG_G => DMA_AXIS_CONFIG_G)
+      port map (
+         -- Slave Port
+         sAxisClk        => axilClk,
+         sAxisRst        => axilRst,
+         sAxisMaster     => eventTrigMsgMaster,
+         sAxisSlave      => eventTrigMsgSlave,
+         sAxisCtrl       => eventTrigMsgCtrl,
+         fifoPauseThresh => eventTrigPauseThresh(8 downto 0),
+         -- Master Port
+         mAxisClk        => axilClk,
+         mAxisRst        => axilRst,
+         mAxisMaster     => trigMsgMaster,
+         mAxisSlave      => trigMsgSlave);
+
+   U_EventTrigPauseThresh : entity surf.AxiLiteRegs
+      generic map (
+         TPD_G           => TPD_G,
+         NUM_WRITE_REG_G => 1,
+         INI_WRITE_REG_G => (0 => x"0000_0001"))
+      port map (
+         -- AXI-Lite Bus
+         axiClk           => axilClk,
+         axiClkRst        => axilRst,
+         axiReadMaster    => axilReadMasters(1),
+         axiReadSlave     => axilReadSlaves(1),
+         axiWriteMaster   => axilWriteMasters(1),
+         axiWriteSlave    => axilWriteSlaves(1),
+         -- User Read/Write registers
+         writeRegister(0) => eventTrigPauseThresh);
 
    -----------------------
    -- DMA to HW ASYNC FIFO
@@ -109,9 +191,9 @@ begin
          NUM_SLAVES_G   => 3,
          MODE_G         => "ROUTED",
          TDEST_ROUTES_G => (
-            0           => "0000000-",  -- Trig on 0x0, Event on 0x1
-            1           => "00000010",  -- Map PGP[VC1] to TDEST 0x2
-            2           => "00000011"),  -- Map Timing   to TDEST 0x3
+            0           => "0000000-",        -- Trig on 0x0, Event on 0x1
+            1           => "00000010",        -- Map PGP[VC1] to TDEST 0x2
+            2           => "00000011"),       -- Map Timing   to TDEST 0x3
          TRANS_TDEST_G  => X"01",
          AXIS_CONFIG_G  => DMA_AXIS_CONFIG_G)
       port map (
@@ -119,15 +201,15 @@ begin
          axisClk         => axilClk,
          axisRst         => axilRst,
          -- AXI-Lite Interface (axisClk domain)
-         axilReadMaster  => axilReadMaster,
-         axilReadSlave   => axilReadSlave,
-         axilWriteMaster => axilWriteMaster,
-         axilWriteSlave  => axilWriteSlave,
+         axilReadMaster  => axilReadMasters(0),
+         axilReadSlave   => axilReadSlaves(0),
+         axilWriteMaster => axilWriteMasters(0),
+         axilWriteSlave  => axilWriteSlaves(0),
          -- AXIS Interfaces
-         sAxisMasters(0) => eventTrigMsgMaster,
+         sAxisMasters(0) => trigMsgMaster,
          sAxisMasters(1) => pgpObMasters(1),  -- PGP[VC1]
          sAxisMasters(2) => eventTimingMsgMaster,
-         sAxisSlaves(0)  => eventTrigMsgSlave,
+         sAxisSlaves(0)  => trigMsgSlave,
          sAxisSlaves(1)  => pgpObSlaves(1),   -- PGP[VC1]
          sAxisSlaves(2)  => eventTimingMsgSlave,
          mAxisMaster     => eventMaster,

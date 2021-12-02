@@ -3,6 +3,7 @@ ClinkDevRoot:
     #########################################################################################################
     Application:
       AppLane[:]:
+        XpmPauseThresh: 0x1
         EventBuilder:
           Bypass: 0x4 # Masking off XPM Timing message port because not implemented in LCLS-I mode
           Timeout: 0x0
