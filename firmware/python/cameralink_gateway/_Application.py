@@ -28,10 +28,18 @@ class AppLane(pr.Device):
         #######################################
         self.add(batcher.AxiStreamBatcherEventBuilder(
             name         = 'EventBuilder',
-            offset       = 0x00000,
+            offset       = 0x0_0000,
             numberSlaves = 3, # Total number of slave indexes (not necessarily same as TDEST)
             tickUnit     = '156.25MHz',
             expand       = True,
+        ))
+
+        self.add(pr.RemoteVariable(
+            name         = 'XpmPauseThresh',
+            description  = 'Threshold in unit of AXIS words (8 bytes per word).  The XPM is 48byte message. So setting this register to 0x7 would NOT back pressure until there is two message in the pipeline',
+            offset       = 0x1_0100,
+            bitSize      = 9,
+            mode         = 'RW',
         ))
 
 class Application(pr.Device):
