@@ -119,13 +119,13 @@ class ClinkDevRoot(shared.Root):
             for vc in range(4):
                 if enVcMask & (0x1 << vc):
                     self.enVcMask[vc] = True
-                    if (dev is not 'sim'):
+                    if (dev != 'sim'):
                         self.dmaStreams[lane][vc] = rogue.hardware.axi.AxiStreamDma(dev,(0x100*lane)+vc,1)
                     else:
                         self.dmaStreams[lane][vc] = rogue.interfaces.stream.TcpClient('localhost', (8000+2)+(512*lane)+2*vc)
 
         # Check if not doing simulation
-        if (dev is not 'sim'):
+        if (dev != 'sim'):
 
             # Create the stream interface
             for lane in self.laneConfig:
@@ -272,7 +272,7 @@ class ClinkDevRoot(shared.Root):
 #            enableList.hidden = True
 
         # Check if simulation
-        if (self.dev is 'sim'):
+        if (self.dev == 'sim'):
             pass
 
         # Check if PGP[lane].VC[0] = SRPv3 (register access) is enabled
