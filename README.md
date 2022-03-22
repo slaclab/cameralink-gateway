@@ -68,22 +68,6 @@ SFP[0] is fiber closed to the power connector.  Numbering goes from left to righ
 
 <!--- ######################################################## -->
 
-# SLAC PGP GEN3 PCIe Fiber mapping
-
-```
-QSFP[0][0] = PGP.Lane[0].VC[3:0]
-QSFP[0][1] = Unused QSFP Link
-QSFP[0][2] = Unused QSFP Link
-QSFP[0][3] = Unused QSFP Link
-QSFP[1][0] = LCLS-I  Timing Receiver
-QSFP[1][1] = LCLS-II Timing Receiver
-QSFP[1][2] = Unused QSFP Link
-QSFP[1][3] = Unused QSFP Link
-SFP = Unused SFP Link
-```
-
-<!--- ######################################################## -->
-
 # SLAC PGP GEN4 PCIe Fiber mapping
 
 ```
@@ -100,7 +84,7 @@ SFP = Unused SFP Link
 
 <!--- ######################################################## -->
 
-# KCU1500 PCIe Fiber mapping
+# C1100 (or KCU1500) PCIe Fiber mapping
 
 ```
 QSFP[0][0] = PGP.Lane[0].VC[3:0]
@@ -165,21 +149,9 @@ $ make gui
 
 # How to build the PCIe firmware
 
-1) Setup Xilinx licensing
-```
-$ source cameralink-gateway/firmware/setup_env_slac.sh
-```
+PCIe firmware images are attached to the tag releases of "slaclab/lcls2-pgp-pcie-apps" and no longer built in this github repo
 
-2) Go to the target directory and make the firmware:
-```
-$ cd cameralink-gateway/firmware/targets/ClinkKcu1500Pgp2b/
-$ make
-```
-
-3) Optional: Review the results in GUI mode
-```
-$ make gui
-```
+https://github.com/slaclab/lcls2-pgp-pcie-apps
 
 <!--- ######################################################## -->
 
@@ -254,7 +226,7 @@ $ source setup_env_slac.sh
 ```
 $ python scripts/updatePcieFpga.py --path <PATH_TO_IMAGE_DIR>
 ```
-where <PATH_TO_IMAGE_DIR> is path to image directory (example: ../firmware/targets/ClinkKcu1500Pgp2b/images/)
+where <PATH_TO_IMAGE_DIR> is path to image directory (example: ../../lcls2-pgp-pcie-apps/firmware/targets/XilinxC1100/Lcls2XilinxC1100Pgp4_6Gbps/images/)
 
 3) Reboot the computer
 ```
