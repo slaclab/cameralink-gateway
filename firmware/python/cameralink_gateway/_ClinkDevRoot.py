@@ -55,7 +55,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x07110000
+        self.FwVersionLock = 0x08000000
 
         # Set local variables
         self.laneConfig     = laneConfig
@@ -288,16 +288,6 @@ class ClinkDevRoot(shared.Root):
                 # Dump the address map
                 self.saveAddressMap( "dump/addressMapDump.dump" )
                 self.saveAddressMap( "dump/addressMapDump.h", headerEn=True )
-
-            # Check for PCIe FW version
-            fwVersion = self.ClinkPcie.AxiPcieCore.AxiVersion.FpgaVersion.get()
-            if (fwVersion != self.FwVersionLock):
-                errMsg = f"""
-                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FwVersionLock:#04x}
-                    Please update PCIe firmware using software/scripts/updatePcieFpga.py
-                    """
-                click.secho(errMsg, bg='red')
-                raise ValueError(errMsg)
 
             # Check for FEB FW version
             for lane in self.laneConfig:
