@@ -57,6 +57,7 @@ ClinkTop:
       Trg_Exp_Del: '1' # Selects delay in microseconds between trigger signal and beginning of exposure
       Trg_Str_En:  '0' # 0x0 - disable Trigger Strobe
       Exp_Ctl_Mod: '1' # 0x1 - pulse width - for triggering
+      #Test_Mod_Sel: '1' # 0x1 for checker pattern
       ################################################################
       # Camera Link Base and Medium support 8, 10, or 12-bit output
       # whereas Camera Link Full only supports 8 or 10 bits per pixel.
@@ -76,7 +77,7 @@ ClinkTop:
 ###################
 TrigCtrl[0]:
   EnableTrig: True
-  InvCC: False # Active High Pulse
+  InvCC: True # Active High Pulse
   TrigMap: ChA # ChA = pgpTrigger(0)
   TrigPulseWidth: 32.768 # units of us
   TrigMask: 0x1 # CC1 trigger

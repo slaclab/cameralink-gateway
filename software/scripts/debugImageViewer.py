@@ -96,11 +96,10 @@ class myRoot(pr.Root):
 
         self.dmaStream   = rogue.hardware.axi.AxiStreamDma(args.dev,(0x100*args.lane)+1,1)
         self.rateDrop    = rogue.interfaces.stream.RateDrop(True,1.0)
-        self.fifo        = rogue.interfaces.stream.Fifo(10,0,False)
         self.unbatcher   = rogue.protocols.batcher.SplitterV1()
         self.eventReader = EventReader()
 
-        self.dmaStream >> self.rateDrop >> self.fifo >> self.unbatcher >> self.eventReader
+        self.dmaStream >> self.rateDrop >> self.unbatcher >> self.eventReader
 
     def updatePlot(self,i):
         if self.eventReader.nextPlot:
