@@ -55,7 +55,7 @@ class ClinkDevRoot(shared.Root):
                  **kwargs):
 
         # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x07150000
+        self.FwVersionLock = 0x07160000
 
         # Set local variables
         self.laneConfig     = laneConfig
@@ -359,6 +359,13 @@ class ClinkDevRoot(shared.Root):
                         clChDev.SerThrottle.set(10000)
                     dev.Trg_Mode_En.set('1') # 0x1 - trigger is enabled; camera in trigger mode
                     dev.Trg_Inp_Sel.set('1') # 0x3 - computer; camera expects trigger from CC1 via Camera Link cable.
+
+                # Startup procedures for JaiCm140
+                uartDev = self.find(typ=cl.UartJaiCm140)
+                for dev in uartDev:
+                    dev.VN.set('?') # Firmware Version
+                    dev.ID.set('?') # Camera ID Request
+                    dev.MD.set('?') # Model Name Request
 
             # Load the configurations
             if self.enableConfig:
