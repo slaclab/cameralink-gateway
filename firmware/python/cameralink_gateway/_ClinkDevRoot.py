@@ -54,8 +54,11 @@ class ClinkDevRoot(shared.Root):
                  enVcMask       = 0xD, # Enable lane mask: Don't connect data stream (VC1) by default because intended for C++ process
                  **kwargs):
 
-        # Set the firmware Version lock = firmware/targets/shared_version.mk
-        self.FwVersionLock = 0x07160000
+        # Set the FEB firmware Version lock = https://github.com/slaclab/cameralink-gateway/blob/master/firmware/targets/shared_version.mk
+        self.FebVersionLock = 0x08000000
+
+        # Set the FEB firmware Version lock = https://github.com/slaclab/lcls2-pgp-pcie-apps/blob/master/firmware/targets/shared_config.mk
+        self.PcieVersionLock = 0x03010000
 
         # Set local variables
         self.laneConfig     = laneConfig
@@ -291,10 +294,11 @@ class ClinkDevRoot(shared.Root):
 
             # Check for PCIe FW version
             fwVersion = self.ClinkPcie.AxiPcieCore.AxiVersion.FpgaVersion.get()
-            if (fwVersion != self.FwVersionLock):
+            if (fwVersion != self.PcieVersionLock):
                 errMsg = f"""
-                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FwVersionLock:#04x}
+                    PCIe.AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.PcieVersionLock:#04x}
                     Please update PCIe firmware using software/scripts/updatePcieFpga.py
+                    https://github.com/slaclab/lcls2-pgp-pcie-apps/blob/master/firmware/targets/shared_config.mk
                     """
                 click.secho(errMsg, bg='red')
                 raise ValueError(errMsg)
@@ -307,10 +311,11 @@ class ClinkDevRoot(shared.Root):
                 if (self.RemRxLinkReady[lane].get() != 0):
                     # Check for FW version
                     fwVersion = self.ClinkFeb[lane].AxiVersion.FpgaVersion.get()
-                    if (fwVersion != self.FwVersionLock):
+                    if (fwVersion != self.FebVersionLock):
                         errMsg = f"""
-                            Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FwVersionLock:#04x}
+                            Fpga[lane={lane}].AxiVersion.FpgaVersion = {fwVersion:#04x} != {self.FebVersionLock:#04x}
                             Please update Fpga[{lane}] at Lane={lane} firmware using software/scripts/updateFeb.py
+                            https://github.com/slaclab/cameralink-gateway/blob/master/firmware/targets/shared_version.mk
                             """
                         click.secho(errMsg, bg='red')
                         raise ValueError(errMsg)
