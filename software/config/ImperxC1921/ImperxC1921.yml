@@ -28,10 +28,6 @@ ClinkTop:
     # TapCount: 4 # Medium (4 taps)
     # DataMode: 12Bit
     ################################################################
-    # LinkMode: Full
-    # TapCount: 8 # Full (8 taps)
-    # DataMode: 8Bit
-    ################################################################
     LinkMode: Deca
     TapCount: 8 # Deca (8 taps)
     DataMode: 10Bit
@@ -74,10 +70,6 @@ ClinkTop:
       # A2D_Bits:    '2' # 0x2 - 12 bits
       # Bit_Dpt_Sel: '2' # 0x2 - 12 bits
       # Dat_Fmt_Sel: '2' # 0x2 - Medium (4 taps)
-      ################################################################
-      # A2D_Bits:    '0' # 0x1 - 8 bits
-      # Bit_Dpt_Sel: '0' # 0x1 - 8 bits
-      # Dat_Fmt_Sel: '3' # 0x3 - Full (8 taps)
       ################################################################
       A2D_Bits:    '1' # 0x1 - 10 bits
       Bit_Dpt_Sel: '1' # 0x1 - 10 bits

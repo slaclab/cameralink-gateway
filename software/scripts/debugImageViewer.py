@@ -25,6 +25,9 @@ import numpy as np
 # Set the argument parser
 parser = argparse.ArgumentParser()
 
+# Convert str to bool
+argBool = lambda s: s.lower() in ['true', 't', 'yes', '1']
+
 parser.add_argument(
     "--dev",
     type     = str,
@@ -61,6 +64,13 @@ parser.add_argument(
     help     = "Number of bytes per pixel",
 )
 
+parser.add_argument(
+    "--deca",
+    type     = argBool,
+    required = False,
+    default  = False,
+    help     = "Enable DECA mode",
+)
 
 # Get the arguments
 args = parser.parse_args()
@@ -70,8 +80,14 @@ args = parser.parse_args()
 class EventReader(rogue.interfaces.stream.Slave):
     def __init__(self):
         rogue.interfaces.stream.Slave.__init__(self)
-        self.dtype     = 'int16' if (args.bytePerPix==2) else 'uint8'
-        self.imageSize = (args.xDim*args.yDim)
+        if args.deca:
+            self.dtype = 'uint8'
+            self.imageSize = (10*args.xDim*args.yDim)//8
+
+        else:
+            self.dtype     = 'int16' if (args.bytePerPix==2) else 'uint8'
+            self.imageSize = (args.xDim*args.yDim)
+
         self.image     = [[0 for x in range(args.xDim)] for y in range(args.yDim)]
         self.nextPlot  = False
 
@@ -83,9 +99,24 @@ class EventReader(rogue.interfaces.stream.Slave):
             ba = bytearray(frameSize)
             frame.read(ba, 0)
             data = np.frombuffer(ba, dtype=self.dtype, count=self.imageSize)
-            for y in range(args.yDim):
-                for x in range(args.xDim):
-                    self.image[y][x] = data[y*args.xDim+x]
+            if args.deca:
+                x=0
+                y=0
+                for i in range(self.imageSize//5):
+                    word = np.int64(0)
+                    for j in range(5):
+                        word = word<<8 | np.int64(0xFF&data[ 5*i + 4-j ])
+                    for j in range(4):
+                        self.image[y][x] = (word>>(10*j))&0x3FF
+                        x += 1
+                        if x==args.xDim:
+                            x=0
+                            y += 1
+
+            else:
+                for y in range(args.yDim):
+                    for x in range(args.xDim):
+                        self.image[y][x] = data[y*args.xDim+x]
             self.nextPlot  = True
 
 #################################################################
