@@ -79,5 +79,5 @@ jobs:
           source ${HOME}/miniconda/etc/profile.d/conda.sh
           cd ${HOME}/download/
           conda build --debug conda-recipe --output-folder bld-dir -c tidair-tag -c tidair-packages -c conda-forge
-          anaconda -t ${{ steps.get_image_info.outputs.token }} upload bld-dir/${{ steps.get_image_info.outputs.os }}/*.tar.bz2
+          anaconda -t ${{ steps.get_image_info.outputs.token }} upload --force bld-dir/noarch/*.tar.bz2
 
