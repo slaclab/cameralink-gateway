@@ -321,11 +321,11 @@ class ClinkDevRoot(shared.Root):
                         raise ValueError(errMsg)
 
                     # Force expand parts of the device tree
-                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane]._expand = True
-                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[0]._expand = False
-                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[1]._expand = True # Camera image stream
-                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[2]._expand = False
-                    self.ClinkPcie.Hsio.PgpRxAxisMon[lane].Ch[3]._expand = False
+                    self.ClinkPcie.Hsio.PgpRxVcMon[lane]._expand = True
+                    self.ClinkPcie.Hsio.PgpRxVcMon[lane].Ch[0]._expand = False
+                    self.ClinkPcie.Hsio.PgpRxVcMon[lane].Ch[1]._expand = True # Camera image stream
+                    self.ClinkPcie.Hsio.PgpRxVcMon[lane].Ch[2]._expand = False
+                    self.ClinkPcie.Hsio.PgpRxVcMon[lane].Ch[3]._expand = False
                 else:
                     # Collapse the lanes with links that are down
                     self.ClinkPcie.Application.AppLane[lane]._expand = False
