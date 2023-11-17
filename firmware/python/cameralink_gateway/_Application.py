@@ -34,10 +34,21 @@ class AppLane(pr.Device):
             expand       = True,
         ))
 
+        # weaver - cameralink-gateway firmware now uses 
+        #   lcls2-pgp-fw-lib/Application.vhd, but the python support
+        #   for this is not in the lcls2-pgp-fw-lib tag.  Add it here:
+        #   Tap register at address 0 and shift XpmPauseThreshold to address 4
+        self.add(pr.RemoteVariable(
+            name         = 'VcTap',
+            description  = 'Virtual channel for event builder output',
+            offset       = 0x1_0100,
+            bitSize      = 3,
+            mode         = 'RW',
+        ))
         self.add(pr.RemoteVariable(
             name         = 'XpmPauseThresh',
             description  = 'Threshold in unit of AXIS words (8 bytes per word).  The XPM is 48byte message. So setting this register to 0x7 would NOT back pressure until there is two message in the pipeline',
-            offset       = 0x1_0100,
+            offset       = 0x1_0104,
             bitSize      = 9,
             mode         = 'RW',
         ))
