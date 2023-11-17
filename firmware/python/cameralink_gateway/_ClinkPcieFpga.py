@@ -11,7 +11,6 @@
 import pyrogue as pr
 
 import axipcie                 as pcie
-import cameralink_gateway      as clDev
 import lcls2_pgp_fw_lib.shared as shared
 
 class ClinkPcieFpga(pr.Device):
@@ -33,7 +32,7 @@ class ClinkPcieFpga(pr.Device):
         ))
 
         # Application layer
-        self.add(clDev.Application(
+        self.add(shared.ApplicationLaneConfigDict(
             offset     = 0x00C0_0000,
             laneConfig = laneConfig,
             expand     = True,
