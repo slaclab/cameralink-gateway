@@ -22,7 +22,7 @@ import surf.protocols.batcher as batcher
 import surf.protocols.clink   as cl
 import l2si_core              as l2si
 
-rogue.Version.minVersion('5.1.0')
+rogue.Version.minVersion('6.1.1')
 # rogue.Version.exactVersion('5.1.0')
 
 class DummyBiDirStream(rogue.interfaces.stream.Master, rogue.interfaces.stream.Slave):
