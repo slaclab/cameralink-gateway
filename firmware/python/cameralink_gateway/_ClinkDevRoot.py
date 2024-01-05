@@ -87,6 +87,10 @@ class ClinkDevRoot(shared.Root):
             initRead    = initRead,
             **kwargs)
 
+        # added for rogue6
+        self.zmqServer = pr.interfaces.ZmqServer(root=self, addr='*', port=0)
+        self.addInterface(self.zmqServer)
+
         # Unhide the RemoteVariableDump command
         self.RemoteVariableDump.hidden = False
 

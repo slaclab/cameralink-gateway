@@ -227,7 +227,7 @@ if __name__ == "__main__":
         if (args.guiType == 'PyDM'):
             import pyrogue.pydm
             pyrogue.pydm.runPyDM(
-                root  = root,
+                serverList  = root.zmqServer.address,
                 sizeX = 800,
                 sizeY = 1000,
             )
