@@ -52,6 +52,7 @@ class ClinkDevRoot(shared.Root):
                  enableConfig   = True,
                  pcieBoardType  = None,
                  enVcMask       = 0xD, # Enable lane mask: Don't connect data stream (VC1) by default because intended for C++ process
+                 zmqSrvEn       = True,  # Flag to include the ZMQ server
                  **kwargs):
 
         # Set the FEB firmware Version lock = https://github.com/slaclab/cameralink-gateway/blob/master/firmware/targets/shared_version.mk
@@ -73,12 +74,6 @@ class ClinkDevRoot(shared.Root):
         for lane in self.laneConfig:
             self.defaultFile.append(f'config/{self.laneConfig[lane]}/lane{lane}.yml')
 
-        # Check for simulation
-        if dev == 'sim':
-            kwargs['timeout'] = 100000000 # 100 s
-        else:
-            kwargs['timeout'] = 5000000 # 5 s
-
         # Pass custom value to parent via super function
         super().__init__(
             dev         = dev,
@@ -87,10 +82,20 @@ class ClinkDevRoot(shared.Root):
             initRead    = initRead,
             **kwargs)
 
-        # added for rogue6
-        self.zmqServer = pr.interfaces.ZmqServer(root=self, addr='*', port=0)
-        self.addInterface(self.zmqServer)
+        # Add ZMQ server
+        if zmqSrvEn:
+            self.zmqServer = pyrogue.interfaces.ZmqServer(root=self, addr='*', port=0)
+            self.addInterface(self.zmqServer)
 
+        # Check for simulation
+        if dev == 'sim':
+            # Set the timeout
+            self._timeout = 100000000 # firmware simulation slow and timeout base on real time (not simulation time)
+
+        else:
+            # Set the timeout
+            self._timeout = 5000000 # 5.0 seconds default
+                     
         # Unhide the RemoteVariableDump command
         self.RemoteVariableDump.hidden = False
 
