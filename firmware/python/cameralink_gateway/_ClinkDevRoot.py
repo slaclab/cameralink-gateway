@@ -84,7 +84,7 @@ class ClinkDevRoot(shared.Root):
 
         # Add ZMQ server
         if zmqSrvEn:
-            self.zmqServer = pr.interfaces.ZmqServer(root=self, addr='*', port=0)
+            self.zmqServer = pr.interfaces.ZmqServer(root=self, addr='127.0.0.1', port=0)
             self.addInterface(self.zmqServer)
 
         # Check for simulation
