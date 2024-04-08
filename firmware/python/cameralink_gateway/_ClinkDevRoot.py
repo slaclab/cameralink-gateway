@@ -58,7 +58,7 @@ class ClinkDevRoot(shared.Root):
         # Set the FEB firmware Version lock = https://github.com/slaclab/cameralink-gateway/blob/master/firmware/targets/shared_version.mk
         self.FebVersionLock = 0x08020000
 
-        # Set the FEB firmware Version lock = https://github.com/slaclab/lcls2-pgp-pcie-apps/blob/master/firmware/targets/shared_config.mk
+        # Set the PCIe firmware Version lock = https://github.com/slaclab/lcls2-pgp-pcie-apps/blob/master/firmware/targets/shared_config.mk
         self.PcieVersionLock = 0x03080000
 
         # Set local variables
