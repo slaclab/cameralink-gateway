@@ -74,7 +74,7 @@ if __name__ == "__main__":
         "--enLclsII",
         type     = argBool,
         required = False,
-        default  = False, # Default: Disable LCLS-II hardware registers
+        default  = True, # Default: Disable LCLS-II hardware registers
         help     = "Enable LCLS-II hardware registers",
     )
 
