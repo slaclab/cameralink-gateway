@@ -58,7 +58,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--pgp4",
         type     = argBool,
-        required = True,
+        required = False,
+        default  = True,
         help     = "False = PGP2b, True = PGPv4",
     )
 
@@ -190,7 +191,7 @@ if __name__ == "__main__":
 
     # Otherwise assume it is relative in a standard development directory structure
     except:
-
+q
         # Check for release zip file path
         if args.releaseZip is not None:
             pyrogue.addLibraryPath(args.releaseZip + '/python')
