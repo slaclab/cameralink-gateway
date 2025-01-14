@@ -22,8 +22,7 @@ import surf.protocols.batcher as batcher
 import surf.protocols.clink   as cl
 import l2si_core              as l2si
 
-rogue.Version.minVersion('6.1.1')
-# rogue.Version.exactVersion('5.1.0')
+rogue.Version.minVersion('6.4.0')
 
 class DummyBiDirStream(rogue.interfaces.stream.Master, rogue.interfaces.stream.Slave):
 
@@ -59,7 +58,7 @@ class ClinkDevRoot(shared.Root):
         self.FebVersionLock = 0x08020000
 
         # Set the PCIe firmware Version lock = https://github.com/slaclab/lcls2-pgp-pcie-apps/blob/master/firmware/targets/shared_config.mk
-        self.PcieVersionLock = 0x03080000
+        self.PcieVersionLock = 0x03100000
 
         # Set local variables
         self.laneConfig     = laneConfig
