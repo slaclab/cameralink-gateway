@@ -94,7 +94,7 @@ class ClinkDevRoot(shared.Root):
         else:
             # Set the timeout
             self._timeout = 5000000 # 5.0 seconds default
-                     
+
         # Unhide the RemoteVariableDump command
         self.RemoteVariableDump.hidden = False
 

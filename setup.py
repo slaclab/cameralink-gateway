@@ -45,7 +45,7 @@ setup(
         'cameralink_gateway.axipcie',
         'cameralink_gateway.lcls2_pgp_fw_lib',
         'cameralink_gateway.lcls2_pgp_fw_lib.shared',
-        'cameralink_gateway.ClinkFeb', 
+        'cameralink_gateway.ClinkFeb',
     ],
     package_dir = {
         'cameralink_gateway': 'firmware/python/cameralink_gateway',
