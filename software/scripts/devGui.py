@@ -191,7 +191,7 @@ if __name__ == "__main__":
 
     # Otherwise assume it is relative in a standard development directory structure
     except:
-q
+
         # Check for release zip file path
         if args.releaseZip is not None:
             pyrogue.addLibraryPath(args.releaseZip + '/python')
