@@ -12,6 +12,7 @@ import pyrogue as pr
 
 import axipcie                 as pcie
 import lcls2_pgp_fw_lib.shared as shared
+import surf.axi                as axi
 
 class ClinkPcieFpga(pr.Device):
     def __init__(self,
@@ -20,6 +21,7 @@ class ClinkPcieFpga(pr.Device):
                  enLclsI    = True,
                  enLclsII   = False,
                  boardType  = None,
+                 useDdr     = False,
                  **kwargs):
         super().__init__(**kwargs)
 
@@ -30,6 +32,14 @@ class ClinkPcieFpga(pr.Device):
             boardType   = boardType,
             expand      = False,
         ))
+
+        if useDdr:
+            for i in range(4):
+                self.add(axi.AxiStreamDmaV2Fifo(
+                    name    = f'DmaBuffer[{i}]',
+                    offset  = 0x0010_0000+i*0x100,
+                    expand  = False,
+                ))
 
         # Application layer
         self.add(shared.ApplicationLaneConfigDict(
