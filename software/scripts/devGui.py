@@ -175,6 +175,12 @@ if __name__ == "__main__":
         help     = "Sets the GUI type (PyDM or None)",
     )
 
+    parser.add_argument(
+        "--ddr",
+        action   = 'store_true',
+        help     = "Includes on-board DDR support",
+    )
+
     # Get the arguments
     args = parser.parse_args()
 
@@ -219,6 +225,7 @@ if __name__ == "__main__":
             pgp4           = args.pgp4,
             seuDumpDir     = args.seuDumpDir,
             pcieBoardType  = args.pcieBoardType,
+            useDdr         = args.ddr,
             enVcMask       = args.enVcMask,
         ) as root:
 

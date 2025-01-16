@@ -50,6 +50,7 @@ class ClinkDevRoot(shared.Root):
                  enableDump     = False,
                  enableConfig   = True,
                  pcieBoardType  = None,
+                 useDdr         = False,
                  enVcMask       = 0xD, # Enable lane mask: Don't connect data stream (VC1) by default because intended for C++ process
                  zmqSrvEn       = True,  # Flag to include the ZMQ server
                  **kwargs):
@@ -111,6 +112,7 @@ class ClinkDevRoot(shared.Root):
             enLclsI    = enLclsI,
             enLclsII   = enLclsII,
             boardType  = pcieBoardType,
+            useDdr     = useDdr,
             expand     = True,
         ))
 
