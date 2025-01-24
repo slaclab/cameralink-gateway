@@ -5,7 +5,7 @@ ClinkDevRoot:
       AppLane[:]:
         XpmPauseThresh: 0x1
         EventBuilder:
-          Bypass: 0x0
+          Bypass: 0x4 # Masking off XPM Timing message port because TriggerSource=EVR
           Timeout: 0x0
           Blowoff: True # Flush the downstream data/trigger pipelines
     #########################################################################################################
@@ -92,4 +92,25 @@ ClinkDevRoot:
             Partition: 0
             PauseThreshold: 16
             TriggerDelay: 42
+            TriggerSource: EVR
+          ###################
+          EvrV2CoreTriggers:
+          ###################
+            EvrV2ChannelReg[:]:
+              EnableReg: True
+              RateType: FixedRates
+              DestType: All
+              RateSel: 1 #  10 Hz
+              DestType: All
+              DestSel: 0x0
+            ###################
+            EvrV2TriggerReg[:]:
+              EnableTrig: True
+              Source: 0x0
+              Polarity: Rising
+              ComplEn: Disabled
+              ComplAnd: LogicOR
+              Delay: 0x0
+              Width: 0x1
+            ###################
     #########################################################################################################
