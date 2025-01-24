@@ -421,6 +421,14 @@ class ClinkDevRoot(shared.Root):
                 print(f'Loading {defaultFile} Configuration File...')
                 self.LoadConfig(defaultFile)
 
+                # Check if LCLS-II mode & standAloneMode
+                if self.startupMode and self.standAloneMode:
+                    # standAloneMode creates a XPM trigger source
+                    for devPtr in self.find(typ=batcher.AxiStreamBatcherEventBuilder):
+                        devPtr.Bypass.set(0)
+                    for devPtr in self.find(typ=l2si.TriggerEventBuffer):
+                        devPtr.TriggerSource.setDisp('XPM')
+
             if (self.enableDump):
                 # Dump the state of the hardware before configuration
                 self.ReadAll()
