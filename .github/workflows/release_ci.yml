@@ -1,0 +1,57 @@
+# ----------------------------------------------------------------------------
+# This file is part of the Cameralink Gateway package. It is subject to
+# the license terms in the LICENSE.txt file found in the top-level directory
+# of this distribution and at:
+#    https://confluence.slac.stanford.edu/display/ppareg/LICENSE.html.
+# No part of the Cameralink Gateway package, including this file, may be
+# copied, modified, propagated, or distributed except according to the terms
+# contained in the LICENSE.txt file.
+# ----------------------------------------------------------------------------
+# The following environment variables are required for this process:
+# secrets.CONDA_UPLOAD_TOKEN_TAG
+# secrets.GH_TOKEN
+
+name: CI Workflow
+on: [push]
+
+jobs:
+
+# ----------------------------------------------------------------------------
+
+  test_and_document:
+    name: Test And Generate Documentation
+    runs-on: ubuntu-22.04
+    steps:
+
+      # This step checks out a copy of your repository.
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+# ----------------------------------------------------------------------------
+
+  gen_release:
+    needs: [test_and_document]
+    uses: slaclab/ruckus/.github/workflows/gen_release.yml@main
+    with:
+      version: '1.0.0'
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+# ----------------------------------------------------------------------------
+
+  conda_build_proj:
+    needs: [test_and_document]
+    uses: slaclab/ruckus/.github/workflows/conda_build_proj.yml@main
+    with:
+      version: '1.0.0'
+      gitub_repo: ${{ github.repository }}
+    secrets:
+      CONDA_UPLOAD_TOKEN_TAG: ${{ secrets.CONDA_UPLOAD_TOKEN_TAG }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+# ----------------------------------------------------------------------------
