@@ -2,14 +2,15 @@
 
 <!--- ######################################################## -->
 
-# Before you clone the GIT repository
-
-https://confluence.slac.stanford.edu/x/vJmDFg
-
 # Clone the GIT repository
 
+Install git large filesystems (git-lfs) in your .gitconfig (1-time step per unix environment)
+```bash
+$ git lfs install
 ```
-$ git clone --recursive git@github.com:slaclab/cameralink-gateway
+Clone the git repo with git-lfs enabled
+```bash
+$ git clone --recursive https://github.com/slaclab/cameralink-gateway.git
 ```
 
 <!--- ######################################################## -->
