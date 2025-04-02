@@ -76,9 +76,9 @@ https://confluence.slac.stanford.edu/x/HLuDFg
 
 <!--- ######################################################## -->
 
-# How to install the Rogue With Anaconda
+# How to install the Rogue With miniforge
 
-> https://slaclab.github.io/rogue/installing/anaconda.html
+> https://slaclab.github.io/rogue/installing/miniforge.html
 
 <!--- ######################################################## -->
 
