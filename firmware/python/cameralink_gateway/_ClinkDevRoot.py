@@ -59,7 +59,7 @@ class ClinkDevRoot(shared.Root):
         self.FebVersionLock = 0x08020000
 
         # Set the PCIe firmware Version lock = https://github.com/slaclab/lcls2-pgp-pcie-apps/blob/master/firmware/targets/shared_config.mk
-        self.PcieVersionLock = 0x03110000
+        self.PcieVersionLock = 0x03120000
 
         # Set local variables
         self.laneConfig     = laneConfig
