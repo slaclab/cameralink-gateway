@@ -391,10 +391,7 @@ class ClinkDevRoot(shared.Root):
                     dev.ID.set('?')  # DeviceID = Serial Number
                     dev.VN.set('?')  # DeviceFirmware Version
 
-                    # dev.CLCF.set('2')# 2: 84.9MHz
-                    # dev.TAGM.set('3')# 3: Geometry_1X4_1Y
-                    # dev.BA.set('2')  # 2: Mono12
-                    # dev.TM.set('0')  # 0: Off
+                    # Requires setting these before YAML to prevent "bad" serial reponses
                     dev.TI.set('13') # 13: CL_CC1_In
                     dev.TA.set('3')  # 3: LevelLow
                     dev.EM.set('2')  # 2: TriggerWidth
