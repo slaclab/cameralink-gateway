@@ -19,7 +19,7 @@ ClinkTop:
     VSkip: 0x0
     VActive: 0xFFFF
     ###################
-    UartJaiCm140: # JAI CM-140MCL-UV UART interface
+    UartJaiCm140:  # JAI CM-140MCL-UV UART interface
       SM: '0'      # 0=Preset Shutter
       SH: '0'      # 0=Off
       TR: '1'      # 1=EPS(Edge pre select)

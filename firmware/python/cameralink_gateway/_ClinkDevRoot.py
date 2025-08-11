@@ -382,6 +382,24 @@ class ClinkDevRoot(shared.Root):
                     dev.ID.set('?') # Camera ID Request
                     dev.MD.set('?') # Model Name Request
 
+                # Startup procedures for JaiGo500m
+                uartDev = self.find(typ=cl.UartJaiGo500m)
+                for dev in uartDev:
+                    dev.DVN.set('?') # DeviceVendorName
+                    dev.MD.set('?')  # DeviceModelName
+                    dev.DV.set('?')  # DeviceVersion
+                    dev.ID.set('?')  # DeviceID = Serial Number
+                    dev.VN.set('?')  # DeviceFirmware Version
+
+                    # dev.CLCF.set('2')# 2: 84.9MHz
+                    # dev.TAGM.set('3')# 3: Geometry_1X4_1Y
+                    # dev.BA.set('2')  # 2: Mono12
+                    # dev.TM.set('0')  # 0: Off
+                    dev.TI.set('13') # 13: CL_CC1_In
+                    dev.TA.set('3')  # 3: LevelLow
+                    dev.EM.set('2')  # 2: TriggerWidth
+                    dev.TM.set('1')  # 1: On
+
             # Load the configurations
             if self.enableConfig:
 
