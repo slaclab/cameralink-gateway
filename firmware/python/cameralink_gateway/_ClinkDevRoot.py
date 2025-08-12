@@ -382,8 +382,8 @@ class ClinkDevRoot(shared.Root):
                     dev.ID.set('?') # Camera ID Request
                     dev.MD.set('?') # Model Name Request
 
-                # Startup procedures for JaiGo500m
-                uartDev = self.find(typ=cl.UartJaiGo500m)
+                # Startup procedures for JaiGo5000m
+                uartDev = self.find(typ=cl.UartJaiGo5000m)
                 for dev in uartDev:
                     dev.DVN.set('?') # DeviceVendorName
                     dev.MD.set('?')  # DeviceModelName

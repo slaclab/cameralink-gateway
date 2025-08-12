@@ -19,7 +19,7 @@ ClinkTop:
     VSkip: 0x0
     VActive: 0xFFFF
     ###################
-    UartJaiGo500m: # Jai-GO-5000M-PMCL-UV UART interface
+    UartJaiGo5000m: # Jai-GO-5000M-PMCL-UV UART interface
       TM: '1'   # 1: On
       TI: '13'  # 13: CL_CC1_In
       TA: '3'   # 3: LevelLow
