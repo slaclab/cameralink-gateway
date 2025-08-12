@@ -1,13 +1,13 @@
 ###################
 ClinkTop:
 ###################
-  PllConfig[:]: '40MHz'
+  PllConfig[:]: '85MHz'
   ###################
   Ch[:]:
-    LinkMode: Base
-    DataMode: 10Bit
+    LinkMode: Medium
+    DataMode: 12Bit
     FrameMode: Frame
-    TapCount: 1
+    TapCount: 4
     DataEn: True
     Blowoff: False
     BaudRate: 9600 # units of bps
@@ -19,19 +19,17 @@ ClinkTop:
     VSkip: 0x0
     VActive: 0xFFFF
     ###################
-    UartJaiCm140:  # JAI CM-140MCL-UV UART interface
-      SM: '0'      # 0=Preset Shutter
-      SH: '0'      # 0=Off
-      TR: '1'      # 1=EPS(Edge pre select)
-      TP: '0'      # 0=Active Low
-      TI: '0'      # 0=Camera Link
-      BA: '1'      # 10-bit
-      SC: '0'      # 0=Full Frame
-      VB: '0'      # 0=OFF
+    UartJaiGo5000m: # Jai-GO-5000M-PMCL-UV UART interface
+      TM: '1'   # 1: On
+      TI: '13'  # 13: CL_CC1_In
+      TA: '3'   # 3: LevelLow
+      EM: '2'   # 2: TriggerWidth
+      TAGM: '3' # 3: Geometry_1X4_1Y
+      BA: '2'   # 2: Mono12
+      CLCF: '2' # 2: 84.9MHz
 ###################
 TrigCtrl[0]:
   EnableTrig: True
-  # InvCC: False # Active High Pulse
   InvCC: True # Active LOW Pulse
   TrigMap: ChA # ChA = pgpTrigger(0)
   TrigPulseWidth: 100.0 # units of us
