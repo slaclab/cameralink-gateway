@@ -1,11 +1,17 @@
 ##################################################################################################
 # 1944 (H) x 1472 (V)
 ##################################################################################################
-# 2 Byte x 1944 x 1472 = 5723136 Byte Images
+# 2 Byte x 1944 x 1472 = 5723136 Byte Images (Base and Medium mode)
 # 5723136 Byte Images x 120 Hz = 5.494 Gb/s
 ##################################################################################################
-# 1 Byte x 1944 x 1472 = 2861568 Byte Images
+# 1 Byte x 1944 x 1472 = 2861568 Byte Images (Full mode)
 # 2861568 Byte Images x 120 Hz = 2.747 Gb/s
+##################################################################################################
+# 10-bit x 1944 x 1472 x 1B/8b  = 3576960 Byte Images (Deca mode)
+# 3576960 Bytes Images x 120 Hz = 3.433 Gb/s
+# Note: In deca mode, FW does NOT add zero padding to the data stream (like in 10-bit in 12-bit mode)
+#       because we would not be able to keep up with 120 Hz on some of the cameras. So it is a 
+#       requirement that the image processing does the 10-bit image processing 
 ##################################################################################################
 # https://www.imperx.com/cmos-cameras/c1921/
 # https://www.imperx.com/download/335/spec-sheets/20491/cl_c1921_r2_2019_w.pdf
@@ -28,13 +34,13 @@ ClinkTop:
     # TapCount: 4 # Medium (4 taps)
     # DataMode: 12Bit
     ################################################################
-    LinkMode: Full
-    TapCount: 8 # Full (8 taps)
-    DataMode: 8Bit
+    # LinkMode: Full
+    # TapCount: 8 # Full (8 taps)
+    # DataMode: 8Bit
     ################################################################
-    # LinkMode: Deca
-    # TapCount: 8 # Deca (8 taps)
-    # DataMode: 10Bit
+    LinkMode: Deca
+    TapCount: 8 # Deca (8 taps)
+    DataMode: 10Bit
     ################################################################
     FrameMode: Frame
     DataEn: True
@@ -75,13 +81,13 @@ ClinkTop:
       # Bit_Dpt_Sel: '2' # 0x2 - 12 bits
       # Dat_Fmt_Sel: '2' # 0x2 - Medium (4 taps)
       ################################################################
-      A2D_Bits:    '0' # 0x0 - 8 bits
-      Bit_Dpt_Sel: '0' # 0x0 - 8 bits
-      Dat_Fmt_Sel: '3' # 0x3 - Full (8 taps)
+      # A2D_Bits:    '0' # 0x0 - 8 bits
+      # Bit_Dpt_Sel: '0' # 0x0 - 8 bits
+      # Dat_Fmt_Sel: '3' # 0x3 - Full (8 taps)
       ################################################################
-      # A2D_Bits:    '1' # 0x1 - 10 bits
-      # Bit_Dpt_Sel: '1' # 0x1 - 10 bits
-      # Dat_Fmt_Sel: '4' # 0x4 - Deca (8 taps)
+      A2D_Bits:    '1' # 0x1 - 10 bits
+      Bit_Dpt_Sel: '1' # 0x1 - 10 bits
+      Dat_Fmt_Sel: '4' # 0x4 - Deca (8 taps)
       ################################################################
 ###################
 TrigCtrl[0]:
