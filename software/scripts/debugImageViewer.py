@@ -126,11 +126,17 @@ class myRoot(pr.Root):
         super().__init__(**kwargs)
 
         self.dmaStream   = rogue.hardware.axi.AxiStreamDma(args.dev,(0x100*args.lane)+1,1)
-        self.rateDrop    = rogue.interfaces.stream.RateDrop(True,1.0)
+        self.fifo = pr.interfaces.stream.Fifo(
+            name        = 'LiveDisplayDropFifo',
+            description = 'Fifo to prevent back pressuring stream',
+            maxDepth    = 1, # Drop if more than 1 frame in FIFO
+            trimSize    = 0, # No triming
+            noCopy      = False, # Create copy of buffer
+        )
         self.unbatcher   = rogue.protocols.batcher.SplitterV1()
         self.eventReader = EventReader()
 
-        self.dmaStream >> self.rateDrop >> self.unbatcher >> self.eventReader
+        self.dmaStream >> self.fifo >> self.unbatcher >> self.eventReader
 
     def updatePlot(self,i):
         if self.eventReader.nextPlot:
