@@ -3,6 +3,7 @@ ClinkDevRoot:
     #########################################################################################################
     Application:
       AppLane[:]:
+        ClinkDecaMode: 0x0 # PCIe FW-based DECA mode unpacking disabled by default
         XpmPauseThresh: 0x1
         EventBuilder:
           Bypass: 0x4 # Masking off XPM Timing message port because TriggerSource=EVR
