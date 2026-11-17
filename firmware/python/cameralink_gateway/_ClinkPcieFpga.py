@@ -14,6 +14,12 @@ import axipcie                 as pcie
 import lcls2_pgp_fw_lib.shared as shared
 import surf.axi                as axi
 
+# _EXTREF firmware Si570 timing reference (MHz), indexed by TimingFrameRx.ClkSel
+EXTREF_FREQ_C = [
+    119.0,         # 0: LCLS-I
+    1300.0/7.0,    # 1: LCLS-II (185.714 MHz)
+]
+
 class ClinkPcieFpga(pr.Device):
     def __init__(self,
                  laneConfig = {0: 'Opal1000'},
@@ -58,3 +64,36 @@ class ClinkPcieFpga(pr.Device):
             enLclsII   = enLclsII,
             expand     = True,
         ))
+
+        # Every timing mode change (ConfigLclsTimingV1/V2, ConfigureXpmMini,
+        # ConfigureTpgMiniStream) goes through ConfigLclsTimingBase, which resets
+        # the timing clocks and PHYs. Retune the Si570 first on _EXTREF firmware.
+        timingRx   = self.Hsio.TimingRx
+        configBase = timingRx.ConfigLclsTimingBase
+
+        def configLclsTimingBase(ClkSel, UseMiniTpg):
+            self.SetExtRefClk(ClkSel)
+            configBase(ClkSel=ClkSel, UseMiniTpg=UseMiniTpg)
+
+        timingRx.ConfigLclsTimingBase = configLclsTimingBase
+
+    def SetExtRefClk(self, clkSel):
+        # Legacy firmware uses the fixed GT reference clocks: nothing to program
+        if not self.AxiPcieCore.AxiVersion.ImageName.get().endswith('_EXTREF'):
+            return
+
+        if not hasattr(self.AxiPcieCore, 'Si570'):
+            raise ValueError(f'{self.path}: _EXTREF firmware requires pcieBoardType=XilinxKcu1500 to program the Si570 timing reference')
+
+        si570 = self.AxiPcieCore.Si570
+        freq  = EXTREF_FREQ_C[clkSel]
+        print(f'{self.path}.SetExtRefClk(): Si570.Frequency = {freq:.6f} MHz')
+
+        # Si570 is disabled by default (slow I2C), so only enable it while programming
+        enable = si570.enable.get()
+        si570.enable.set(True)
+        try:
+            si570.Frequency.set(freq)
+        finally:
+            if enable is False:
+                si570.enable.set(False)
